@@ -245,7 +245,4 @@ extern volatile U8 usb_request_break_generation;
 extern volatile U8 cpt_sof;
 S_line_coding line_coding;
 
-void sof_action()
-{
-  cpt_sof++;
-}
+

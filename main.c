@@ -259,7 +259,7 @@ ISR(USB_GEN_vect)
   if (((UDINT & (1 << SOFI)) ? (1 == 1) : (0 == 1))
       && ((UDIEN & (1 << SOFE)) ? (1 == 1) : (0 == 1))) {
     (UDINT = ~(1 << SOFI));
-    sof_action();
+    cpt_sof++;
   }
   if (((UDINT & (1 << SUSPI)) ? (1 == 1) : (0 == 1))
       && ((UDIEN & (1 << SUSPE)) ? (1 == 1) : (0 == 1))) {
