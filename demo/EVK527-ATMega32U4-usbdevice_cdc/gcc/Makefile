@@ -1,100 +1,44 @@
-##############################################################################
-# Generic Makefile for following parts AT90USBx ATMegaxUx
-###############################################################################
-
-OUTPUT = default
-
-# General Flags
-TARGET = $(PROJECT).elf
-CC = avr-gcc
-MAKECFG   = config.mk
-
-# Options common to compile, link and assembly rules
-COMMON = -mmcu=$(MCU)
-
-# Compile options common for all C compilation units.
-CFLAGS = $(COMMON)
-CFLAGS += -Wall -gdwarf-2 -Os -fsigned-char -ffunction-sections -ffunction-sections
-CFLAGS += -MD -MP -MT $(OUTPUT)/$(*F).o -MF $(OUTPUT)/dep/$(@F).d 
-
-# Assembly specific flags
-ASMFLAGS = $(COMMON)
-ASMFLAGS += -x assembler-with-cpp -Wa,-gdwarf2
-
-# Linker flags
-LDFLAGS = $(COMMON)
-LDFLAGS += -Wl,-Map=$(PROJECT).map,--cref,--gc-sections,--relax
-
-# Intel Hex file production flags
-HEX_FLASH_FLAGS = -R .eeprom
-
-# Eeprom file production flags
-HEX_EEPROM_FLAGS = -j .eeprom
-HEX_EEPROM_FLAGS += --set-section-flags=.eeprom="alloc,load"
-HEX_EEPROM_FLAGS += --change-section-lma .eeprom=0
-
-# Include Directories
-INCLUDES = -I"./.." -I"../conf" -I"../../.." -I"../../../../at90usb128" -I"../../../../common" 
-
-# Include Source files list and part informations
-include $(MAKECFG)
-
-
-## Build
-.PHONY: all
-all: $(TARGET) $(PROJECT).hex size
-
-## Clean target
-.PHONY: clean
-clean:
-	@echo "Clean project"
-	@-rm -rf $(OUTPUT)/dep/* $(OUTPUT)/* $(PROJECT).elf $(PROJECT).hex $(PROJECT).eep $(PROJECT).map
-
-## Rebuild the project.
-.PHONY: rebuild
-rebuild: clean all
-
-
-## Compile
-
-# Create objects files list with sources files
-OBJECTS  = $(CSRCS:.c=.o) $(ASSRCS:.s=.o)
-
-.PHONY: objfiles
-objfiles: $(OBJECTS)
-
-# create object files from C source files.
-%.o: %.c
-	@echo 'Building file: $<'
-	@$(shell mkdir $(OUTPUT) 2>/dev/null)
-	@$(shell mkdir $(OUTPUT)/dep 2>/dev/null)
-	@$(CC) $(INCLUDES) $(CFLAGS) -c $< -o $(OUTPUT)/$(@F)
-	
-# Preprocess & assemble: create object files from assembler source files.
-%.o: %.s
-	@echo 'Building file: $<'
-	@$(shell mkdir $(OUTPUT) 2>/dev/null)
-	@$(shell mkdir $(OUTPUT)/dep 2>/dev/null)
-	@$(CC) $(INCLUDES) $(ASMFLAGS) -c $< -o $(OUTPUT)/$(@F)
-
-
-## Link
-$(TARGET): $(OBJECTS)
-	@echo "Linking"
-	@$(CC) $(LDFLAGS) $(addprefix $(OUTPUT)/,$(notdir $(OBJECTS))) $(LINKONLYOBJECTS) $(LIBDIRS) $(LIBS) -o $(TARGET)
-
-%.hex: $(TARGET)
-	@echo "Create hex file"
-	@avr-objcopy -O ihex $(HEX_FLASH_FLAGS)  $< $@
-
-%.eep: $(TARGET)
-	@echo "Create eep file"
-	@avr-objcopy $(HEX_EEPROM_FLAGS) -O ihex $< $@  || exit 0
-
-%.lss: $(TARGET)
-	@echo "Create lss file"
-	@avr-objdump -h -S $< > $@
-
-size: ${TARGET}
-	@avr-size -C --mcu=${MCU} ${TARGET}
-
+all:
+	mkdir -p default
+	mkdir -p default/dep
+	avr-gcc -I"./.." -I"../conf" -I"../../.." -I"../../../../at90usb128" -I"../../../../common"  -mmcu=atmega32u4 -Wall -gdwarf-2 -Os -fsigned-char -ffunction-sections -ffunction-sections -MD -MP -MT default/start_boot.o -MF default/dep/start_boot.o.d  -c ../../../lib_mcu/util/start_boot.c -o default/start_boot.o
+	mkdir -p default
+	mkdir -p default/dep
+	avr-gcc -I"./.." -I"../conf" -I"../../.." -I"../../../../at90usb128" -I"../../../../common"  -mmcu=atmega32u4 -Wall -gdwarf-2 -Os -fsigned-char -ffunction-sections -ffunction-sections -MD -MP -MT default/uart_lib.o -MF default/dep/uart_lib.o.d  -c ../../../lib_mcu/uart/uart_lib.c -o default/uart_lib.o
+	mkdir -p default
+	mkdir -p default/dep
+	avr-gcc -I"./.." -I"../conf" -I"../../.." -I"../../../../at90usb128" -I"../../../../common"  -mmcu=atmega32u4 -Wall -gdwarf-2 -Os -fsigned-char -ffunction-sections -ffunction-sections -MD -MP -MT default/uart_usb_lib.o -MF default/dep/uart_usb_lib.o.d  -c ../uart_usb_lib.c -o default/uart_usb_lib.o
+	mkdir -p default
+	mkdir -p default/dep
+	avr-gcc -I"./.." -I"../conf" -I"../../.." -I"../../../../at90usb128" -I"../../../../common"  -mmcu=atmega32u4 -Wall -gdwarf-2 -Os -fsigned-char -ffunction-sections -ffunction-sections -MD -MP -MT default/usb_descriptors.o -MF default/dep/usb_descriptors.o.d  -c ../usb_descriptors.c -o default/usb_descriptors.o
+	mkdir -p default
+	mkdir -p default/dep
+	avr-gcc -I"./.." -I"../conf" -I"../../.." -I"../../../../at90usb128" -I"../../../../common"  -mmcu=atmega32u4 -Wall -gdwarf-2 -Os -fsigned-char -ffunction-sections -ffunction-sections -MD -MP -MT default/usb_device_task.o -MF default/dep/usb_device_task.o.d  -c ../../../modules/usb/device_chap9/usb_device_task.c -o default/usb_device_task.o
+	mkdir -p default
+	mkdir -p default/dep
+	avr-gcc -I"./.." -I"../conf" -I"../../.." -I"../../../../at90usb128" -I"../../../../common"  -mmcu=atmega32u4 -Wall -gdwarf-2 -Os -fsigned-char -ffunction-sections -ffunction-sections -MD -MP -MT default/usb_drv.o -MF default/dep/usb_drv.o.d  -c ../../../lib_mcu/usb/usb_drv.c -o default/usb_drv.o
+	mkdir -p default
+	mkdir -p default/dep
+	avr-gcc -I"./.." -I"../conf" -I"../../.." -I"../../../../at90usb128" -I"../../../../common"  -mmcu=atmega32u4 -Wall -gdwarf-2 -Os -fsigned-char -ffunction-sections -ffunction-sections -MD -MP -MT default/usb_specific_request.o -MF default/dep/usb_specific_request.o.d  -c ../usb_specific_request.c -o default/usb_specific_request.o
+	mkdir -p default
+	mkdir -p default/dep
+	avr-gcc -I"./.." -I"../conf" -I"../../.." -I"../../../../at90usb128" -I"../../../../common"  -mmcu=atmega32u4 -Wall -gdwarf-2 -Os -fsigned-char -ffunction-sections -ffunction-sections -MD -MP -MT default/power_drv.o -MF default/dep/power_drv.o.d  -c ../../../lib_mcu/power/power_drv.c -o default/power_drv.o
+	mkdir -p default
+	mkdir -p default/dep
+	avr-gcc -I"./.." -I"../conf" -I"../../.." -I"../../../../at90usb128" -I"../../../../common"  -mmcu=atmega32u4 -Wall -gdwarf-2 -Os -fsigned-char -ffunction-sections -ffunction-sections -MD -MP -MT default/scheduler.o -MF default/dep/scheduler.o.d  -c ../../../modules/scheduler/scheduler.c -o default/scheduler.o
+	mkdir -p default
+	mkdir -p default/dep
+	avr-gcc -I"./.." -I"../conf" -I"../../.." -I"../../../../at90usb128" -I"../../../../common"  -mmcu=atmega32u4 -Wall -gdwarf-2 -Os -fsigned-char -ffunction-sections -ffunction-sections -MD -MP -MT default/cdc_task.o -MF default/dep/cdc_task.o.d  -c ../cdc_task.c -o default/cdc_task.o
+	mkdir -p default
+	mkdir -p default/dep
+	avr-gcc -I"./.." -I"../conf" -I"../../.." -I"../../../../at90usb128" -I"../../../../common"  -mmcu=atmega32u4 -Wall -gdwarf-2 -Os -fsigned-char -ffunction-sections -ffunction-sections -MD -MP -MT default/main.o -MF default/dep/main.o.d  -c ../main.c -o default/main.o
+	mkdir -p default
+	mkdir -p default/dep
+	avr-gcc -I"./.." -I"../conf" -I"../../.." -I"../../../../at90usb128" -I"../../../../common"  -mmcu=atmega32u4 -Wall -gdwarf-2 -Os -fsigned-char -ffunction-sections -ffunction-sections -MD -MP -MT default/usb_standard_request.o -MF default/dep/usb_standard_request.o.d  -c ../../../modules/usb/device_chap9/usb_standard_request.c -o default/usb_standard_request.o
+	mkdir -p default
+	mkdir -p default/dep
+	avr-gcc -I"./.." -I"../conf" -I"../../.." -I"../../../../at90usb128" -I"../../../../common"  -mmcu=atmega32u4 -Wall -gdwarf-2 -Os -fsigned-char -ffunction-sections -ffunction-sections -MD -MP -MT default/usb_task.o -MF default/dep/usb_task.o.d  -c ../../../modules/usb/usb_task.c -o default/usb_task.o
+	mkdir -p default
+	mkdir -p default/dep
+	avr-gcc -I"./.." -I"../conf" -I"../../.." -I"../../../../at90usb128" -I"../../../../common"  -mmcu=atmega32u4 -x assembler-with-cpp -Wa,-gdwarf2 -c ../../../lib_mcu/flash/flash_drv.s -o default/flash_drv.o
+	avr-gcc -mmcu=atmega32u4 -Wl,-Map=EVK527-ATMega32U4-usbdevice_cdc.map,--cref,--gc-sections,--relax default/start_boot.o default/uart_lib.o default/uart_usb_lib.o default/usb_descriptors.o default/usb_device_task.o default/usb_drv.o default/usb_specific_request.o default/power_drv.o default/scheduler.o default/cdc_task.o default/main.o default/usb_standard_request.o default/usb_task.o default/flash_drv.o    -o EVK527-ATMega32U4-usbdevice_cdc.elf
