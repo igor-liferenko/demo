@@ -1,236 +1,305 @@
-/*This file has been prepared for Doxygen automatic documentation generation.*/
-//! \file *********************************************************************
-//!
-//! \brief This file manages the USB device controller.
-//!
-//!  The USB task checks the income of new requests from the USB Host.
-//!  When a Setup request occurs, this task will launch the processing
-//!  of this setup contained in the usb_standard_request.c file.
-//!  Other class specific requests are also processed in this file.
-//!
-//! - Compiler:           IAR EWAVR and GNU GCC for AVR
-//! - Supported devices:  ATmega32U4
-//!
-//! \author               Atmel Corporation: http://www.atmel.com \n
-//!                       Support and FAQ: http://support.atmel.no/
-//!
-//! ***************************************************************************
+typedef float Float16;
 
-/* Copyright (c) 2007, Atmel Corporation All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- * 1. Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- *
- * 3. The name of ATMEL may not be used to endorse or promote products derived
- * from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY ATMEL ``AS IS'' AND ANY EXPRESS OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE EXPRESSLY AND
- * SPECIFICALLY DISCLAIMED. IN NO EVENT SHALL ATMEL BE LIABLE FOR ANY DIRECT,
- * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+typedef unsigned char U8 ;
+typedef unsigned short U16;
+typedef unsigned long U32;
+typedef signed char S8 ;
+typedef signed short S16;
+typedef long S32;
 
-//_____  I N C L U D E S ___________________________________________________
 
-#include "config.h"
-#include "conf_usb.h"
-#include "usb_device_task.h"
-#include "modules/usb/usb_task.h"
-#include "lib_mcu/usb/usb_drv.h"
-#include "usb_descriptors.h"
-#include "modules/usb/device_chap9/usb_standard_request.h"
-#include "lib_mcu/pll/pll_drv.h"
-#ifdef USE_USB_AUTOBAUD
-#include "lib_mcu/wdt/wdt_drv.h"
-#endif
 
-//_____ M A C R O S ________________________________________________________
+typedef unsigned char Bool;
 
-//_____ D E F I N I T I O N S ______________________________________________
 
-//!
-//! Public : (bit) usb_connected
-//! usb_connected is set to TRUE when VBUS has been detected
-//! usb_connected is set to FALSE otherwise
-//!/
-bit   usb_connected=0;
+typedef U8 Status;
+typedef Bool Status_bool;
+typedef unsigned char Uchar;
 
-//!
-//! Public : (bit) usb_suspended
-//! usb_suspended is set to TRUE when USB is in suspend mode
-//! usb_suspended is set to FALSE otherwise
-//!/
-bit   usb_suspended=0;
+
+typedef unsigned char Uint8;
+typedef unsigned int Uint16;
+typedef unsigned long int Uint32;
+
+typedef char Int8;
+typedef int Int16;
+typedef long int Int32;
+
+typedef unsigned char Byte;
+typedef unsigned int Word;
+typedef unsigned long int DWord;
+
+typedef union
+{
+  Uint32 dw;
+  Uint16 w[2];
+  Uint8 b[4];
+} Union32;
+
+typedef union
+{
+  Uint16 w;
+  Uint8 b[2];
+} Union16;
+typedef char p_uart_ptchar;
+typedef char r_uart_ptchar;
+#include  <avr/interrupt.h>
+#include  <avr/pgmspace.h>
+#include  <avr/io.h>
+U8 flash_read_sig(unsigned long adr);
 
 
 
 
-//!
-//! Public : (U8) usb_configuration_nb
-//! Store the number of the USB configuration used by the USB device
-//! when its value is different from zero, it means the device mode is enumerated
-//! Used with USB_DEVICE_FEATURE == ENABLED only
-//!/
-extern U8  usb_configuration_nb;
 
-//_____ D E C L A R A T I O N S ____________________________________________
 
-//!
-//! @brief This function initializes the USB device controller and system interrupt
-//!
-//! This function enables the USB controller and init the USB interrupts.
-//! The aim is to allow the USB connection detection in order to send
-//! the appropriate USB event to the operating mode manager.
-//!
-//! @param none
-//!
-//! @return none
-//!
-//!/
+
+U8 flash_read_fuse(unsigned long adr);
+extern void sof_action(void);
+extern void suspend_action(void);
+extern  U8  usb_suspended;
+
+
+
+
+
+extern  U8  usb_connected;
+void usb_device_task_init (void);
+void usb_start_device (void);
+void usb_device_task (void);
+extern volatile U16 g_usb_event;
+extern U8 g_usb_mode;
+extern U8 usb_remote_wup_feature;
+void usb_task_init (void);
+void usb_task (void);
+
+extern volatile U8 private_sof_counter;
+typedef enum endpoint_parameter{ep_num, ep_type, ep_direction, ep_size, ep_bank, nyet_status} t_endpoint_parameter;
+U8 usb_config_ep (U8, U8);
+U8 usb_select_enpoint_interrupt (void);
+U16 usb_get_nb_byte_epw (void);
+U8 usb_send_packet (U8 , U8*, U8);
+U8 usb_read_packet (U8 , U8*, U8);
+void usb_halt_endpoint (U8);
+void usb_reset_endpoint (U8);
+U8 usb_init_device (void);
+void usb_process_request( void);
+
+
+
+
+
+
+
+
+
+
+void usb_generate_remote_wakeup(void);
+
+extern U8 usb_configuration_nb;
+extern U8 remote_wakeup_feature;
+typedef struct
+{
+   U8 bmRequestType;
+   U8 bRequest;
+   U16 wValue;
+   U16 wIndex;
+   U16 wLength;
+} S_UsbRequest;
+
+
+typedef struct {
+   U8 bLength;
+   U8 bDescriptorType;
+   U16 bscUSB;
+   U8 bDeviceClass;
+   U8 bDeviceSubClass;
+   U8 bDeviceProtocol;
+   U8 bMaxPacketSize0;
+   U16 idVendor;
+   U16 idProduct;
+   U16 bcdDevice;
+   U8 iManufacturer;
+   U8 iProduct;
+   U8 iSerialNumber;
+   U8 bNumConfigurations;
+} S_usb_device_descriptor;
+
+
+
+typedef struct {
+   U8 bLength;
+   U8 bDescriptorType;
+   U16 wTotalLength;
+   U8 bNumInterfaces;
+   U8 bConfigurationValue;
+   U8 iConfiguration;
+   U8 bmAttibutes;
+   U8 MaxPower;
+} S_usb_configuration_descriptor;
+
+
+
+typedef struct {
+   U8 bLength;
+   U8 bDescriptorType;
+   U8 bInterfaceNumber;
+   U8 bAlternateSetting;
+   U8 bNumEndpoints;
+   U8 bInterfaceClass;
+   U8 bInterfaceSubClass;
+   U8 bInterfaceProtocol;
+   U8 iInterface;
+} S_usb_interface_descriptor;
+
+
+
+typedef struct {
+   U8 bLength;
+   U8 bDescriptorType;
+   U8 bEndpointAddress;
+   U8 bmAttributes;
+   U16 wMaxPacketSize;
+   U8 bInterval;
+} S_usb_endpoint_descriptor;
+
+
+
+typedef struct {
+   U8 bLength;
+   U8 bDescriptorType;
+   U16 bscUSB;
+   U8 bDeviceClass;
+   U8 bDeviceSubClass;
+   U8 bDeviceProtocol;
+   U8 bMaxPacketSize0;
+   U8 bNumConfigurations;
+   U8 bReserved;
+} S_usb_device_qualifier_descriptor;
+
+
+
+typedef struct {
+   U8 bLength;
+   U8 bDescriptorType;
+   U16 wlangid;
+} S_usb_language_id;
+
+
+
+
+
+
+typedef struct {
+   U8 bLength;
+   U8 bDescriptorType;
+   U16 wstring[ 5 ];
+} S_usb_manufacturer_string_descriptor;
+
+
+
+
+
+
+typedef struct {
+   U8 bLength;
+   U8 bDescriptorType;
+   U16 wstring[ 16 ];
+} S_usb_product_string_descriptor;
+
+
+
+
+
+
+typedef struct {
+   U8 bLength;
+   U8 bDescriptorType;
+   U16 wstring[ 0x05 ];
+} S_usb_serial_number;
+
+
+
+
+typedef struct
+{
+   S_usb_configuration_descriptor cfg;
+   S_usb_interface_descriptor ifc0;
+   U8 CS_INTERFACE[19];
+   S_usb_endpoint_descriptor ep3;
+   S_usb_interface_descriptor ifc1;
+   S_usb_endpoint_descriptor ep1;
+   S_usb_endpoint_descriptor ep2;
+} S_usb_user_configuration_descriptor;
+U8  usb_connected=0;
+
+
+
+
+
+
+U8  usb_suspended=0;
+
+
+
+
+
+
+
+
+
+
+extern U8 usb_configuration_nb;
 void usb_device_task_init(void)
 {
-   Usb_disable();
-   Usb_enable();
-#if (USB_LOW_SPEED_DEVICE==ENABLE)
-   Usb_low_speed_mode();
-#endif
-   Usb_enable_vbus_pad();
-   Usb_enable_vbus_interrupt();
-   Enable_interrupt();
+   (USBCON &= ~((1<<USBE))) ;
+   (USBCON |= ((1<<USBE) )) ;
+   (USBCON |= (1<<OTGPADE)) ;
+   (USBCON |= (1<<VBUSTE)) ;
+   sei() ;
 }
-
-//!
-//! @brief This function initializes the USB device controller
-//!
-//! This function enables the USB controller and init the USB interrupts.
-//! The aim is to allow the USB connection detection in order to send
-//! the appropriate USB event to the operating mode manager.
-//! Start device function is executed once VBUS connection has been detected
-//! either by the VBUS change interrupt either by the VBUS high level
-//!
-//! @param none
-//!
-//! @return none
-//!
 void usb_start_device (void)
 {
-   Usb_freeze_clock();
-#ifndef USE_USB_AUTOBAUD
-   Pll_start_auto();
-#else
-   usb_autobaud();
-#endif
-   Wait_pll_ready();
-   Usb_unfreeze_clock();
-   Usb_attach();
-#if (USB_RESET_CPU == ENABLED)
-   Usb_reset_all_system();
-#else
-   Usb_reset_macro_only();
-#endif
-   Usb_enable_suspend_interrupt();
-   Usb_enable_reset_interrupt();
-   Enable_interrupt();
-   usb_init_device();         // configure the USB controller EP0
-}
+   (USBCON |= (1<<FRZCLK)) ;
 
-//! @brief Entry point of the USB device mamagement
-//!
-//! This function is the entry point of the USB management. Each USB
-//! event is checked here in order to launch the appropriate action.
-//! If a Setup request occurs on the Default Control Endpoint,
-//! the usb_process_request() function is call in the usb_standard_request.c file
-//!
-//! @param none
-//!
-//! @return none
+   (PLLFRQ &= ~ ( (1<<PDIV3)| (1<<PDIV2) | (1<<PDIV1)| (1<<PDIV0)) ,PLLFRQ|= ( (0<<PDIV3)| (1<<PDIV2) | (0<<PDIV1)| (0<<PDIV0)) | (1<<PLLUSB) , PLLCSR = ( ( 1<<PINDIV ) | (1<<PLLE))) ;
+   while (!(PLLCSR & (1<<PLOCK))) ;
+   (USBCON &= ~(1<<FRZCLK)) ;
+   (UDCON &= ~(1<<DETACH)) ;
+
+
+
+   (UDCON &= ~(1<<RSTCPU)) ;
+
+   (UDIEN |= (1<<SUSPE)) ;
+   (UDIEN |= (1<<EORSTE)) ;
+   sei() ;
+   usb_init_device();
+}
 void usb_device_task(void)
 {
-   if (usb_connected == FALSE)
+   if (usb_connected ==  (0==1) )
    {
-     if (Is_usb_vbus_high())    // check if Vbus ON to attach
+     if ( ((USBSTA & (1<<VBUS)) ? (1==1) : (0==1) ) )
      {
-       Usb_enable();
-       usb_connected = TRUE;
+       (USBCON |= ((1<<USBE) )) ;
+       usb_connected =  (1==1) ;
        usb_start_device();
-       Usb_vbus_on_action();
+       ;
      }
    }
 
-   if(Is_usb_event(EVT_USB_RESET))
+   if( ((g_usb_event & (1<< 8 )) ? (1==1) : (0==1) ) )
    {
-      Usb_ack_event(EVT_USB_RESET);
-      Usb_reset_endpoint(0);
+      (g_usb_event &= ~(1<< 8 )) ;
+      (UERST = 1 << (U8)0, UERST = 0) ;
       usb_configuration_nb=0;
    }
 
-   // Here connection to the device enumeration process
-   Usb_select_endpoint(EP_CONTROL);
-   if (Is_usb_receive_setup())
+
+   (UENUM = (U8) 0 ) ;
+   if ( (UEINTX&(1<<RXSTPI)) )
    {
       usb_process_request();
    }
 }
-
-
-#ifdef USE_USB_AUTOBAUD
-#warning CAUTION Preliminary USB autobaud for USB DFU bootloader Only... 
-//! @brief USB devive autobaud
-//!
-//! This function performs an autobaud configuration for the USB interface.
-//! the autobaud function performs the configuration of the PLL dedicated to the USB interface.
-//! The autobaud algorithm consists in trying each USB PLL until the correct detection of Start
-//! of Frame (USB SOF).
-//!
-//! @warning Code:?? bytes (function code length)
-//!
-//! @param none
-//!
-//! @return none
-void usb_autobaud(void)
-{
-
-   U16 count_rc=0;
-
-   volatile U16 tempo;
-   
-   Wdt_change_interrupt_16ms();
-   TCCR1B=0x00; TCCR1A=0x00;
-   TCNT1=0x00;  TIFR1=0x01;            //! Clear TOV2 flag and counter value
-   
-   TCCR1B|=(1<<CS01) |(1<<CS00);       // ClkIO/64, with prescaler /2 -> XTAL/128
-
-   while(Is_not_wdt_interrupt());
-   Wdt_ack_interrupt();
-   TCCR1B=0;
-   Wdt_off();
-
-   
-   count_rc=TCNT1;
-   TCCR1B=0x00; TCCR1A=0x00;
-   TCNT1=0x00;  TIFR1=0x01;            //! Clear TOV2 flag and counter value  
-   if(count_rc>1500)                   // 16MHz/128 with 16ms watchdog gives 2000 ticks
-   {
-      Start_pll(PLL_IN_PRESCAL_ENABLE);               //! FOSC 16MHz
-   }
-   else
-   {
-      Start_pll(PLL_IN_PRESCAL_DISABLE);                //! FOSC 8MHz
-   }
-   
-}
-#endif
-

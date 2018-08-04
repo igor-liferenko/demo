@@ -1,292 +1,373 @@
-/*This file has been prepared for Doxygen automatic documentation generation.*/
-//! \file *********************************************************************
-//!
-//! \brief This file manages the USB task either device/host or both.
-//!
-//!  The USB task selects the correct USB task (usb_device task or usb_host task
-//!  to be executed depending on the current mode available.
-//!  According to USB_DEVICE_FEATURE and USB_HOST_FEATURE value (located in conf_usb.h file)
-//!  The usb_task can be configured to support USB DEVICE mode or USB Host mode or both
-//!  for a dual role device application.
-//!  This module also contains the general USB interrupt subroutine. This subroutine is used
-//!  to detect asynchronous USB events.
-//!  Note:
-//!    - The usb_task belongs to the scheduler, the usb_device_task and usb_host do not, they are called
-//!      from the general usb_task
-//!    - See conf_usb.h file for more details about the configuration of this module
-//!
-//! - Compiler:           IAR EWAVR and GNU GCC for AVR
-//! - Supported devices:  ATmega32U4
-//!
-//! \author               Atmel Corporation: http://www.atmel.com \n
-//!                       Support and FAQ: http://support.atmel.no/
-//!
-//! ***************************************************************************
+typedef float Float16;
 
-/* Copyright (c) 2007, Atmel Corporation All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- * 1. Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- *
- * 3. The name of ATMEL may not be used to endorse or promote products derived
- * from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY ATMEL ``AS IS'' AND ANY EXPRESS OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE EXPRESSLY AND
- * SPECIFICALLY DISCLAIMED. IN NO EVENT SHALL ATMEL BE LIABLE FOR ANY DIRECT,
- * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-
-//_____  I N C L U D E S ___________________________________________________
-
-#include "config.h"
-#include "conf_usb.h"
-#include "usb_task.h"
-#include "lib_mcu/usb/usb_drv.h"
-#include "usb_descriptors.h"
-#include "lib_mcu/power/power_drv.h"
-#include "lib_mcu/wdt/wdt_drv.h"
-#include "lib_mcu/pll/pll_drv.h"
-#include "modules/usb/device_chap9/usb_device_task.h"
-
-#ifndef  USE_USB_PADS_REGULATOR
-   #error "USE_USB_PADS_REGULATOR" should be defined as ENABLE or DISABLE in conf_usb.h file
-#endif
-
-//_____ M A C R O S ________________________________________________________
+typedef unsigned char U8 ;
+typedef unsigned short U16;
+typedef unsigned long U32;
+typedef signed char S8 ;
+typedef signed short S16;
+typedef long S32;
 
 
 
-//_____ D E F I N I T I O N S ______________________________________________
+typedef unsigned char Bool;
 
-//!
-//! Public : U16 g_usb_event
-//! usb_connected is used to store USB events detected upon
-//! USB general interrupt subroutine
-//! Its value is managed by the following macros (See usb_task.h file)
-//! Usb_send_event(x)
-//! Usb_ack_event(x)
-//! Usb_clear_all_event()
-//! Is_usb_event(x)
-//! Is_not_usb_event(x)
+
+typedef U8 Status;
+typedef Bool Status_bool;
+typedef unsigned char Uchar;
+
+
+typedef unsigned char Uint8;
+typedef unsigned int Uint16;
+typedef unsigned long int Uint32;
+
+typedef char Int8;
+typedef int Int16;
+typedef long int Int32;
+
+typedef unsigned char Byte;
+typedef unsigned int Word;
+typedef unsigned long int DWord;
+
+typedef union
+{
+  Uint32 dw;
+  Uint16 w[2];
+  Uint8 b[4];
+} Union32;
+
+typedef union
+{
+  Uint16 w;
+  Uint8 b[2];
+} Union16;
+typedef char p_uart_ptchar;
+typedef char r_uart_ptchar;
+#include  <avr/interrupt.h>
+#include  <avr/pgmspace.h>
+#include  <avr/io.h>
+U8 flash_read_sig(unsigned long adr);
+
+
+
+
+
+
+
+U8 flash_read_fuse(unsigned long adr);
+extern void sof_action(void);
+extern void suspend_action(void);
+extern volatile U16 g_usb_event;
+extern U8 g_usb_mode;
+extern U8 usb_remote_wup_feature;
+void usb_task_init (void);
+void usb_task (void);
+
+extern volatile U8 private_sof_counter;
+typedef enum endpoint_parameter{ep_num, ep_type, ep_direction, ep_size, ep_bank, nyet_status} t_endpoint_parameter;
+U8 usb_config_ep (U8, U8);
+U8 usb_select_enpoint_interrupt (void);
+U16 usb_get_nb_byte_epw (void);
+U8 usb_send_packet (U8 , U8*, U8);
+U8 usb_read_packet (U8 , U8*, U8);
+void usb_halt_endpoint (U8);
+void usb_reset_endpoint (U8);
+U8 usb_init_device (void);
+void usb_process_request( void);
+
+
+
+
+
+
+
+
+
+
+void usb_generate_remote_wakeup(void);
+
+extern U8 usb_configuration_nb;
+extern U8 remote_wakeup_feature;
+typedef struct
+{
+   U8 bmRequestType;
+   U8 bRequest;
+   U16 wValue;
+   U16 wIndex;
+   U16 wLength;
+} S_UsbRequest;
+
+
+typedef struct {
+   U8 bLength;
+   U8 bDescriptorType;
+   U16 bscUSB;
+   U8 bDeviceClass;
+   U8 bDeviceSubClass;
+   U8 bDeviceProtocol;
+   U8 bMaxPacketSize0;
+   U16 idVendor;
+   U16 idProduct;
+   U16 bcdDevice;
+   U8 iManufacturer;
+   U8 iProduct;
+   U8 iSerialNumber;
+   U8 bNumConfigurations;
+} S_usb_device_descriptor;
+
+
+
+typedef struct {
+   U8 bLength;
+   U8 bDescriptorType;
+   U16 wTotalLength;
+   U8 bNumInterfaces;
+   U8 bConfigurationValue;
+   U8 iConfiguration;
+   U8 bmAttibutes;
+   U8 MaxPower;
+} S_usb_configuration_descriptor;
+
+
+
+typedef struct {
+   U8 bLength;
+   U8 bDescriptorType;
+   U8 bInterfaceNumber;
+   U8 bAlternateSetting;
+   U8 bNumEndpoints;
+   U8 bInterfaceClass;
+   U8 bInterfaceSubClass;
+   U8 bInterfaceProtocol;
+   U8 iInterface;
+} S_usb_interface_descriptor;
+
+
+
+typedef struct {
+   U8 bLength;
+   U8 bDescriptorType;
+   U8 bEndpointAddress;
+   U8 bmAttributes;
+   U16 wMaxPacketSize;
+   U8 bInterval;
+} S_usb_endpoint_descriptor;
+
+
+
+typedef struct {
+   U8 bLength;
+   U8 bDescriptorType;
+   U16 bscUSB;
+   U8 bDeviceClass;
+   U8 bDeviceSubClass;
+   U8 bDeviceProtocol;
+   U8 bMaxPacketSize0;
+   U8 bNumConfigurations;
+   U8 bReserved;
+} S_usb_device_qualifier_descriptor;
+
+
+
+typedef struct {
+   U8 bLength;
+   U8 bDescriptorType;
+   U16 wlangid;
+} S_usb_language_id;
+
+
+
+
+
+
+typedef struct {
+   U8 bLength;
+   U8 bDescriptorType;
+   U16 wstring[ 5 ];
+} S_usb_manufacturer_string_descriptor;
+
+
+
+
+
+
+typedef struct {
+   U8 bLength;
+   U8 bDescriptorType;
+   U16 wstring[ 16 ];
+} S_usb_product_string_descriptor;
+
+
+
+
+
+
+typedef struct {
+   U8 bLength;
+   U8 bDescriptorType;
+   U16 wstring[ 0x05 ];
+} S_usb_serial_number;
+
+
+
+
+typedef struct
+{
+   S_usb_configuration_descriptor cfg;
+   S_usb_interface_descriptor ifc0;
+   U8 CS_INTERFACE[19];
+   S_usb_endpoint_descriptor ep3;
+   S_usb_interface_descriptor ifc1;
+   S_usb_endpoint_descriptor ep1;
+   S_usb_endpoint_descriptor ep2;
+} S_usb_user_configuration_descriptor;
+#include  <avr/power.h>
+void set_idle_mode(void);
+void set_power_down_mode(void);
+void set_adc_noise_reduction_mode(void);
+void set_power_save_mode(void);
+void set_standby_mode(void);
+void set_ext_standby_mode(void);
+void Clock_switch_external(void);
+void Clock_switch_internal(void);
+#include  <avr/io.h>
+#include  <avr/wdt.h>
+extern  U8  usb_suspended;
+
+
+
+
+
+extern  U8  usb_connected;
+void usb_device_task_init (void);
+void usb_start_device (void);
+void usb_device_task (void);
 volatile U16 g_usb_event=0;
 
 
-#if (USB_DEVICE_FEATURE == ENABLED)
-//!
-//! Public : (bit) usb_connected
-//! usb_connected is set to TRUE when VBUS has been detected
-//! usb_connected is set to FALSE otherwise
-//! Used with USB_DEVICE_FEATURE == ENABLED only
-//!/
-extern bit   usb_connected;
 
-//!
-//! Public : (U8) usb_configuration_nb
-//! Store the number of the USB configuration used by the USB device
-//! when its value is different from zero, it means the device mode is enumerated
-//! Used with USB_DEVICE_FEATURE == ENABLED only
-//!/
-extern U8    usb_configuration_nb;
 
-//!
-//! Public : (U8) remote_wakeup_feature
-//! Store a host request for remote wake up (set feature received)
-//!/
+
+
+
+
+
+extern  U8  usb_connected;
+
+
+
+
+
+
+
+extern U8 usb_configuration_nb;
+
+
+
+
+
 extern U8 remote_wakeup_feature;
-#endif
-
-
-#if (USB_HOST_FEATURE == ENABLED)
-//!
-//! Private : (U8) private_sof_counter
-//! Incremented  by host SOF interrupt subroutime
-//! This counter is used to detect timeout in host requests.
-//! It must not be modified by the user application tasks.
-//!/
-volatile U8 private_sof_counter=0;
-
-   #if (USB_HOST_PIPE_INTERRUPT_TRANSFER == ENABLE)
-extern volatile S_pipe_int   it_pipe_str[MAX_EP_NB];
-   #endif
-
-#endif
-
-#if ((USB_DEVICE_FEATURE == ENABLED)&& (USB_HOST_FEATURE == ENABLED))
-//!
-//! Public : (U8) g_usb_mode
-//! Used in dual role application (both device/host) to store
-//! the current mode the usb controller is operating
-//!/
-   U8 g_usb_mode=USB_MODE_UNDEFINED;
-   U8 g_old_usb_mode;
-#endif
-
-//_____ D E C L A R A T I O N S ____________________________________________
-
-/**
- * @brief This function initializes the USB process.
- *
- *  The function calls the coresponding usb mode initialization function
- *
- *  @param none
- *
- *  @return none
- */
 void usb_task_init(void)
 {
-   #if (USE_USB_PADS_REGULATOR==ENABLE)  // Otherwise assume USB PADs regulator is not used
-   Usb_enable_regulator();
-   #endif
    usb_device_task_init();
-#if (USB_REMOTE_WAKEUP == ENABLED)
-   usb_remote_wup_feature = DISABLED;
-#endif
-}
 
-/**
- *  @brief Entry point of the USB mamnagement
- *
- *  The function calls the coresponding usb management function.
- *
- *  @param none
- *
- *  @return none
-*/
+   usb_remote_wup_feature =  0 ;
+
+}
 void usb_task(void)
 {
    usb_device_task();
 }
-
-//! @brief USB interrupt subroutine
-//!
-//! This function is called each time a USB interrupt occurs.
-//! The following USB DEVICE events are taken in charge:
-//! - Start Of Frame
-//! - Suspend
-//! - Wake-Up
-//! - Resume
-//! - Reset
-//!
-//! For each event, the user can launch an action by completing
-//! the associate define (See conf_usb.h file to add action upon events)
-//!
-//! Note: Only interrupts events that are enabled are processed
-//!
-//! @param none
-//!
-//! @return none
-#ifdef __GNUC__
  ISR(USB_GEN_vect)
-#else
-#pragma vector = USB_General_vect
-__interrupt void usb_general_interrupt()
-#endif
 {
-  //- VBUS state detection
-   if (Is_usb_vbus_transition() && Is_usb_vbus_interrupt_enabled())
+
+   if ( ((USBINT & (1<<VBUSTI)) ? (1==1) : (0==1) )  &&  ((USBCON & (1<<VBUSTE)) ? (1==1) : (0==1) ) )
    {
-      Usb_ack_vbus_transition();
-      if (Is_usb_vbus_high())
+      (USBINT = ~(1<<VBUSTI)) ;
+      if ( ((USBSTA & (1<<VBUS)) ? (1==1) : (0==1) ) )
       {
-         usb_connected = TRUE;
-         Usb_vbus_on_action();
-         Usb_send_event(EVT_USB_POWERED);
-         Usb_enable_reset_interrupt();
+         usb_connected =  (1==1) ;
+         ;
+         (g_usb_event |= (1<< 1 )) ;
+         (UDIEN |= (1<<EORSTE)) ;
          usb_start_device();
-         Usb_attach();
+         (UDCON &= ~(1<<DETACH)) ;
       }
       else
       {
-         Usb_vbus_off_action();
-         usb_connected = FALSE;
+         ;
+         usb_connected =  (0==1) ;
          usb_configuration_nb = 0;
-         Usb_send_event(EVT_USB_UNPOWERED);
+         (g_usb_event |= (1<< 2 )) ;
       }
    }
-  // - Device start of frame received
-   if (Is_usb_sof() && Is_sof_interrupt_enabled())
+
+   if ( ((UDINT & (1<<SOFI)) ? (1==1) : (0==1) )  &&  ((UDIEN & (1<<SOFE)) ? (1==1) : (0==1) ) )
    {
-      Usb_ack_sof();
-      Usb_sof_action();
+      (UDINT = ~(1<<SOFI)) ;
+      sof_action(); ;
    }
-  // - Device Suspend event (no more USB activity detected)
-   if (Is_usb_suspend() && Is_suspend_interrupt_enabled())
+
+   if ( ((UDINT & (1<<SUSPI)) ? (1==1) : (0==1) )  &&  ((UDIEN & (1<<SUSPE)) ? (1==1) : (0==1) ) )
    {
-      usb_suspended=TRUE;
-      Usb_ack_wake_up();                 // clear wake up to detect next event
-      Usb_send_event(EVT_USB_SUSPEND);
-      Usb_ack_suspend();
-      Usb_enable_wake_up_interrupt();
-      Usb_disable_resume_interrupt();
-      Usb_freeze_clock();
-      Stop_pll();
-      Usb_suspend_action();
+      usb_suspended= (1==1) ;
+      (UDINT = ~(1<<WAKEUPI)) ;
+      (g_usb_event |= (1<< 5 )) ;
+      (UDINT = ~(1<<SUSPI)) ;
+      (UDIEN |= (1<<WAKEUPE)) ;
+      (UDIEN &= ~(1<<EORSME)) ;
+      (USBCON |= (1<<FRZCLK)) ;
+      (PLLCSR &= (~(1<<PLLE)),PLLCSR=0 ) ;
+      ;
    }
-  // - Wake up event (USB activity detected): Used to resume
-   if (Is_usb_wake_up() && Is_wake_up_interrupt_enabled())
+
+   if ( ((UDINT & (1<<WAKEUPI)) ? (1==1) : (0==1) )  &&  ((UDIEN & (1<<WAKEUPE)) ? (1==1) : (0==1) ) )
    {
-      if(Is_pll_ready()==FALSE)
+      if( (PLLCSR & (1<<PLOCK) ) == (0==1) )
       {
-         #ifdef USE_USB_AUTOBAUD
-            usb_autobaud();
-         #else
-            Pll_start_auto();
-         #endif
-         Wait_pll_ready();
+
+
+
+            (PLLFRQ &= ~ ( (1<<PDIV3)| (1<<PDIV2) | (1<<PDIV1)| (1<<PDIV0)) ,PLLFRQ|= ( (0<<PDIV3)| (1<<PDIV2) | (0<<PDIV1)| (0<<PDIV0)) | (1<<PLLUSB) , PLLCSR = ( ( 1<<PINDIV ) | (1<<PLLE))) ;
+
+         while (!(PLLCSR & (1<<PLOCK))) ;
       }
-      Usb_unfreeze_clock();
-      Usb_ack_wake_up();
+      (USBCON &= ~(1<<FRZCLK)) ;
+      (UDINT = ~(1<<WAKEUPI)) ;
       if(usb_suspended)
       {
-         Usb_enable_resume_interrupt();
-         Usb_enable_reset_interrupt();
-         Usb_ack_wake_up();
-         Usb_disable_wake_up_interrupt();
-         Usb_wake_up_action();
-         Usb_send_event(EVT_USB_WAKE_UP);
-         Usb_enable_suspend_interrupt();
-         Usb_enable_resume_interrupt();
-         Usb_enable_reset_interrupt();
+         (UDIEN |= (1<<EORSME)) ;
+         (UDIEN |= (1<<EORSTE)) ;
+         (UDINT = ~(1<<WAKEUPI)) ;
+         (UDIEN &= ~(1<<WAKEUPE)) ;
+         ;
+         (g_usb_event |= (1<< 6 )) ;
+         (UDIEN |= (1<<SUSPE)) ;
+         (UDIEN |= (1<<EORSME)) ;
+         (UDIEN |= (1<<EORSTE)) ;
 
       }
    }
-  // - Resume state bus detection
-   if (Is_usb_resume() && Is_resume_interrupt_enabled())
+
+   if ( ((UDINT & (1<<EORSMI)) ? (1==1) : (0==1) )  &&  ((UDIEN & (1<<EORSME)) ? (1==1) : (0==1) ) )
    {
-      usb_suspended = FALSE;
-      Usb_disable_wake_up_interrupt();
-      Usb_ack_resume();
-      Usb_disable_resume_interrupt();
-      Usb_resume_action();
-      Usb_send_event(EVT_USB_RESUME);
+      usb_suspended =  (0==1) ;
+      (UDIEN &= ~(1<<WAKEUPE)) ;
+      (UDINT = ~(1<<EORSMI)) ;
+      (UDIEN &= ~(1<<EORSME)) ;
+      ;
+      (g_usb_event |= (1<< 7 )) ;
    }
-  // - USB bus reset detection
-   if (Is_usb_reset()&& Is_reset_interrupt_enabled())
+
+   if ( ((UDINT & (1<<EORSTI)) ? (1==1) : (0==1) ) &&  ((UDIEN & (1<<EORSTE)) ? (1==1) : (0==1) ) )
    {
-      #if (USB_REMOTE_WAKEUP == ENABLED)
-      usb_remote_wup_feature = DISABLED;
-      #endif
-      Usb_ack_reset();
+
+      usb_remote_wup_feature =  0 ;
+
+      (UDINT = ~(1<<EORSTI)) ;
       usb_init_device();
-      Usb_reset_action();
-      Usb_send_event(EVT_USB_RESET);
+      ;
+      (g_usb_event |= (1<< 8 )) ;
    }
 
 }
-
-
-

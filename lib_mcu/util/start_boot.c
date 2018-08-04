@@ -1,77 +1,90 @@
-/*This file has been prepared for Doxygen automatic documentation generation.*/
-//! \file *********************************************************************
-//!
-//! \brief 
-//!
-//! - Compiler:           IAR EWAVR and GNU GCC for AVR
-//! - Supported devices:  AT90USB1287, AT90USB1286, AT90USB647, AT90USB646
-//!
-//! \author               Atmel Corporation: http://www.atmel.com \n
-//!                       Support and FAQ: http://support.atmel.no/
-//!
-//! ***************************************************************************
+typedef float Float16;
 
-/* Copyright (c) 2007, Atmel Corporation All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- * 1. Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- *
- * 3. The name of ATMEL may not be used to endorse or promote products derived
- * from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY ATMEL ``AS IS'' AND ANY EXPRESS OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE EXPRESSLY AND
- * SPECIFICALLY DISCLAIMED. IN NO EVENT SHALL ATMEL BE LIABLE FOR ANY DIRECT,
- * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+typedef unsigned char U8 ;
+typedef unsigned short U16;
+typedef unsigned long U32;
+typedef signed char S8 ;
+typedef signed short S16;
+typedef long S32;
 
-#include "config.h"
-#include "start_boot.h"
-#include "lib_mcu/wdt/wdt_drv.h"
+
+
+typedef unsigned char Bool;
+
+
+typedef U8 Status;
+typedef Bool Status_bool;
+typedef unsigned char Uchar;
+
+
+typedef unsigned char Uint8;
+typedef unsigned int Uint16;
+typedef unsigned long int Uint32;
+
+typedef char Int8;
+typedef int Int16;
+typedef long int Int32;
+
+typedef unsigned char Byte;
+typedef unsigned int Word;
+typedef unsigned long int DWord;
+
+typedef union
+{
+  Uint32 dw;
+  Uint16 w[2];
+  Uint8 b[4];
+} Union32;
+
+typedef union
+{
+  Uint16 w;
+  Uint8 b[2];
+} Union16;
+typedef char p_uart_ptchar;
+typedef char r_uart_ptchar;
+#include  <avr/interrupt.h>
+#include  <avr/pgmspace.h>
+#include  <avr/io.h>
+U8 flash_read_sig(unsigned long adr);
+
+
+
+
+
+
+
+U8 flash_read_fuse(unsigned long adr);
+   extern U32 boot_key __attribute__ ((section (".noinit")));
+void start_boot_if_required(void);
+void start_boot(void);
+#include  <avr/io.h>
+#include  <avr/wdt.h>
 
 void (*start_bootloader) (void)=(void (*)(void))0x3800;
 
-#ifdef __GNUC__
-   U32 boot_key __attribute__ ((section (".noinit")));
-#else
-   __no_init U32 boot_key; 
-#endif
-   
 
+   U32 boot_key __attribute__ ((section (".noinit")));
 void start_boot_if_required(void)
 {
-  if(boot_key==GOTOBOOTKEY)
+  if(boot_key== 0x55AAAA55 )
   {
       boot_key = 0;
-      (*start_bootloader)();           //! Jumping to bootloader
+      (*start_bootloader)();
   }
 }
 
 void start_boot(void)
 {
    boot_key=0x55AAAA55;
-   
-   // Enable the WDT for reset mode
-   #ifndef  __GNUC__
-      Wdt_change_16ms();
-   #else
+
+
+
+
+
       wdt_reset();
-      Wdt_change_enable();
-      Wdt_enable_16ms();
-   #endif
+      (WDTCSR |= (1<<WDCE) ) ;
+      (WDTCSR = (1<<WDE)) ;
+
    while(1);
 }
-

@@ -1,194 +1,156 @@
-/*This file has been prepared for Doxygen automatic documentation generation.*/
-//! \file *********************************************************************
-//!
-//! \brief This file contains the Power and clock management driver routines.
-//!
-//!  This file contains the Power and clock management driver routines.
-//!
-//! - Compiler:           IAR EWAVR and GNU GCC for AVR
-//! - Supported devices:  ATmega32U4
-//!
-//! \author               Atmel Corporation: http://www.atmel.com \n
-//!                       Support and FAQ: http://support.atmel.no/
-//!
-//! ***************************************************************************
+typedef float Float16;
 
-/* Copyright (c) 2007, Atmel Corporation All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- * 1. Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- *
- * 3. The name of ATMEL may not be used to endorse or promote products derived
- * from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY ATMEL ``AS IS'' AND ANY EXPRESS OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE EXPRESSLY AND
- * SPECIFICALLY DISCLAIMED. IN NO EVENT SHALL ATMEL BE LIABLE FOR ANY DIRECT,
- * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-
-//_____ I N C L U D E S ____________________________________________________
-
-#include "config.h"
-#include "power_drv.h"
-
-//_____ M A C R O S ________________________________________________________
+typedef unsigned char U8 ;
+typedef unsigned short U16;
+typedef unsigned long U32;
+typedef signed char S8 ;
+typedef signed short S16;
+typedef long S32;
 
 
-//_____ D E C L A R A T I O N ______________________________________________
 
-//! Set_cpu_prescaler.
-//!
-//! This function write the CPU prescaler register to a define value
-//!
-//! @param U8 the precaler value to be written
-//!
-//! @return none.
-//!
-#ifndef __GNUC__
-   #pragma optimize=none 
-   void Set_cpu_prescaler(U8 x)
-   {
-      U8 save_int=SREG&0x80;
-      Disable_interrupt();
-      CLKPR=(1<<CLKPCE);
-      CLKPR=x;
-      if(save_int) { Enable_interrupt(); }
-   }
-#endif
+typedef unsigned char Bool;
 
-//! set_power_down_mode.
-//!
-//! This function makes the AVR core enter power down mode.
-//!
-//! @param none
-//!
-//! @return none.
-//!
+
+typedef U8 Status;
+typedef Bool Status_bool;
+typedef unsigned char Uchar;
+
+
+typedef unsigned char Uint8;
+typedef unsigned int Uint16;
+typedef unsigned long int Uint32;
+
+typedef char Int8;
+typedef int Int16;
+typedef long int Int32;
+
+typedef unsigned char Byte;
+typedef unsigned int Word;
+typedef unsigned long int DWord;
+
+typedef union
+{
+  Uint32 dw;
+  Uint16 w[2];
+  Uint8 b[4];
+} Union32;
+
+typedef union
+{
+  Uint16 w;
+  Uint8 b[2];
+} Union16;
+typedef char p_uart_ptchar;
+typedef char r_uart_ptchar;
+#include  <avr/interrupt.h>
+#include  <avr/pgmspace.h>
+#include  <avr/io.h>
+U8 flash_read_sig(unsigned long adr);
+
+
+
+
+
+
+
+U8 flash_read_fuse(unsigned long adr);
+#include  <avr/power.h>
+void set_idle_mode(void);
+void set_power_down_mode(void);
+void set_adc_noise_reduction_mode(void);
+void set_power_save_mode(void);
+void set_standby_mode(void);
+void set_ext_standby_mode(void);
+void Clock_switch_external(void);
+void Clock_switch_internal(void);
 void set_power_down_mode(void)
 {
-   Setup_power_down_mode();
-   Sleep_instruction();
+   (SMCR=0,SMCR |= (1<<SE)+(1<<SM1)) ;
+   {asm("SLEEP");} ;
 }
-
-
-
-//! set_idle_mode.
-//!
-//! This function makes the AVR core enter idle mode.
-//!
-//! @param none
-//!
-//! @return none.
-//!
 void set_idle_mode(void)
 {
-   Setup_idle_mode();
-   Sleep_instruction();
+   (SMCR=0,SMCR |= (1<<SE)) ;
+   {asm("SLEEP");} ;
 }
 
-//! set_adc_noise_reduction_mode.
-//!
-//! This function makes the AVR core enter adc noise reduction mode.
-//!
-//! @param none
-//!
-//! @return none.
-//!
+
+
+
+
+
+
+
+
 void set_adc_noise_reduction_mode(void)
 {
-   Setup_adc_noise_reduction_mode();
-   Sleep_instruction();
+   (SMCR=0,SMCR |= (1<<SE)+(1<<SM0)) ;
+   {asm("SLEEP");} ;
 }
 
-//! set_power_save_mode.
-//!
-//! This function makes the AVR core enter power save mode.
-//!
-//! @param none
-//!
-//! @return none.
-//!
+
+
+
+
+
+
+
+
 void set_power_save_mode(void)
 {
-   Setup_power_save_mode();
-   Sleep_instruction();
+   (SMCR=0,SMCR |= (1<<SE)+(1<<SM1)+(1<<SM0)) ;
+   {asm("SLEEP");} ;
 }
 
-//! set_standby_mode.
-//!
-//! This function makes the AVR core enter standby mode.
-//!
-//! @param none
-//!
-//! @return none.
-//!
+
+
+
+
+
+
+
+
 void set_standby_mode(void)
 {
-   Setup_standby_mode();
-   Sleep_instruction();
+   (SMCR=0,SMCR |= (1<<SE)+(1<<SM2)+(1<<SM1)) ;
+   {asm("SLEEP");} ;
 }
 
-//! set_ext_standby_mode.
-//!
-//! This function makes the AVR core enter extended standby mode.
-//!
-//! @param none
-//!
-//! @return none.
-//!
+
+
+
+
+
+
+
+
 void set_ext_standby_mode(void)
 {
-   Setup_ext_standby_mode();
-   Sleep_instruction();
+   (SMCR=0,SMCR |= (1<<SE)+(1<<SM2)+(1<<SM1)+(1<<SM0)) ;
+   {asm("SLEEP");} ;
 }
-
-
-
-
-//! Clock_switch_external.
-//!
-//! This function makes the AVR selects the EXTERNAL clock source (CRYSTAL)
-//!
-//! @param none
-//!
-//! @return none.
-//!
 void Clock_switch_external(void)
 {
-  Enable_external_clock();
-  while (!External_clock_ready());
-  Select_external_clock();
-  Disable_RC_clock();
+  (CLKSEL0 |= (1<<EXTE)) ;
+  while (! (((CLKSTA&(1<<EXTON)) != 0) ? (1==1) : (0==1) ) );
+  (CLKSEL0 |= (1<<CLKS)) ;
+  (CLKSEL0 &= ~(1<<RCE)) ;
 }
 
 
-//! Clock_switch_internal.
-//!
-//! This function makes the AVR selects the INTERNAL clock source (RC)
-//!
-//! @param none
-//!
-//! @return none.
-//!
+
+
+
+
+
+
+
+
 void Clock_switch_internal(void)
 {
-  Enable_RC_clock();
-  while (!RC_clock_ready());
-  Select_RC_clock();
-  Disable_external_clock();
+  (CLKSEL0 |= (1<<RCE)) ;
+  while (! (((CLKSTA&(1<<RCON)) != 0) ? (1==1) : (0==1) ) );
+  (CLKSEL0 &= ~(1<<CLKS)) ;
+  (CLKSEL0 &= ~(1<<EXTE)) ;
 }
-

@@ -1,96 +1,88 @@
-/*This file has been prepared for Doxygen automatic documentation generation.*/
-//! \file *********************************************************************
-//!
-//! \brief This file contains the USB driver routines.
-//!
-//!  This file contains the USB driver routines.
-//!
-//! - Compiler:           IAR EWAVR and GNU GCC for AVR
-//! - Supported devices:  ATmega32U4
-//!
-//! \author               Atmel Corporation: http://www.atmel.com \n
-//!                       Support and FAQ: http://support.atmel.no/
-//!
-//! ***************************************************************************
+typedef float Float16;
 
-/* Copyright (c) 2007, Atmel Corporation All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- * 1. Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- *
- * 3. The name of ATMEL may not be used to endorse or promote products derived
- * from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY ATMEL ``AS IS'' AND ANY EXPRESS OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE EXPRESSLY AND
- * SPECIFICALLY DISCLAIMED. IN NO EVENT SHALL ATMEL BE LIABLE FOR ANY DIRECT,
- * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-
-//_____ I N C L U D E S ____________________________________________________
-
-#include "config.h"
-#include "conf_usb.h"
-#include "usb_drv.h"
-
-//_____ M A C R O S ________________________________________________________
-
-//_____ D E C L A R A T I O N ______________________________________________
+typedef unsigned char U8 ;
+typedef unsigned short U16;
+typedef unsigned long U32;
+typedef signed char S8 ;
+typedef signed short S16;
+typedef long S32;
 
 
 
-//! usb_configure_endpoint.
-//!
-//!  This function configures an endpoint with the selected type.
-//!
-//!
-//! @param config0
-//! @param config1
-//!
-//! @return Is_endpoint_configured.
-//!
+typedef unsigned char Bool;
+
+
+typedef U8 Status;
+typedef Bool Status_bool;
+typedef unsigned char Uchar;
+
+
+typedef unsigned char Uint8;
+typedef unsigned int Uint16;
+typedef unsigned long int Uint32;
+
+typedef char Int8;
+typedef int Int16;
+typedef long int Int32;
+
+typedef unsigned char Byte;
+typedef unsigned int Word;
+typedef unsigned long int DWord;
+
+typedef union
+{
+  Uint32 dw;
+  Uint16 w[2];
+  Uint8 b[4];
+} Union32;
+
+typedef union
+{
+  Uint16 w;
+  Uint8 b[2];
+} Union16;
+typedef char p_uart_ptchar;
+typedef char r_uart_ptchar;
+#include  <avr/interrupt.h>
+#include  <avr/pgmspace.h>
+#include  <avr/io.h>
+U8 flash_read_sig(unsigned long adr);
+
+
+
+
+
+
+
+U8 flash_read_fuse(unsigned long adr);
+extern void sof_action(void);
+extern void suspend_action(void);
+typedef enum endpoint_parameter{ep_num, ep_type, ep_direction, ep_size, ep_bank, nyet_status} t_endpoint_parameter;
+U8 usb_config_ep (U8, U8);
+U8 usb_select_enpoint_interrupt (void);
+U16 usb_get_nb_byte_epw (void);
+U8 usb_send_packet (U8 , U8*, U8);
+U8 usb_read_packet (U8 , U8*, U8);
+void usb_halt_endpoint (U8);
+void usb_reset_endpoint (U8);
+U8 usb_init_device (void);
 U8 usb_config_ep(U8 config0, U8 config1)
 {
-    Usb_enable_endpoint();
+    (UECONX |= (1<<EPEN)) ;
     UECFG0X = config0;
     UECFG1X = (UECFG1X & (1<<ALLOC)) | config1;
-    Usb_allocate_memory();
-    return (Is_endpoint_configured());
+    (UECFG1X |= (1<<ALLOC)) ;
+    return ( ((UESTA0X & (1<<CFGOK)) ? (1==1) : (0==1) ) );
 }
-
-//! usb_select_endpoint_interrupt.
-//!
-//! This function select the endpoint where an event occurs and returns the
-//! number of this endpoint. If no event occurs on the endpoints, this
-//! function returns 0.
-//!
-//!
-//! @param none
-//!
-//! @return endpoint number.
-//!
 U8 usb_select_enpoint_interrupt(void)
 {
 U8 interrupt_flags;
 U8 ep_num;
 
    ep_num = 0;
-   interrupt_flags = Usb_interrupt_flags();
+   interrupt_flags =  (UEINT) ;
 
-   while(ep_num < MAX_EP_NB)
+   while(ep_num <  7 )
    {
       if (interrupt_flags & 1)
       {
@@ -104,128 +96,46 @@ U8 ep_num;
    }
    return 0;
 }
-
-//! usb_send_packet.
-//!
-//! This function moves the data pointed by tbuf to the selected endpoint fifo
-//! and sends it through the USB.
-//!
-//!
-//! @param ep_num       number of the addressed endpoint
-//! @param *tbuf        address of the first data to send
-//! @param data_length  number of bytes to send
-//!
-//! @return address of the next U8 to send.
-//!
-//! Example:
-//! usb_send_packet(3,&first_data,0x20);    // send packet on the endpoint #3
-//! while(!(Usb_tx_complete));              // wait packet ACK'ed by the Host
-//! Usb_clear_tx_complete();                     // acknowledge the transmit
-//!
-//! Note:
-//! tbuf is incremented of 'data_length'.
-//!
 U8 usb_send_packet(U8 ep_num, U8* tbuf, U8 data_length)
 {
 U8 remaining_length;
 
    remaining_length = data_length;
-   Usb_select_endpoint(ep_num);
-   while(Is_usb_write_enabled() && (0 != remaining_length))
+   (UENUM = (U8)ep_num ) ;
+   while( (UEINTX&(1<<RWAL))  && (0 != remaining_length))
    {
-      Usb_write_byte(*tbuf);
+      (UEDATX = (U8)*tbuf) ;
       remaining_length--;
       tbuf++;
    }
    return remaining_length;
 }
-
-//! usb_read_packet.
-//!
-//! This function moves the data stored in the selected endpoint fifo to
-//! the address specified by *rbuf.
-//!
-//!
-//! @param ep_num       number of the addressed endpoint
-//! @param *rbuf        aaddress of the first data to write with the USB data
-//! @param data_length  number of bytes to read
-//!
-//! @return address of the next U8 to send.
-//!
-//! Example:
-//! while(!(Usb_rx_complete));                      // wait new packet received
-//! usb_read_packet(4,&first_data,usb_get_nb_byte); // read packet from ep 4
-//! Usb_clear_rx();                                 // acknowledge the transmit
-//!
-//! Note:
-//! rbuf is incremented of 'data_length'.
-//!
-U8 usb_read_packet(U8 ep_num, U8* rbuf, U8  data_length)
+U8 usb_read_packet(U8 ep_num, U8* rbuf, U8 data_length)
 {
 U8 remaining_length;
 
    remaining_length = data_length;
-   Usb_select_endpoint(ep_num);
+   (UENUM = (U8)ep_num ) ;
 
-   while(Is_usb_read_enabled() && (0 != remaining_length))
+   while( (UEINTX&(1<<RWAL))  && (0 != remaining_length))
    {
-      *rbuf = Usb_read_byte();
+      *rbuf =  (UEDATX) ;
       remaining_length--;
       rbuf++;
    }
    return remaining_length;
 }
-
-//! usb_halt_endpoint.
-//!
-//! This function sends a STALL handshake for the next Host request. A STALL
-//! handshake will be send for each next request untill a SETUP or a Clear Halt
-//! Feature occurs for this endpoint.
-//!
-//! @param ep_num number of the addressed endpoint
-//!
-//! @return none
-//!
 void usb_halt_endpoint (U8 ep_num)
 {
-   Usb_select_endpoint(ep_num);
-   Usb_enable_stall_handshake();
+   (UENUM = (U8)ep_num ) ;
+   (UECONX |= (1<<STALLRQ)) ;
 }
-
-//! usb_init_device.
-//!
-//! This function initializes the USB device controller and
-//! configures the Default Control Endpoint.
-//!
-//!
-//! @param none
-//!
-//! @return status
-//!
 U8 usb_init_device (void)
 {
-      Usb_select_endpoint(EP_CONTROL);
-      if(!Is_usb_endpoint_enabled())
+      (UENUM = (U8) 0 ) ;
+      if(! ((UECONX & (1<<EPEN)) ? (1==1) : (0==1) ) )
       {
-#if (USB_LOW_SPEED_DEVICE==DISABLE)
-         return usb_configure_endpoint(EP_CONTROL,    \
-                                TYPE_CONTROL,  \
-                                DIRECTION_OUT, \
-                                SIZE_32,       \
-                                ONE_BANK,      \
-                                NYET_DISABLED);
-#else
-         return usb_configure_endpoint(EP_CONTROL,    \
-                                TYPE_CONTROL,  \
-                                DIRECTION_OUT, \
-                                SIZE_8,       \
-                                ONE_BANK,      \
-                                NYET_DISABLED);
-
-#endif         
+         return  ( (UENUM = (U8)0 ) , usb_config_ep( ((0 <<6) | (1 <<1) | (0 )) , ((2 <<4) | (0 <<2) ) )) ;
       }
-   return FALSE;
+   return  (0==1) ;
 }
-
-
-

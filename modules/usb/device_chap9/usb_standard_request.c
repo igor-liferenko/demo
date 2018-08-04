@@ -1,439 +1,582 @@
-/*This file has been prepared for Doxygen automatic documentation generation.*/
-//! \file *********************************************************************
-//!
-//! \brief Process USB device enumeration requests.
-//!
-//!  This file contains the USB endpoint 0 management routines corresponding to
-//!  the standard enumeration process (refer to chapter 9 of the USB
-//!  specification.
-//!  This file calls routines of the usb_specific_request.c file for non-standard
-//!  request management.
-//!  The enumeration parameters (descriptor tables) are contained in the
-//!  usb_descriptors.c file.
-//!
-//! - Compiler:           IAR EWAVR and GNU GCC for AVR
-//! - Supported devices:  ATmega32U4
-//!
-//! \author               Atmel Corporation: http://www.atmel.com \n
-//!                       Support and FAQ: http://support.atmel.no/
-//!
-//! ***************************************************************************
+typedef float Float16;
 
-/* Copyright (c) 2007, Atmel Corporation All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- * 1. Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- *
- * 3. The name of ATMEL may not be used to endorse or promote products derived
- * from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY ATMEL ``AS IS'' AND ANY EXPRESS OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE EXPRESSLY AND
- * SPECIFICALLY DISCLAIMED. IN NO EVENT SHALL ATMEL BE LIABLE FOR ANY DIRECT,
- * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-
-//_____ I N C L U D E S ____________________________________________________
-
-#include "config.h"
-#include "conf_usb.h"
-#include "lib_mcu/usb/usb_drv.h"
-#include "usb_descriptors.h"
-#include "modules/usb/device_chap9/usb_standard_request.h"
-#include "lib_mcu/pll/pll_drv.h"
-#include "usb_specific_request.h"
+typedef unsigned char U8 ;
+typedef unsigned short U16;
+typedef unsigned long U32;
+typedef signed char S8 ;
+typedef signed short S16;
+typedef long S32;
 
 
-//_____ M A C R O S ________________________________________________________
+
+typedef unsigned char Bool;
 
 
-//_____ D E F I N I T I O N ________________________________________________
-
-//_____ P R I V A T E   D E C L A R A T I O N ______________________________
-
-static  void    usb_get_descriptor(   void);
-static  void    usb_set_address(      void);
-static  void    usb_set_configuration(void);
-static  void    usb_clear_feature(    void);
-static  void    usb_set_feature(      void);
-static  void    usb_get_status(       void);
-static  void    usb_get_configuration(void);
-static  void    usb_get_interface (void);
-static  void    usb_set_interface (void);
+typedef U8 Status;
+typedef Bool Status_bool;
+typedef unsigned char Uchar;
 
 
-#ifndef USB_REMOTE_WAKEUP_FEATURE
-   #error USB_REMOTE_WAKEUP_FEATURE should be defined as ENABLE or DISABLE in conf_usb.h
-#endif
+typedef unsigned char Uint8;
+typedef unsigned int Uint16;
+typedef unsigned long int Uint32;
+
+typedef char Int8;
+typedef int Int16;
+typedef long int Int32;
+
+typedef unsigned char Byte;
+typedef unsigned int Word;
+typedef unsigned long int DWord;
+
+typedef union
+{
+  Uint32 dw;
+  Uint16 w[2];
+  Uint8 b[4];
+} Union32;
+
+typedef union
+{
+  Uint16 w;
+  Uint8 b[2];
+} Union16;
+typedef char p_uart_ptchar;
+typedef char r_uart_ptchar;
+#include  <avr/interrupt.h>
+#include  <avr/pgmspace.h>
+#include  <avr/io.h>
+U8 flash_read_sig(unsigned long adr);
 
 
 
 
-//_____ D E C L A R A T I O N ______________________________________________
 
-static  bit  zlp;
-static  U8   endpoint_status[MAX_EP_NB];
-static  U8   device_status=DEVICE_STATUS;
 
-#ifdef __GNUC__
+
+U8 flash_read_fuse(unsigned long adr);
+extern void sof_action(void);
+extern void suspend_action(void);
+typedef enum endpoint_parameter{ep_num, ep_type, ep_direction, ep_size, ep_bank, nyet_status} t_endpoint_parameter;
+U8 usb_config_ep (U8, U8);
+U8 usb_select_enpoint_interrupt (void);
+U16 usb_get_nb_byte_epw (void);
+U8 usb_send_packet (U8 , U8*, U8);
+U8 usb_read_packet (U8 , U8*, U8);
+void usb_halt_endpoint (U8);
+void usb_reset_endpoint (U8);
+U8 usb_init_device (void);
+extern volatile U16 g_usb_event;
+extern U8 g_usb_mode;
+extern U8 usb_remote_wup_feature;
+void usb_task_init (void);
+void usb_task (void);
+
+extern volatile U8 private_sof_counter;
+void usb_process_request( void);
+
+
+
+
+
+
+
+
+
+
+void usb_generate_remote_wakeup(void);
+
+extern U8 usb_configuration_nb;
+extern U8 remote_wakeup_feature;
+typedef struct
+{
+   U8 bmRequestType;
+   U8 bRequest;
+   U16 wValue;
+   U16 wIndex;
+   U16 wLength;
+} S_UsbRequest;
+
+
+typedef struct {
+   U8 bLength;
+   U8 bDescriptorType;
+   U16 bscUSB;
+   U8 bDeviceClass;
+   U8 bDeviceSubClass;
+   U8 bDeviceProtocol;
+   U8 bMaxPacketSize0;
+   U16 idVendor;
+   U16 idProduct;
+   U16 bcdDevice;
+   U8 iManufacturer;
+   U8 iProduct;
+   U8 iSerialNumber;
+   U8 bNumConfigurations;
+} S_usb_device_descriptor;
+
+
+
+typedef struct {
+   U8 bLength;
+   U8 bDescriptorType;
+   U16 wTotalLength;
+   U8 bNumInterfaces;
+   U8 bConfigurationValue;
+   U8 iConfiguration;
+   U8 bmAttibutes;
+   U8 MaxPower;
+} S_usb_configuration_descriptor;
+
+
+
+typedef struct {
+   U8 bLength;
+   U8 bDescriptorType;
+   U8 bInterfaceNumber;
+   U8 bAlternateSetting;
+   U8 bNumEndpoints;
+   U8 bInterfaceClass;
+   U8 bInterfaceSubClass;
+   U8 bInterfaceProtocol;
+   U8 iInterface;
+} S_usb_interface_descriptor;
+
+
+
+typedef struct {
+   U8 bLength;
+   U8 bDescriptorType;
+   U8 bEndpointAddress;
+   U8 bmAttributes;
+   U16 wMaxPacketSize;
+   U8 bInterval;
+} S_usb_endpoint_descriptor;
+
+
+
+typedef struct {
+   U8 bLength;
+   U8 bDescriptorType;
+   U16 bscUSB;
+   U8 bDeviceClass;
+   U8 bDeviceSubClass;
+   U8 bDeviceProtocol;
+   U8 bMaxPacketSize0;
+   U8 bNumConfigurations;
+   U8 bReserved;
+} S_usb_device_qualifier_descriptor;
+
+
+
+typedef struct {
+   U8 bLength;
+   U8 bDescriptorType;
+   U16 wlangid;
+} S_usb_language_id;
+
+
+
+
+
+
+typedef struct {
+   U8 bLength;
+   U8 bDescriptorType;
+   U16 wstring[ 5 ];
+} S_usb_manufacturer_string_descriptor;
+
+
+
+
+
+
+typedef struct {
+   U8 bLength;
+   U8 bDescriptorType;
+   U16 wstring[ 16 ];
+} S_usb_product_string_descriptor;
+
+
+
+
+
+
+typedef struct {
+   U8 bLength;
+   U8 bDescriptorType;
+   U16 wstring[ 0x05 ];
+} S_usb_serial_number;
+
+
+
+
+typedef struct
+{
+   S_usb_configuration_descriptor cfg;
+   S_usb_interface_descriptor ifc0;
+   U8 CS_INTERFACE[19];
+   S_usb_endpoint_descriptor ep3;
+   S_usb_interface_descriptor ifc1;
+   S_usb_endpoint_descriptor ep1;
+   S_usb_endpoint_descriptor ep2;
+} S_usb_user_configuration_descriptor;
+
+
+
+extern  PROGMEM  const S_usb_device_descriptor usb_dev_desc;
+extern  PROGMEM  const S_usb_user_configuration_descriptor usb_conf_desc;
+extern  PROGMEM  const S_usb_user_configuration_descriptor usb_other_conf_desc;
+extern  PROGMEM  const S_usb_device_qualifier_descriptor usb_qual_desc;
+extern  PROGMEM  const S_usb_manufacturer_string_descriptor usb_user_manufacturer_string_descriptor;
+extern  PROGMEM  const S_usb_product_string_descriptor usb_user_product_string_descriptor;
+extern  PROGMEM  const S_usb_serial_number usb_user_serial_number;
+extern  PROGMEM  const S_usb_language_id usb_user_language_id;
+
+
+
+
+Bool usb_user_read_request(U8, U8);
+Bool usb_user_get_descriptor(U8 , U8);
+void usb_user_endpoint_init(U8);
+void cdc_get_line_coding();
+void cdc_set_line_coding();
+void cdc_set_control_line_state(U16);
+void cdc_send_break(U16);
+Bool cdc_update_serial_state();
+
+
+
+typedef struct
+{
+   U32 dwDTERate;
+   U8 bCharFormat;
+   U8 bParityType;
+   U8 bDataBits;
+}S_line_coding;
+
+
+
+typedef union
+{
+   U8 all;
+   struct {
+      U8 DTR:1;
+      U8 RTS:1;
+      U8 unused:6;
+   };
+}S_line_status;
+
+
+
+typedef union
+{
+   U16 all;
+   struct {
+      U16 bDCD:1;
+      U16 bDSR:1;
+      U16 bBreak:1;
+      U16 bRing:1;
+      U16 bFraming:1;
+      U16 bParity:1;
+      U16 bOverRun:1;
+      U16 reserved:9;
+   };
+}S_serial_state;
+
+
+
+
+
+
+
+
+
+static void usb_get_descriptor( void);
+static void usb_set_address( void);
+static void usb_set_configuration(void);
+static void usb_clear_feature( void);
+static void usb_set_feature( void);
+static void usb_get_status( void);
+static void usb_get_configuration(void);
+static void usb_get_interface (void);
+static void usb_set_interface (void);
+static  U8  zlp;
+static U8 endpoint_status[ 7 ];
+static U8 device_status= 1 ;
+
+
         PGM_VOID_P pbuffer;
-#else
-        U8   code *pbuffer;
-#endif
-        U8   data_to_transfer;
+        U8 data_to_transfer;
 
-        U16  wInterface;
+        U16 wInterface;
 
-static  U8   bmRequestType;
-        U8      remote_wakeup_feature=DISABLE; 
-        U8   usb_configuration_nb;
-extern  bit     usb_connected;
-extern  code    const S_usb_device_descriptor             usb_user_device_descriptor;
-extern  code    const S_usb_user_configuration_descriptor usb_user_configuration_descriptor;
+static U8 bmRequestType;
+        U8 remote_wakeup_feature= 0 ;
+        U8 usb_configuration_nb;
+extern  U8  usb_connected;
+extern  PROGMEM  const S_usb_device_descriptor usb_user_device_descriptor;
+extern  PROGMEM  const S_usb_user_configuration_descriptor usb_user_configuration_descriptor;
 
-U8      usb_remote_wup_feature;  // Store ENABLED value if a SetFeature(RemoteWakeUp) has been received
-
-
-//! usb_process_request.
-//!
-//! @brief This function reads the SETUP request sent to the default control endpoint
-//! and calls the appropriate function. When exiting of the usb_read_request
-//! function, the device is ready to manage the next request.
-//!
-//! @param none
-//!
-//! @return none
-//! @note list of supported requests:
-//! SETUP_GET_DESCRIPTOR
-//! SETUP_GET_CONFIGURATION
-//! SETUP_SET_ADDRESS
-//! SETUP_SET_CONFIGURATION
-//! SETUP_CLEAR_FEATURE
-//! SETUP_SET_FEATURE
-//! SETUP_GET_STATUS
-//!
+U8 usb_remote_wup_feature;
 void usb_process_request(void)
 {
-   U8  bmRequest;
+   U8 bmRequest;
 
-   Usb_ack_control_out();
-   bmRequestType = Usb_read_byte();
-   bmRequest     = Usb_read_byte();
+   (UEINTX &= ~(1<<RXOUTI)) ;
+   bmRequestType =  (UEDATX) ;
+   bmRequest =  (UEDATX) ;
 
    switch (bmRequest)
    {
-    case SETUP_GET_DESCRIPTOR:
-         if (USB_SETUP_GET_STAND_DEVICE == bmRequestType) { usb_get_descriptor(); }
-         else                       { usb_user_read_request(bmRequestType, bmRequest); }
+    case  0x06 :
+         if ( ( (1<<7) | (0<<5) | (0) )  == bmRequestType) { usb_get_descriptor(); }
+         else { usb_user_read_request(bmRequestType, bmRequest); }
          break;
 
-    case SETUP_GET_CONFIGURATION:
-         if (USB_SETUP_GET_STAND_DEVICE == bmRequestType) { usb_get_configuration(); }
-         else                       { usb_user_read_request(bmRequestType, bmRequest); }
+    case  0x08 :
+         if ( ( (1<<7) | (0<<5) | (0) )  == bmRequestType) { usb_get_configuration(); }
+         else { usb_user_read_request(bmRequestType, bmRequest); }
          break;
 
-    case SETUP_SET_ADDRESS:
-         if (USB_SETUP_SET_STAND_DEVICE == bmRequestType) { usb_set_address(); }
-         else                       { usb_user_read_request(bmRequestType, bmRequest); }
+    case  0x05 :
+         if ( ( (0<<7) | (0<<5) | (0) )  == bmRequestType) { usb_set_address(); }
+         else { usb_user_read_request(bmRequestType, bmRequest); }
          break;
 
-    case SETUP_SET_CONFIGURATION:
-         if (USB_SETUP_SET_STAND_DEVICE == bmRequestType) { usb_set_configuration(); }
-         else                       { usb_user_read_request(bmRequestType, bmRequest); }
+    case  0x09 :
+         if ( ( (0<<7) | (0<<5) | (0) )  == bmRequestType) { usb_set_configuration(); }
+         else { usb_user_read_request(bmRequestType, bmRequest); }
          break;
 
-    case SETUP_CLEAR_FEATURE:
-         if (USB_SETUP_SET_STAND_ENDPOINT >= bmRequestType) { usb_clear_feature(); }
-         else                       { usb_user_read_request(bmRequestType, bmRequest); }
+    case  0x01 :
+         if ( ( (0<<7) | (0<<5) | (2) )  >= bmRequestType) { usb_clear_feature(); }
+         else { usb_user_read_request(bmRequestType, bmRequest); }
          break;
 
-    case SETUP_SET_FEATURE:
-         if (USB_SETUP_SET_STAND_ENDPOINT >= bmRequestType) { usb_set_feature(); }
-         else                       { usb_user_read_request(bmRequestType, bmRequest); }
+    case  0x03 :
+         if ( ( (0<<7) | (0<<5) | (2) )  >= bmRequestType) { usb_set_feature(); }
+         else { usb_user_read_request(bmRequestType, bmRequest); }
          break;
 
-    case SETUP_GET_STATUS:
+    case  0x00 :
          if ((0x7F < bmRequestType) & (0x82 >= bmRequestType))
                                     { usb_get_status(); }
-         else                       { usb_user_read_request(bmRequestType, bmRequest); }
+         else { usb_user_read_request(bmRequestType, bmRequest); }
          break;
 
-    case SETUP_GET_INTERFACE:
-          if (bmRequestType == USB_SETUP_GET_STAND_INTERFACE) { usb_get_interface(); }
+    case  0x0A :
+          if (bmRequestType ==  ( (1<<7) | (0<<5) | (1) ) ) { usb_get_interface(); }
           else { usb_user_read_request(bmRequestType, bmRequest); }
           break;
 
 
-    case SETUP_SET_INTERFACE:
-      if (bmRequestType == USB_SETUP_SET_STAND_INTERFACE) {usb_set_interface();}
+    case  0x0B :
+      if (bmRequestType ==  ( (0<<7) | (0<<5) | (1) ) ) {usb_set_interface();}
       break;
 
-    case SETUP_SET_DESCRIPTOR:
-    case SETUP_SYNCH_FRAME:
-    default: //!< un-supported request => call to user read request
-         if(usb_user_read_request(bmRequestType, bmRequest) == FALSE)
+    case  0x07 :
+    case  0x0C :
+    default:
+         if(usb_user_read_request(bmRequestType, bmRequest) ==  (0==1) )
          {
-            Usb_enable_stall_handshake();
-            Usb_ack_receive_setup();
+            (UECONX |= (1<<STALLRQ)) ;
+            (UEINTX &= ~(1<<RXSTPI)) ;
             return;
          }
          break;
   }
 }
-
-
-//! usb_set_address.
-//!
-//! This function manages the SET ADDRESS request. When complete, the device
-//! will filter the requests using the new address.
-//!
-//! @warning Code:xx bytes (function code length)
-//!
-//! @param none
-//!
-//! @return none
-//!
 void usb_set_address(void)
 {
-   U8 addr = Usb_read_byte();
-   Usb_configure_address(addr);
+   U8 addr =  (UEDATX) ;
+   (UDADDR = (UDADDR & (1<<ADDEN)) | ((U8)addr & 0x7F )) ;
 
-   Usb_ack_receive_setup();
+   (UEINTX &= ~(1<<RXSTPI)) ;
 
-   Usb_send_control_in();                    //!< send a ZLP for STATUS phase
-   while(!Is_usb_in_ready());                //!< waits for status phase done
-                                             //!< before using the new address
-   Usb_enable_address();
+   (UEINTX &= ~(1<<TXINI)) ;
+   while(! (UEINTX&(1<<TXINI)) );
+
+   (UDADDR |= (1<<ADDEN)) ;
 }
 
 
-//! This function manages the SET CONFIGURATION request. If the selected
-//! configuration is valid, this function call the usb_user_endpoint_init()
-//! function that will configure the endpoints following the configuration
-//! number.
-//!
+
+
+
+
+
 void usb_set_configuration( void )
 {
 U8 configuration_number;
 
-   configuration_number = Usb_read_byte();
+   configuration_number =  (UEDATX) ;
 
-   if (configuration_number <= NB_CONFIGURATION)
+   if (configuration_number <=  1 )
    {
-      Usb_ack_receive_setup();
+      (UEINTX &= ~(1<<RXSTPI)) ;
       usb_configuration_nb = configuration_number;
    }
    else
    {
-      //!< keep that order (set StallRq/clear RxSetup) or a
-      //!< OUT request following the SETUP may be acknowledged
-      Usb_enable_stall_handshake();
-      Usb_ack_receive_setup();
+
+
+      (UECONX |= (1<<STALLRQ)) ;
+      (UEINTX &= ~(1<<RXSTPI)) ;
       return;
    }
 
-   Usb_send_control_in();                    //!< send a ZLP for STATUS phase
+   (UEINTX &= ~(1<<TXINI)) ;
 
-   usb_user_endpoint_init(usb_configuration_nb);  //!< endpoint configuration
-   Usb_set_configuration_action();
+   usb_user_endpoint_init(usb_configuration_nb);
+   ;
 }
 
 
-//! This function manages the GET DESCRIPTOR request. The device descriptor,
-//! the configuration descriptor and the device qualifier are supported. All
-//! other descriptors must be supported by the usb_user_get_descriptor
-//! function.
-//! Only 1 configuration is supported.
-//!
+
+
+
+
+
+
 void usb_get_descriptor(void)
 {
-U16  wLength;
-U8   descriptor_type ;
-U8   string_type;
-U8   dummy;
-U8   nb_byte;
+U16 wLength;
+U8 descriptor_type ;
+U8 string_type;
+U8 dummy;
+U8 nb_byte;
 
-   zlp             = FALSE;                  /* no zero length packet */
-   string_type     = Usb_read_byte();        /* read LSB of wValue    */
-   descriptor_type = Usb_read_byte();        /* read MSB of wValue    */
+   zlp =  (0==1) ;
+   string_type =  (UEDATX) ;
+   descriptor_type =  (UEDATX) ;
 
    switch (descriptor_type)
    {
-    case DESCRIPTOR_DEVICE:
-      data_to_transfer = Usb_get_dev_desc_length(); //!< sizeof (usb_user_device_descriptor);
-      pbuffer          = Usb_get_dev_desc_pointer();
+    case  0x01 :
+      data_to_transfer =  (sizeof (usb_dev_desc)) ;
+      pbuffer =  (&(usb_dev_desc.bLength)) ;
       break;
-    case DESCRIPTOR_CONFIGURATION:
-      data_to_transfer = Usb_get_conf_desc_length(); //!< sizeof (usb_user_configuration_descriptor);
-      pbuffer          = Usb_get_conf_desc_pointer();
+    case  0x02 :
+      data_to_transfer =  (sizeof (usb_conf_desc)) ;
+      pbuffer =  (&(usb_conf_desc.cfg.bLength)) ;
       break;
     default:
-      if( usb_user_get_descriptor(descriptor_type, string_type)==FALSE )
+      if( usb_user_get_descriptor(descriptor_type, string_type)== (0==1)  )
       {
-         Usb_enable_stall_handshake();
-         Usb_ack_receive_setup();
+         (UECONX |= (1<<STALLRQ)) ;
+         (UEINTX &= ~(1<<RXSTPI)) ;
          return;
       }
       break;
    }
 
-   dummy = Usb_read_byte();                     //!< don't care of wIndex field
-   dummy = Usb_read_byte();
-   LSB(wLength) = Usb_read_byte();              //!< read wLength
-   MSB(wLength) = Usb_read_byte();
-   Usb_ack_receive_setup() ;                  //!< clear the receive setup flag
+   dummy =  (UEDATX) ;
+   dummy =  (UEDATX) ;
+   (((U8* )&wLength)[0])  =  (UEDATX) ;
+   (((U8* )&wLength)[1])  =  (UEDATX) ;
+   (UEINTX &= ~(1<<RXSTPI))  ;
 
    if (wLength > data_to_transfer)
    {
-      if ((data_to_transfer % EP_CONTROL_LENGTH) == 0) { zlp = TRUE; }
-      else { zlp = FALSE; }                   //!< no need of zero length packet
+      if ((data_to_transfer %  32 ) == 0) { zlp =  (1==1) ; }
+      else { zlp =  (0==1) ; }
    }
    else
    {
-      data_to_transfer = (U8)wLength;         //!< send only requested number of data
+      data_to_transfer = (U8)wLength;
    }
 
-   Usb_ack_nak_out();
+   (UEINTX &= ~(1<<NAKOUTI)) ;
 
-   while((data_to_transfer != 0) && (!Is_usb_nak_out_sent()))
+   while((data_to_transfer != 0) && (! (UEINTX&(1<<NAKOUTI)) ))
    {
-      while(!Is_usb_read_control_enabled())
+      while(! (UEINTX&(1<<TXINI)) )
       {
-        if (Is_usb_nak_out_sent())
-          break;    // don't clear the flag now, it will be cleared after
+        if ( (UEINTX&(1<<NAKOUTI)) )
+          break;
       }
 
       nb_byte=0;
-      while(data_to_transfer != 0)        //!< Send data until necessary
+      while(data_to_transfer != 0)
       {
-         if(nb_byte++==EP_CONTROL_LENGTH) //!< Check endpoint 0 size
+         if(nb_byte++== 32 )
          {
             break;
          }
 
-#ifndef __GNUC__
-         Usb_write_byte(*pbuffer++);
-#else    // AVRGCC does not support point to PGM space
-         Usb_write_byte(pgm_read_byte_near((unsigned int)pbuffer++));
-#endif
+
+
+
+         (UEDATX = (U8)pgm_read_byte_near((unsigned int)pbuffer++)) ;
+
          data_to_transfer --;
       }
 
-      if (Is_usb_nak_out_sent())
+      if ( (UEINTX&(1<<NAKOUTI)) )
         break;
       else
-        Usb_send_control_in();
+        (UEINTX &= ~(1<<TXINI)) ;
    }
 
-   if((zlp == TRUE) && (!Is_usb_nak_out_sent()))
+   if((zlp ==  (1==1) ) && (! (UEINTX&(1<<NAKOUTI)) ))
    {
-     while(!Is_usb_read_control_enabled());
-     Usb_send_control_in();
+     while(! (UEINTX&(1<<TXINI)) );
+     (UEINTX &= ~(1<<TXINI)) ;
    }
 
-   while (!(Is_usb_nak_out_sent()));
-   Usb_ack_nak_out();       // clear NAKOUTI
-   Usb_ack_control_out();   // clear RXOUTI
+   while (!( (UEINTX&(1<<NAKOUTI)) ));
+   (UEINTX &= ~(1<<NAKOUTI)) ;
+   (UEINTX &= ~(1<<RXOUTI)) ;
 
 
 
 }
-
-
-//! usb_get_configuration.
-//!
-//! This function manages the GET CONFIGURATION request. The current
-//! configuration number is returned.
-//!
-//! @warning Code:xx bytes (function code length)
-//!
-//! @param none
-//!
-//! @return none
-//!
 void usb_get_configuration(void)
 {
-   Usb_ack_receive_setup();
+   (UEINTX &= ~(1<<RXSTPI)) ;
 
-   Usb_write_byte(usb_configuration_nb);
-   Usb_ack_in_ready();
+   (UEDATX = (U8)usb_configuration_nb) ;
+   (UEINTX &= ~(1<<TXINI), (UEINTX &= ~(1<<FIFOCON)) ) ;
 
-   while( !Is_usb_receive_out() );
-   Usb_ack_receive_out();
+   while( ! (UEINTX&(1<<RXOUTI))  );
+   (UEINTX &= ~(1<<RXOUTI), (UEINTX &= ~(1<<FIFOCON)) ) ;
 }
-
-//! usb_get_status.
-//!
-//! This function manages the GET STATUS request. The device, interface or
-//! endpoint status is returned.
-//!
-//! @warning Code:xx bytes (function code length)
-//!
-//! @param none
-//!
-//! @return none
-//!
 void usb_get_status(void)
 {
 U8 wIndex;
 U8 dummy;
 
-   dummy    = Usb_read_byte();                 //!< dummy read
-   dummy    = Usb_read_byte();                 //!< dummy read
-   wIndex = Usb_read_byte();
+   dummy =  (UEDATX) ;
+   dummy =  (UEDATX) ;
+   wIndex =  (UEDATX) ;
 
    switch(bmRequestType)
    {
-    case USB_SETUP_GET_STAND_DEVICE:    Usb_ack_receive_setup();
-                                   Usb_write_byte(device_status);
+    case  ( (1<<7) | (0<<5) | (0) ) :  (UEINTX &= ~(1<<RXSTPI)) ;
+                                   (UEDATX = (U8)device_status) ;
                                    break;
 
-    case USB_SETUP_GET_STAND_INTERFACE: Usb_ack_receive_setup();
-                                   Usb_write_byte(INTERFACE_STATUS);
+    case  ( (1<<7) | (0<<5) | (1) ) :  (UEINTX &= ~(1<<RXSTPI)) ;
+                                   (UEDATX = (U8) 0x00 ) ;
                                    break;
 
-    case USB_SETUP_GET_STAND_ENDPOINT:  Usb_ack_receive_setup();
-                                   wIndex = wIndex & MSK_EP_DIR;
-                                   Usb_write_byte(endpoint_status[wIndex]);
+    case  ( (1<<7) | (0<<5) | (2) ) :  (UEINTX &= ~(1<<RXSTPI)) ;
+                                   wIndex = wIndex &  0x7F ;
+                                   (UEDATX = (U8)endpoint_status[wIndex]) ;
                                    break;
     default:
-                                   Usb_enable_stall_handshake();
-                                   Usb_ack_receive_setup();
+                                   (UECONX |= (1<<STALLRQ)) ;
+                                   (UEINTX &= ~(1<<RXSTPI)) ;
                                    return;
    }
 
-   Usb_write_byte(0x00);
-   Usb_send_control_in();
+   (UEDATX = (U8)0x00) ;
+   (UEINTX &= ~(1<<TXINI)) ;
 
-   while( !Is_usb_receive_out() );
-   Usb_ack_receive_out();
+   while( ! (UEINTX&(1<<RXOUTI))  );
+   (UEINTX &= ~(1<<RXOUTI), (UEINTX &= ~(1<<FIFOCON)) ) ;
 }
-
-
-//! usb_set_feature.
-//!
-//! This function manages the SET FEATURE request. The USB test modes are
-//! supported by this function.
-//!
-//! @warning Code:xx bytes (function code length)
-//!
-//! @param none
-//!
-//! @return none
-//!
 void usb_set_feature(void)
 {
 U8 wValue;
@@ -442,224 +585,188 @@ U8 dummy;
 
   switch (bmRequestType)
    {
-    case USB_SETUP_SET_STAND_DEVICE:
-      wValue = Usb_read_byte();
+    case  ( (0<<7) | (0<<5) | (0) ) :
+      wValue =  (UEDATX) ;
       switch (wValue)
       {
-         case USB_REMOTE_WAKEUP:
-            if ((wValue == FEATURE_DEVICE_REMOTE_WAKEUP) && (USB_REMOTE_WAKEUP_FEATURE == ENABLED))
+         case  1 :
+            if ((wValue ==  0x01 ) && ( 0  ==  1 ))
             {
-                device_status |= USB_STATUS_REMOTEWAKEUP;
-                remote_wakeup_feature = ENABLED;
-                Usb_ack_receive_setup();
-                Usb_send_control_in();
+                device_status |=  0x02 ;
+                remote_wakeup_feature =  1 ;
+                (UEINTX &= ~(1<<RXSTPI)) ;
+                (UEINTX &= ~(1<<TXINI)) ;
             }
             else
             {
-               Usb_enable_stall_handshake();
-               Usb_ack_receive_setup();
+               (UECONX |= (1<<STALLRQ)) ;
+               (UEINTX &= ~(1<<RXSTPI)) ;
             }
             break;
-            
-            
-            
+
+
+
          default:
-         Usb_enable_stall_handshake();
-         Usb_ack_receive_setup();
+         (UECONX |= (1<<STALLRQ)) ;
+         (UEINTX &= ~(1<<RXSTPI)) ;
          break;
       }
       break;
 
-  case USB_SETUP_SET_STAND_INTERFACE:
-      //!< keep that order (set StallRq/clear RxSetup) or a
-      //!< OUT request following the SETUP may be acknowledged
-      Usb_enable_stall_handshake();
-      Usb_ack_receive_setup();
+  case  ( (0<<7) | (0<<5) | (1) ) :
+
+
+      (UECONX |= (1<<STALLRQ)) ;
+      (UEINTX &= ~(1<<RXSTPI)) ;
     break;
 
-  case USB_SETUP_SET_STAND_ENDPOINT:
-      wValue = Usb_read_byte();
-      dummy    = Usb_read_byte();                //!< dummy read
+  case  ( (0<<7) | (0<<5) | (2) ) :
+      wValue =  (UEDATX) ;
+      dummy =  (UEDATX) ;
 
-      if (wValue == FEATURE_ENDPOINT_HALT)
+      if (wValue ==  0x00 )
       {
-         wIndex = (Usb_read_byte() & MSK_EP_DIR);
+         wIndex = ( (UEDATX)  &  0x7F );
 
-         if (wIndex == EP_CONTROL)
+         if (wIndex ==  0 )
          {
-            Usb_enable_stall_handshake();
-            Usb_ack_receive_setup();
+            (UECONX |= (1<<STALLRQ)) ;
+            (UEINTX &= ~(1<<RXSTPI)) ;
          }
 
-         Usb_select_endpoint(wIndex);
-         if(Is_usb_endpoint_enabled())
+         (UENUM = (U8)wIndex ) ;
+         if( ((UECONX & (1<<EPEN)) ? (1==1) : (0==1) ) )
          {
-            Usb_enable_stall_handshake();
-            Usb_select_endpoint(EP_CONTROL);
+            (UECONX |= (1<<STALLRQ)) ;
+            (UENUM = (U8) 0 ) ;
             endpoint_status[wIndex] = 0x01;
-            Usb_ack_receive_setup();
-            Usb_send_control_in();
+            (UEINTX &= ~(1<<RXSTPI)) ;
+            (UEINTX &= ~(1<<TXINI)) ;
          }
          else
          {
-            Usb_select_endpoint(EP_CONTROL);
-            Usb_enable_stall_handshake();
-            Usb_ack_receive_setup();
+            (UENUM = (U8) 0 ) ;
+            (UECONX |= (1<<STALLRQ)) ;
+            (UEINTX &= ~(1<<RXSTPI)) ;
          }
       }
       else
       {
-         Usb_enable_stall_handshake();
-         Usb_ack_receive_setup();
+         (UECONX |= (1<<STALLRQ)) ;
+         (UEINTX &= ~(1<<RXSTPI)) ;
       }
     break;
 
   default:
-    Usb_enable_stall_handshake();
-    Usb_ack_receive_setup();
+    (UECONX |= (1<<STALLRQ)) ;
+    (UEINTX &= ~(1<<RXSTPI)) ;
     break;
    }
 }
-
-
-//! usb_clear_feature.
-//!
-//! This function manages the SET FEATURE request.
-//!
-//! @warning Code:xx bytes (function code length)
-//!
-//! @param none
-//!
-//! @return none
-//!
 void usb_clear_feature(void)
 {
 U8 wValue;
 U8 wIndex;
 U8 dummy;
 
-   if (bmRequestType == USB_SETUP_SET_STAND_DEVICE)
+   if (bmRequestType ==  ( (0<<7) | (0<<5) | (0) ) )
    {
-     wValue = Usb_read_byte();
-      if ((wValue == FEATURE_DEVICE_REMOTE_WAKEUP) && (USB_REMOTE_WAKEUP_FEATURE == ENABLED))
+     wValue =  (UEDATX) ;
+      if ((wValue ==  0x01 ) && ( 0  ==  1 ))
      {
-       device_status &= ~USB_STATUS_REMOTEWAKEUP;
-         remote_wakeup_feature = DISABLED;
-       Usb_ack_receive_setup();
-       Usb_send_control_in();
+       device_status &= ~ 0x02 ;
+         remote_wakeup_feature =  0 ;
+       (UEINTX &= ~(1<<RXSTPI)) ;
+       (UEINTX &= ~(1<<TXINI)) ;
      }
      else
      {
-      Usb_enable_stall_handshake();
-      Usb_ack_receive_setup();
+      (UECONX |= (1<<STALLRQ)) ;
+      (UEINTX &= ~(1<<RXSTPI)) ;
      }
       return;
    }
-   else if (bmRequestType == USB_SETUP_SET_STAND_INTERFACE)
+   else if (bmRequestType ==  ( (0<<7) | (0<<5) | (1) ) )
    {
-      //!< keep that order (set StallRq/clear RxSetup) or a
-      //!< OUT request following the SETUP may be acknowledged
-      Usb_enable_stall_handshake();
-      Usb_ack_receive_setup();
+
+
+      (UECONX |= (1<<STALLRQ)) ;
+      (UEINTX &= ~(1<<RXSTPI)) ;
       return;
    }
-   else if (bmRequestType == USB_SETUP_SET_STAND_ENDPOINT)
+   else if (bmRequestType ==  ( (0<<7) | (0<<5) | (2) ) )
    {
-      wValue = Usb_read_byte();
-      dummy  = Usb_read_byte();                //!< dummy read
+      wValue =  (UEDATX) ;
+      dummy =  (UEDATX) ;
 
-      if (wValue == FEATURE_ENDPOINT_HALT)
+      if (wValue ==  0x00 )
       {
-         wIndex = (Usb_read_byte() & MSK_EP_DIR);
+         wIndex = ( (UEDATX)  &  0x7F );
 
-         Usb_select_endpoint(wIndex);
-         if(Is_usb_endpoint_enabled())
+         (UENUM = (U8)wIndex ) ;
+         if( ((UECONX & (1<<EPEN)) ? (1==1) : (0==1) ) )
          {
-            if(wIndex != EP_CONTROL)
+            if(wIndex !=  0 )
             {
-               Usb_disable_stall_handshake();
-               Usb_reset_endpoint(wIndex);
-               Usb_reset_data_toggle();
+               (UECONX |= (1<<STALLRQC)) ;
+               (UERST = 1 << (U8)wIndex, UERST = 0) ;
+               (UECONX |= (1<<RSTDT)) ;
             }
-            Usb_select_endpoint(EP_CONTROL);
+            (UENUM = (U8) 0 ) ;
             endpoint_status[wIndex] = 0x00;
-            Usb_ack_receive_setup();
-            Usb_send_control_in();
+            (UEINTX &= ~(1<<RXSTPI)) ;
+            (UEINTX &= ~(1<<TXINI)) ;
          }
          else
          {
-            Usb_select_endpoint(EP_CONTROL);
-            Usb_enable_stall_handshake();
-            Usb_ack_receive_setup();
+            (UENUM = (U8) 0 ) ;
+            (UECONX |= (1<<STALLRQ)) ;
+            (UEINTX &= ~(1<<RXSTPI)) ;
             return;
          }
       }
       else
       {
-         Usb_enable_stall_handshake();
-         Usb_ack_receive_setup();
+         (UECONX |= (1<<STALLRQ)) ;
+         (UEINTX &= ~(1<<RXSTPI)) ;
          return;
       }
    }
 }
-
-
-
-//! usb_get_interface.
-//!
-//! TThis function manages the SETUP_GET_INTERFACE request.
-//!
-//! @warning Code:xx bytes (function code length)
-//!
-//! @param none
-//!
-//! @return none
-//!
 void usb_get_interface (void)
 {
-   Usb_ack_receive_setup();
-   Usb_send_control_in();
+   (UEINTX &= ~(1<<RXSTPI)) ;
+   (UEINTX &= ~(1<<TXINI)) ;
 
-   while( !Is_usb_receive_out() );
-   Usb_ack_receive_out();
+   while( ! (UEINTX&(1<<RXOUTI))  );
+   (UEINTX &= ~(1<<RXOUTI), (UEINTX &= ~(1<<FIFOCON)) ) ;
 }
-
-//! usb_set_interface.
-//!
-//! TThis function manages the SETUP_SET_INTERFACE request.
-//!
-//! @warning Code:xx bytes (function code length)
-//!
-//! @param none
-//!
-//! @return none
-//!
 void usb_set_interface (void)
 {
-  Usb_ack_receive_setup();
-  Usb_send_control_in();                    //!< send a ZLP for STATUS phase
-  while(!Is_usb_in_ready());
+  (UEINTX &= ~(1<<RXSTPI)) ;
+  (UEINTX &= ~(1<<TXINI)) ;
+  while(! (UEINTX&(1<<TXINI)) );
 }
 
-//! usb_generate_remote_wakeup
-//!
-//! This function manages the remote wake up generation
-//!
-//! @param none
-//!
-//! @return none
-//!
+
+
+
+
+
+
+
+
 void usb_generate_remote_wakeup(void)
 {
-   if(Is_pll_ready()==FALSE)
+   if( (PLLCSR & (1<<PLOCK) ) == (0==1) )
    {
-      Pll_start_auto();
-      Wait_pll_ready();
+      (PLLFRQ &= ~ ( (1<<PDIV3)| (1<<PDIV2) | (1<<PDIV1)| (1<<PDIV0)) ,PLLFRQ|= ( (0<<PDIV3)| (1<<PDIV2) | (0<<PDIV1)| (0<<PDIV0)) | (1<<PLLUSB) , PLLCSR = ( ( 1<<PINDIV ) | (1<<PLLE))) ;
+      while (!(PLLCSR & (1<<PLOCK))) ;
    }
-   Usb_unfreeze_clock();
-   if (remote_wakeup_feature == ENABLED)
+   (USBCON &= ~(1<<FRZCLK)) ;
+   if (remote_wakeup_feature ==  1 )
    {
-      Usb_initiate_remote_wake_up();
-      remote_wakeup_feature = DISABLED;
+      (UDCON |= (1<<RMWKUP)) ;
+      remote_wakeup_feature =  0 ;
    }
-}  
+}

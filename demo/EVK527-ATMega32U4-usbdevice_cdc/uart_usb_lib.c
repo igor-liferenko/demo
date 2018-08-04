@@ -1,174 +1,308 @@
-/*This file has been prepared for Doxygen automatic documentation generation.*/
-//! \file *********************************************************************
-//!
-//! \brief @brief This file controls the UART USB functions.
-//!
-//! - Compiler:           IAR EWAVR and GNU GCC for AVR
-//! - Supported devices:  ATmega32U4
-//!
-//! \author               Atmel Corporation: http://www.atmel.com \n
-//!                       Support and FAQ: http://support.atmel.no/
-//!
-//! ***************************************************************************
+typedef float Float16;
 
-/* Copyright (c) 2007, Atmel Corporation All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- * 1. Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- *
- * 3. The name of ATMEL may not be used to endorse or promote products derived
- * from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY ATMEL ``AS IS'' AND ANY EXPRESS OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE EXPRESSLY AND
- * SPECIFICALLY DISCLAIMED. IN NO EVENT SHALL ATMEL BE LIABLE FOR ANY DIRECT,
- * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+typedef unsigned char U8 ;
+typedef unsigned short U16;
+typedef unsigned long U32;
+typedef signed char S8 ;
+typedef signed short S16;
+typedef long S32;
 
-/*_____ I N C L U D E S ____________________________________________________*/
 
-#include "config.h"
-#include "lib_mcu/usb/usb_drv.h"
-#include "usb_descriptors.h"
 
-#include "uart_usb_lib.h"
+typedef unsigned char Bool;
 
-/*_____ M A C R O S ________________________________________________________*/
 
-/*_____ D E F I N I T I O N ________________________________________________*/
+typedef U8 Status;
+typedef Bool Status_bool;
+typedef unsigned char Uchar;
+
+
+typedef unsigned char Uint8;
+typedef unsigned int Uint16;
+typedef unsigned long int Uint32;
+
+typedef char Int8;
+typedef int Int16;
+typedef long int Int32;
+
+typedef unsigned char Byte;
+typedef unsigned int Word;
+typedef unsigned long int DWord;
+
+typedef union
+{
+  Uint32 dw;
+  Uint16 w[2];
+  Uint8 b[4];
+} Union32;
+
+typedef union
+{
+  Uint16 w;
+  Uint8 b[2];
+} Union16;
+typedef char p_uart_ptchar;
+typedef char r_uart_ptchar;
+#include  <avr/interrupt.h>
+#include  <avr/pgmspace.h>
+#include  <avr/io.h>
+U8 flash_read_sig(unsigned long adr);
+
+
+
+
+
+
+
+U8 flash_read_fuse(unsigned long adr);
+typedef enum endpoint_parameter{ep_num, ep_type, ep_direction, ep_size, ep_bank, nyet_status} t_endpoint_parameter;
+U8 usb_config_ep (U8, U8);
+U8 usb_select_enpoint_interrupt (void);
+U16 usb_get_nb_byte_epw (void);
+U8 usb_send_packet (U8 , U8*, U8);
+U8 usb_read_packet (U8 , U8*, U8);
+void usb_halt_endpoint (U8);
+void usb_reset_endpoint (U8);
+U8 usb_init_device (void);
+extern volatile U16 g_usb_event;
+extern U8 g_usb_mode;
+extern U8 usb_remote_wup_feature;
+void usb_task_init (void);
+void usb_task (void);
+
+extern volatile U8 private_sof_counter;
+void usb_process_request( void);
+
+
+
+
+
+
+
+
+
+
+void usb_generate_remote_wakeup(void);
+
+extern U8 usb_configuration_nb;
+extern U8 remote_wakeup_feature;
+extern void sof_action(void);
+extern void suspend_action(void);
+typedef struct
+{
+   U8 bmRequestType;
+   U8 bRequest;
+   U16 wValue;
+   U16 wIndex;
+   U16 wLength;
+} S_UsbRequest;
+
+
+typedef struct {
+   U8 bLength;
+   U8 bDescriptorType;
+   U16 bscUSB;
+   U8 bDeviceClass;
+   U8 bDeviceSubClass;
+   U8 bDeviceProtocol;
+   U8 bMaxPacketSize0;
+   U16 idVendor;
+   U16 idProduct;
+   U16 bcdDevice;
+   U8 iManufacturer;
+   U8 iProduct;
+   U8 iSerialNumber;
+   U8 bNumConfigurations;
+} S_usb_device_descriptor;
+
+
+
+typedef struct {
+   U8 bLength;
+   U8 bDescriptorType;
+   U16 wTotalLength;
+   U8 bNumInterfaces;
+   U8 bConfigurationValue;
+   U8 iConfiguration;
+   U8 bmAttibutes;
+   U8 MaxPower;
+} S_usb_configuration_descriptor;
+
+
+
+typedef struct {
+   U8 bLength;
+   U8 bDescriptorType;
+   U8 bInterfaceNumber;
+   U8 bAlternateSetting;
+   U8 bNumEndpoints;
+   U8 bInterfaceClass;
+   U8 bInterfaceSubClass;
+   U8 bInterfaceProtocol;
+   U8 iInterface;
+} S_usb_interface_descriptor;
+
+
+
+typedef struct {
+   U8 bLength;
+   U8 bDescriptorType;
+   U8 bEndpointAddress;
+   U8 bmAttributes;
+   U16 wMaxPacketSize;
+   U8 bInterval;
+} S_usb_endpoint_descriptor;
+
+
+
+typedef struct {
+   U8 bLength;
+   U8 bDescriptorType;
+   U16 bscUSB;
+   U8 bDeviceClass;
+   U8 bDeviceSubClass;
+   U8 bDeviceProtocol;
+   U8 bMaxPacketSize0;
+   U8 bNumConfigurations;
+   U8 bReserved;
+} S_usb_device_qualifier_descriptor;
+
+
+
+typedef struct {
+   U8 bLength;
+   U8 bDescriptorType;
+   U16 wlangid;
+} S_usb_language_id;
+
+
+
+
+
+
+typedef struct {
+   U8 bLength;
+   U8 bDescriptorType;
+   U16 wstring[ 5 ];
+} S_usb_manufacturer_string_descriptor;
+
+
+
+
+
+
+typedef struct {
+   U8 bLength;
+   U8 bDescriptorType;
+   U16 wstring[ 16 ];
+} S_usb_product_string_descriptor;
+
+
+
+
+
+
+typedef struct {
+   U8 bLength;
+   U8 bDescriptorType;
+   U16 wstring[ 0x05 ];
+} S_usb_serial_number;
+
+
+
+
+typedef struct
+{
+   S_usb_configuration_descriptor cfg;
+   S_usb_interface_descriptor ifc0;
+   U8 CS_INTERFACE[19];
+   S_usb_endpoint_descriptor ep3;
+   S_usb_interface_descriptor ifc1;
+   S_usb_endpoint_descriptor ep1;
+   S_usb_endpoint_descriptor ep2;
+} S_usb_user_configuration_descriptor;
+void uart_usb_init(void);
+U8  uart_usb_test_hit(void);
+char uart_usb_getchar(void);
+U8  uart_usb_tx_ready(void);
+int uart_usb_putchar(int);
+void uart_usb_flush(void);
+void uart_usb_send_buffer(U8 *buffer, U8 nb_data);
+
+
+
+
 
 
 Uchar rx_counter;
-
-/*_____ D E C L A R A T I O N ______________________________________________*/
-
-/** 
-  * @brief Initializes the uart_usb library
-  */
 void uart_usb_init(void)
 {
   rx_counter = 0;
 }
-
-/** 
-  * @brief This function checks if a character has been received on the USB bus.
-  * 
-  * @return bit (true if a byte is ready to be read)
-  */
-bit uart_usb_test_hit(void)
+U8  uart_usb_test_hit(void)
 {
   if (!rx_counter)
   {
-    Usb_select_endpoint(RX_EP);
-    if (Is_usb_receive_out())
+    (UENUM = (U8) 0x02 ) ;
+    if ( (UEINTX&(1<<RXOUTI)) )
     {
-      rx_counter = Usb_byte_counter();
+      rx_counter =  ((U8)(UEBCLX)) ;
       if (!rx_counter)
       {
-        Usb_ack_receive_out();
+        (UEINTX &= ~(1<<RXOUTI), (UEINTX &= ~(1<<FIFOCON)) ) ;
       }
     }
   }
   return (rx_counter!=0);
 }
-
-/** 
-  * @brief This function reads one byte from the USB bus
-  *
-  * If one byte is present in the USB fifo, this byte is returned. If no data
-  * is present in the USB fifo, this function waits for USB data.
-  * 
-  * @return U8 byte received
-  */
 char uart_usb_getchar(void)
 {
   register Uchar data_rx;
 
-  Usb_select_endpoint(RX_EP);
+  (UENUM = (U8) 0x02 ) ;
   if (!rx_counter) while (!uart_usb_test_hit());
-  data_rx=Usb_read_byte();
+  data_rx= (UEDATX) ;
   rx_counter--;
-  if (!rx_counter) Usb_ack_receive_out();
+  if (!rx_counter)  (UEINTX &= ~(1<<RXOUTI), (UEINTX &= ~(1<<FIFOCON)) ) ;
   return data_rx;
 }
-
-
-/** 
-  * @brief This function checks if the USB emission buffer is ready to accept at
-  * at least 1 byte
-  * 
-  * @return Boolean. TRUE if the firmware can write a new byte to transmit.
-  */
-bit uart_usb_tx_ready(void)
+U8  uart_usb_tx_ready(void)
 {
-  if (!Is_usb_write_enabled())
+  if (! (UEINTX&(1<<RWAL)) )
   {
-    return FALSE;
+    return  (0==1) ;
   }
-  return TRUE;
+  return  (1==1) ;
 }
-
-/** 
-  * @brief This function fills the USB transmit buffer with the new data. This buffer
-  * is sent if complete. To flush this buffer before waiting full, launch
-  * the uart_usb_flush() function.
-  * 
-  * @param data_to_send 
-  * 
-  * @return 
-  */
 int uart_usb_putchar(int data_to_send)
 {
    uart_usb_send_buffer((U8*)&data_to_send, 1);
    return data_to_send;
 }
-
-
-
-/** 
-  * @brief This function transmits a ram buffer content to the USB.
-  * This function is mode efficient in term of USB bandwith transfer.
-  * 
-  * @param U8 *buffer : the pointer to the RAM buffer to be sent 
-  * @param data_to_send : the number of data to be sent
-  */
 void uart_usb_send_buffer(U8 *buffer, U8 nb_data)
 {
    U8 zlp;
-   
-   // Compute if zlp required
-   if(nb_data%TX_EP_SIZE) 
-   { zlp=FALSE;} 
-   else { zlp=TRUE; }
-   
-   Usb_select_endpoint(TX_EP);
+
+
+   if(nb_data% 0x20 )
+   { zlp= (0==1) ;}
+   else { zlp= (1==1) ; }
+
+   (UENUM = (U8) 0x01 ) ;
    while (nb_data)
    {
-      while(Is_usb_write_enabled()==FALSE); // Wait Endpoint ready
-      while(Is_usb_write_enabled() && nb_data)
+      while( (UEINTX&(1<<RWAL)) == (0==1) );
+      while( (UEINTX&(1<<RWAL))  && nb_data)
       {
-         Usb_write_byte(*buffer);
+         (UEDATX = (U8)*buffer) ;
          buffer++;
          nb_data--;
    }
-      Usb_ack_in_ready();
+      (UEINTX &= ~(1<<TXINI), (UEINTX &= ~(1<<FIFOCON)) ) ;
    }
    if(zlp)
    {
-      while(Is_usb_write_enabled()==FALSE); // Wait Endpoint ready 
-      Usb_ack_in_ready();
+      while( (UEINTX&(1<<RWAL)) == (0==1) );
+      (UEINTX &= ~(1<<TXINI), (UEINTX &= ~(1<<FIFOCON)) ) ;
 }
 }

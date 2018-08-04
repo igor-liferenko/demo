@@ -1,200 +1,109 @@
-/*This file has been prepared for Doxygen automatic documentation generation.*/
-//! \file *********************************************************************
-//!
-//! \brief This file contains the scheduler routines
-//!
-//! Configuration:
-//!   - SCHEDULER_TYPE in scheduler.h header file
-//!   - Task & init for at least task number 1 must be defined
-//!
-//! - Compiler:           IAR EWAVR and GNU GCC for AVR
-//! - Supported devices:  ATmega32U4
-//!
-//! \author               Atmel Corporation: http://www.atmel.com \n
-//!                       Support and FAQ: http://support.atmel.no/
-//!
-//! ***************************************************************************
+typedef float Float16;
 
-/* Copyright (c) 2007, Atmel Corporation All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- * 1. Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- *
- * 3. The name of ATMEL may not be used to endorse or promote products derived
- * from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY ATMEL ``AS IS'' AND ANY EXPRESS OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE EXPRESSLY AND
- * SPECIFICALLY DISCLAIMED. IN NO EVENT SHALL ATMEL BE LIABLE FOR ANY DIRECT,
- * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-
-//!_____ I N C L U D E S ____________________________________________________
-#define _SCHEDULER_C_
-#include "config.h"                         // system definition 
-#include "scheduler.h"                      // scheduler definition 
+typedef unsigned char U8 ;
+typedef unsigned short U16;
+typedef unsigned long U32;
+typedef signed char S8 ;
+typedef signed short S16;
+typedef long S32;
 
 
-//!_____ M A C R O S ________________________________________________________
-//!_____ D E F I N I T I O N ________________________________________________
-#if SCHEDULER_TYPE != SCHEDULER_FREE
-//! When SCHEDULER_TYPE != SCHEDULER_FREE, this flag control task calls.
-bit   scheduler_tick_flag;
-#endif
 
-#ifdef TOKEN_MODE
-//! Can be used to avoid that some tasks executes at same time. 
-//! The tasks check if the token is free before executing. 
-//! If the token is free, the tasks reserve it at the begin of the execution 
-//! and release it at the end of the execution to enable next waiting tasks to 
-//! run.   
-Uchar token;
-#endif
+typedef unsigned char Bool;
 
-//!_____ D E C L A R A T I O N ______________________________________________
-//! Scheduler initialization
-//!
-//! Task_x_init() and Task_x_fct() are defined in config.h
-//!
-//! @warning Code:XX bytes (function code length)
-//!
-//! @param  :none
-//! @return :none
+
+typedef U8 Status;
+typedef Bool Status_bool;
+typedef unsigned char Uchar;
+
+
+typedef unsigned char Uint8;
+typedef unsigned int Uint16;
+typedef unsigned long int Uint32;
+
+typedef char Int8;
+typedef int Int16;
+typedef long int Int32;
+
+typedef unsigned char Byte;
+typedef unsigned int Word;
+typedef unsigned long int DWord;
+
+typedef union
+{
+  Uint32 dw;
+  Uint16 w[2];
+  Uint8 b[4];
+} Union32;
+
+typedef union
+{
+  Uint16 w;
+  Uint8 b[2];
+} Union16;
+typedef char p_uart_ptchar;
+typedef char r_uart_ptchar;
+#include  <avr/interrupt.h>
+#include  <avr/pgmspace.h>
+#include  <avr/io.h>
+U8 flash_read_sig(unsigned long adr);
+
+
+
+
+
+
+
+U8 flash_read_fuse(unsigned long adr);
+  extern void  usb_task_init  (void);
+  extern void  cdc_task_init  (void);
+  extern void  usb_task  (void);
+  extern void  cdc_task  (void);
+void scheduler_init (void);
+void scheduler_tasks (void);
+void scheduler (void);
+void scheduler_empty_fct (void);
 void scheduler_init (void)
 {
-   #ifdef Scheduler_time_init
-      Scheduler_time_init();
-   #endif
-   #ifdef TOKEN_MODE
-      token =  TOKEN_FREE;
-   #endif
-   #ifdef Scheduler_task_1_init
-      Scheduler_task_1_init();  
-      Scheduler_call_next_init();
-   #endif
-   #ifdef Scheduler_task_2_init
-      Scheduler_task_2_init();  
-      Scheduler_call_next_init();
-   #endif
-   #ifdef Scheduler_task_3_init
-      Scheduler_task_3_init();  
-      Scheduler_call_next_init();
-   #endif
-   #ifdef Scheduler_task_4_init
-      Scheduler_task_4_init();  
-      Scheduler_call_next_init();
-   #endif
-   #ifdef Scheduler_task_5_init
-      Scheduler_task_5_init();  
-      Scheduler_call_next_init();
-   #endif
-   #ifdef Scheduler_task_6_init
-      Scheduler_task_6_init();  
-      Scheduler_call_next_init();
-   #endif
-   #ifdef Scheduler_task_7_init
-      Scheduler_task_7_init();  
-      Scheduler_call_next_init();
-   #endif
-   #ifdef Scheduler_task_8_init
-      Scheduler_task_8_init();  
-      Scheduler_call_next_init();
-   #endif
-   #ifdef Scheduler_task_9_init
-      Scheduler_task_9_init();  
-      Scheduler_call_next_init();
-   #endif
-   #ifdef Scheduler_task_10_init
-      Scheduler_task_10_init();
-      Scheduler_call_next_init();
-   #endif
-   #ifdef Scheduler_task_11_init
-      Scheduler_task_11_init();
-      Scheduler_call_next_init();
-   #endif
-   Scheduler_reset_tick_flag();
+      usb_task_init ();
+      ;
+
+
+      cdc_task_init ();
+      ;
+   ;
 }
 
-//! Task execution scheduler
-//!
-//! @warning Code:XX bytes (function code length)
-//!
-//! @param  :none
-//! @return :none
+
+
+
+
+
+
 void scheduler_tasks (void)
 {
-   // To avoid uncalled segment warning if the empty function is not used
+
    scheduler_empty_fct();
 
    for(;;)
    {
-      Scheduler_new_schedule();
-      #ifdef Scheduler_task_1
-         Scheduler_task_1();
-         Scheduler_call_next_task();
-      #endif
-      #ifdef Scheduler_task_2
-         Scheduler_task_2();
-         Scheduler_call_next_task();
-      #endif
-      #ifdef Scheduler_task_3
-         Scheduler_task_3();
-         Scheduler_call_next_task();
-      #endif
-      #ifdef Scheduler_task_4
-         Scheduler_task_4();
-         Scheduler_call_next_task();
-      #endif
-      #ifdef Scheduler_task_5
-         Scheduler_task_5();
-         Scheduler_call_next_task();
-      #endif
-      #ifdef Scheduler_task_6
-         Scheduler_task_6();
-         Scheduler_call_next_task();
-      #endif
-      #ifdef Scheduler_task_7
-         Scheduler_task_7();
-         Scheduler_call_next_task();
-      #endif
-      #ifdef Scheduler_task_8
-         Scheduler_task_8();
-         Scheduler_call_next_task();
-      #endif
-      #ifdef Scheduler_task_9
-         Scheduler_task_9();
-         Scheduler_call_next_task();
-      #endif
-      #ifdef Scheduler_task_10
-         Scheduler_task_10();
-         Scheduler_call_next_task();
-      #endif
-      #ifdef Scheduler_task_11
-         Scheduler_task_11();
-         Scheduler_call_next_task();
-      #endif
+      ;
+
+         usb_task ();
+         ;
+
+
+         cdc_task ();
+         ;
    }
 }
 
-//! Init & run the scheduler
-//!
-//! @warning Code:XX bytes (function code length)
-//!
-//! @param  :none
-//! @return :none
+
+
+
+
+
+
 void scheduler (void)
 {
    scheduler_init();
@@ -202,14 +111,13 @@ void scheduler (void)
 }
 
 
-//! Do nothing
-//! Avoid uncalled segment warning if the empty function is not used
-//!
-//! @warning Code:XX bytes (function code length)
-//!
-//! @param  :none
-//! @return :none
+
+
+
+
+
+
+
 void scheduler_empty_fct (void)
 {
 }
-
