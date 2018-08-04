@@ -77,6 +77,7 @@ void start_boot_if_required(void);
 void start_boot(void);
 
 void (*start_bootloader) (void) = (void (*)(void)) 0x3800;
+extern U8 usb_remote_wup_feature;
 
 int main(void)
 {
@@ -93,7 +94,8 @@ int main(void)
   }
 
   (clock_prescale_set(0));
-  usb_task_init();
+  usb_device_task_init();
+  usb_remote_wup_feature = 0;
   cdc_task_init();
   while (1) {
     usb_task();

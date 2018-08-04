@@ -194,13 +194,6 @@ extern U8 usb_connected;
 extern U8 usb_configuration_nb;
 
 extern U8 remote_wakeup_feature;
-void usb_task_init(void)
-{
-  usb_device_task_init();
-
-  usb_remote_wup_feature = 0;
-
-}
 
 void usb_task(void)
 {
