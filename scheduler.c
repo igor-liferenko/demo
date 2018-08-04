@@ -77,12 +77,6 @@ void scheduler_tasks(void)
   }
 }
 
-void scheduler(void)
-{
-  scheduler_init();
-  scheduler_tasks();
-}
-
 void scheduler_empty_fct(void)
 {
 }

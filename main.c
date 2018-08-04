@@ -93,7 +93,8 @@ int main(void)
   }
 
   (clock_prescale_set(0));
-  scheduler();
+  scheduler_init();
+  scheduler_tasks();
   return 0;
 }
 
