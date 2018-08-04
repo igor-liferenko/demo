@@ -53,17 +53,6 @@ U8 uart_test_hit(void)
   return ((UCSR1A) & 0x80);
 }
 
-U8 uart_init(void)
-{
-
-  ((UBRR1) = (U16) (((U32) 16000 * 1000L) / ((U32) 57600 / 2 * 16) - 1));
-  ((UCSR1A) |= (1 << U2X1));
-  ((UCSR1C) = 0x06);
-
-  ((UCSR1B) |= 0x10 | 0x08);
-  return (1 == 1);
-}
-
 int uart_putchar(int ch)
 {
   while (!((UCSR1A) & 0x20));

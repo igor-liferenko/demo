@@ -103,7 +103,10 @@ int main(void)
   (USBCON |= (1 << VBUSTE));
   sei();
   usb_remote_wup_feature = 0;
-  uart_init();
+  ((UBRR1) = (U16) (((U32) 16000 * 1000L) / ((U32) 57600 / 2 * 16) - 1));
+  ((UCSR1A) |= (1 << U2X1));
+  ((UCSR1C) = 0x06);
+  ((UCSR1B) |= 0x10 | 0x08);
   ((UCSR1B) |= 0x80);
   (DDRD |= (1 << PIND5) | (1 << PIND6) | (1 << PIND7));
   {
