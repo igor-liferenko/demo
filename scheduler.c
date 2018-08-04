@@ -51,15 +51,6 @@ void scheduler_init(void);
 void scheduler_tasks(void);
 void scheduler(void);
 void scheduler_empty_fct(void);
-void scheduler_init(void)
-{
-  usb_task_init();
-  ;
-
-  cdc_task_init();
-  ;
-  ;
-}
 
 void scheduler_tasks(void)
 {

@@ -93,7 +93,8 @@ int main(void)
   }
 
   (clock_prescale_set(0));
-  scheduler_init();
+  usb_task_init();
+  cdc_task_init();
   scheduler_tasks();
   return 0;
 }
