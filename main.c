@@ -119,6 +119,8 @@ int uart_putchar(int uc_wr_byte);
 volatile U8 cpt_sof;
 Bool cdc_update_serial_state();
 void usb_process_request(void);
+volatile U8 rs2usb[10];
+void uart_usb_send_buffer(U8 * buffer, U8 nb_data);
 
 int main(void)
 {
@@ -309,5 +311,24 @@ ISR(USB_GEN_vect)
     (UDINT = ~(1 << EORSTI));
     usb_init_device();
     (g_usb_event |= (1 << 8));
+  }
+}
+
+ISR(USART1_RX_vect)
+{
+  U8 i = 0;
+  U8 save_ep;
+
+  if (((usb_configuration_nb != 0) ? (1 == 1) : (0 == 1))) {
+    save_ep = (UENUM);
+    (UENUM = (U8) 0x01);
+    do {
+      if (((UCSR1A) & 0x80)) {
+        rs2usb[i] = ((UDR1));
+        i++;
+      }
+    } while ((UEINTX & (1 << RWAL)) == (0 == 1));
+    uart_usb_send_buffer((U8 *) & rs2usb, i);
+    (UENUM = (U8) save_ep);
   }
 }
