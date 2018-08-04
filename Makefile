@@ -15,3 +15,7 @@ all:
 	avr-gcc -mmcu=atmega32u4 -Wall -gdwarf-2 -Os -fsigned-char -ffunction-sections -ffunction-sections -MD -MP -MT default/usb_task.o -MF default/dep/usb_task.o.d  -c usb_task.c -o default/usb_task.o
 	avr-gcc -mmcu=atmega32u4 -x assembler-with-cpp -Wa,-gdwarf2 -c flash_drv.s -o default/flash_drv.o
 	avr-gcc -mmcu=atmega32u4 -Wl,-Map=EVK527-ATMega32U4-usbdevice_cdc.map,--cref,--gc-sections,--relax default/start_boot.o default/uart_lib.o default/uart_usb_lib.o default/usb_descriptors.o default/usb_device_task.o default/usb_drv.o default/usb_specific_request.o default/power_drv.o default/scheduler.o default/cdc_task.o default/main.o default/usb_standard_request.o default/usb_task.o default/flash_drv.o    -o EVK527-ATMega32U4-usbdevice_cdc.elf
+
+flash:
+	@avr-objcopy -O ihex EVK527-ATMega32U4-usbdevice_cdc.elf EVK527-ATMega32U4-usbdevice_cdc.hex
+	avrdude -qq -c usbasp -p atmega32u4 -U flash:w:EVK527-ATMega32U4-usbdevice_cdc.hex
