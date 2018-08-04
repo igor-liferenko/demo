@@ -238,70 +238,13 @@ extern U32 boot_key __attribute__ ((section(".noinit")));
 void start_boot_if_required(void);
 void start_boot(void);
 #include  <stdio.h>
-volatile U8 cpt_sof;
 extern U8 rx_counter;
 extern U8 tx_counter;
 extern volatile U8 usb_request_break_generation;
-
+extern volatile U8 cpt_sof;
 S_line_coding line_coding;
-S_line_status line_status;
-S_serial_state serial_state;
 
 volatile U8 rs2usb[10];
-
-void cdc_task(void)
-{
-
-  if (((usb_configuration_nb != 0) ? (1 == 1) : (0 == 1))
-      && line_status.DTR) {
-    if (((UCSR1A) & 0x20)) {
-      if (uart_usb_test_hit()) {
-	while (rx_counter) {
-	  uart_putchar(uart_usb_getchar());
-	  (PIND |= (1 << PIND6));
-	}
-      }
-    }
-
-    if (cpt_sof >= 100) {
-      if (((0 == ((flash_read_fuse(0x0003)) & (1 << 6)))
-	   || (PINF & (1 << PINF6)) ? (0 == 1) : (1 == 1))) {
-	printf("Select Pressed !\r\n");
-      }
-      if (((0 == ((flash_read_fuse(0x0003)) & (1 << 6)))
-	   || (PINF & (1 << PINF7)) ? (0 == 1) : (1 == 1))) {
-	printf("Right Pressed !\r\n");
-	serial_state.bDCD = (1 == 1);
-      } else
-	serial_state.bDCD = (0 == 1);
-
-      if (((0 == ((flash_read_fuse(0x0003)) & (1 << 6)))
-	   || (PINF & (1 << PINF4)) ? (0 == 1) : (1 == 1))) {
-	printf("Left Pressed !\r\n");
-	serial_state.bDSR = (1 == 1);
-      } else
-	serial_state.bDSR = (0 == 1);
-
-      if (((PINC & (1 << PINC6)) ? (0 == 1) : (1 == 1)))
-	printf("Down Pressed !\r\n");
-
-      if (((0 == ((flash_read_fuse(0x0003)) & (1 << 6)))
-	   || (PINF & (1 << PINF5)) ? (0 == 1) : (1 == 1)))
-	printf("Up Pressed !\r\n");
-
-      if (((PINE & (1 << PINE2)) ? (0 == 1) : (1 == 1)))
-	printf("Hello from ATmega32U4 !\r\n");
-
-      cdc_update_serial_state();
-    }
-
-    if (usb_request_break_generation == (1 == 1)) {
-      usb_request_break_generation = (0 == 1);
-      (PIND |= (1 << PIND7));
-      start_boot();
-    }
-  }
-}
 
 void sof_action()
 {

@@ -88,6 +88,35 @@ extern U8 usb_connected;
 void usb_device_task(void);
 void usb_start_device(void);
 extern void sof_action(void);
+extern volatile U8 usb_request_break_generation;
+typedef union {
+  U16 all;
+  struct {
+    U16 bDCD:1;
+    U16 bDSR:1;
+    U16 bBreak:1;
+    U16 bRing:1;
+    U16 bFraming:1;
+    U16 bParity:1;
+    U16 bOverRun:1;
+    U16 reserved:9;
+  };
+} S_serial_state;
+S_serial_state serial_state;
+typedef union {
+  U8 all;
+  struct {
+    U8 DTR:1;
+    U8 RTS:1;
+    U8 unused:6;
+  };
+} S_line_status;
+S_line_status line_status;
+U8 uart_usb_test_hit(void);
+extern U8 rx_counter;
+int uart_putchar(int uc_wr_byte);
+volatile U8 cpt_sof;
+Bool cdc_update_serial_state();
 
 int main(void)
 {
@@ -130,7 +159,56 @@ int main(void)
            (int (*)(FILE *)) uart_usb_getchar);
   while (1) {
     usb_device_task();
-    cdc_task();
+      if (((usb_configuration_nb != 0) ? (1 == 1) : (0 == 1))
+      && line_status.DTR) {
+    if (((UCSR1A) & 0x20)) {
+      if (uart_usb_test_hit()) {
+	while (rx_counter) {
+	  uart_putchar(uart_usb_getchar());
+	  (PIND |= (1 << PIND6));
+	}
+      }
+    }
+
+    if (cpt_sof >= 100) {
+      if (((0 == ((flash_read_fuse(0x0003)) & (1 << 6)))
+	   || (PINF & (1 << PINF6)) ? (0 == 1) : (1 == 1))) {
+	printf("Select Pressed !\r\n");
+      }
+      if (((0 == ((flash_read_fuse(0x0003)) & (1 << 6)))
+	   || (PINF & (1 << PINF7)) ? (0 == 1) : (1 == 1))) {
+	printf("Right Pressed !\r\n");
+	serial_state.bDCD = (1 == 1);
+      } else
+	serial_state.bDCD = (0 == 1);
+
+      if (((0 == ((flash_read_fuse(0x0003)) & (1 << 6)))
+	   || (PINF & (1 << PINF4)) ? (0 == 1) : (1 == 1))) {
+	printf("Left Pressed !\r\n");
+	serial_state.bDSR = (1 == 1);
+      } else
+	serial_state.bDSR = (0 == 1);
+
+      if (((PINC & (1 << PINC6)) ? (0 == 1) : (1 == 1)))
+	printf("Down Pressed !\r\n");
+
+      if (((0 == ((flash_read_fuse(0x0003)) & (1 << 6)))
+	   || (PINF & (1 << PINF5)) ? (0 == 1) : (1 == 1)))
+	printf("Up Pressed !\r\n");
+
+      if (((PINE & (1 << PINE2)) ? (0 == 1) : (1 == 1)))
+	printf("Hello from ATmega32U4 !\r\n");
+
+      cdc_update_serial_state();
+    }
+
+    if (usb_request_break_generation == (1 == 1)) {
+      usb_request_break_generation = (0 == 1);
+      (PIND |= (1 << PIND7));
+      start_boot();
+    }
+  }
+
   }
   return 0;
 }
