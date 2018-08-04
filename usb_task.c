@@ -195,11 +195,6 @@ extern U8 usb_configuration_nb;
 
 extern U8 remote_wakeup_feature;
 
-void usb_task(void)
-{
-  usb_device_task();
-}
-
 ISR(USB_GEN_vect)
 {
 

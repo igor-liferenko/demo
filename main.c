@@ -122,7 +122,7 @@ int main(void)
   fdevopen((int (*)(char, FILE *)) (uart_usb_putchar),
            (int (*)(FILE *)) uart_usb_getchar);
   while (1) {
-    usb_task();
+    usb_device_task();
     cdc_task();
   }
   return 0;
