@@ -49,16 +49,7 @@ void start_boot(void);
 #include  <avr/io.h>
 #include  <avr/wdt.h>
 
-void (*start_bootloader) (void) = (void (*)(void)) 0x3800;
-
 U32 boot_key __attribute__ ((section(".noinit")));
-void start_boot_if_required(void)
-{
-  if (boot_key == 0x55AAAA55) {
-    boot_key = 0;
-    (*start_bootloader) ();
-  }
-}
 
 void start_boot(void)
 {

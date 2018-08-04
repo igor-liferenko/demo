@@ -76,6 +76,8 @@ extern U32 boot_key __attribute__ ((section(".noinit")));
 void start_boot_if_required(void);
 void start_boot(void);
 
+void (*start_bootloader) (void) = (void (*)(void)) 0x3800;
+
 int main(void)
 {
   (UHWCON |= (1 << UVREGE));
@@ -85,7 +87,11 @@ int main(void)
   (WDTCSR |= (1 << WDCE));
   (WDTCSR = 0x00);
 
-  start_boot_if_required();
+  if (boot_key == 0x55AAAA55) {
+    boot_key = 0;
+    (*start_bootloader) ();
+  }
+
   (clock_prescale_set(0));
   scheduler();
   return 0;
