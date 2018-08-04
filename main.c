@@ -121,6 +121,13 @@ Bool cdc_update_serial_state();
 void usb_process_request(void);
 volatile U8 rs2usb[10];
 void uart_usb_send_buffer(U8 * buffer, U8 nb_data);
+typedef struct {
+  U32 dwDTERate;
+  U8 bCharFormat;
+  U8 bParityType;
+  U8 bDataBits;
+} S_line_coding;
+S_line_coding line_coding;
 
 int main(void)
 {
