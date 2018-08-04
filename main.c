@@ -97,7 +97,11 @@ int main(void)
   }
 
   (clock_prescale_set(0));
-  usb_device_task_init();
+  (USBCON &= ~((1 << USBE)));
+  (USBCON |= ((1 << USBE)));
+  (USBCON |= (1 << OTGPADE));
+  (USBCON |= (1 << VBUSTE));
+  sei();
   usb_remote_wup_feature = 0;
   uart_init();
   ((UCSR1B) |= 0x80);

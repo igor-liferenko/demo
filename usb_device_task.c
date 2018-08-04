@@ -181,14 +181,6 @@ U8 usb_connected = 0;
 U8 usb_suspended = 0;
 
 extern U8 usb_configuration_nb;
-void usb_device_task_init(void)
-{
-  (USBCON &= ~((1 << USBE)));
-  (USBCON |= ((1 << USBE)));
-  (USBCON |= (1 << OTGPADE));
-  (USBCON |= (1 << VBUSTE));
-  sei();
-}
 
 void usb_start_device(void)
 {
