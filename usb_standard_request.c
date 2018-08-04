@@ -46,7 +46,8 @@ U8 flash_read_fuse(unsigned long adr);
 extern void sof_action(void);
 extern void suspend_action(void);
 typedef enum endpoint_parameter { ep_num, ep_type, ep_direction, ep_size,
-    ep_bank, nyet_status } t_endpoint_parameter;
+  ep_bank, nyet_status
+} t_endpoint_parameter;
 U8 usb_config_ep(U8, U8);
 U8 usb_select_enpoint_interrupt(void);
 U16 usb_get_nb_byte_epw(void);
@@ -261,7 +262,8 @@ void usb_process_request(void)
   case 0x06:
     if (((1 << 7) | (0 << 5) | (0)) == bmRequestType) {
       usb_get_descriptor();
-    } else {
+    }
+    else {
       usb_user_read_request(bmRequestType, bmRequest);
     }
     break;
@@ -269,7 +271,8 @@ void usb_process_request(void)
   case 0x08:
     if (((1 << 7) | (0 << 5) | (0)) == bmRequestType) {
       usb_get_configuration();
-    } else {
+    }
+    else {
       usb_user_read_request(bmRequestType, bmRequest);
     }
     break;
@@ -277,7 +280,8 @@ void usb_process_request(void)
   case 0x05:
     if (((0 << 7) | (0 << 5) | (0)) == bmRequestType) {
       usb_set_address();
-    } else {
+    }
+    else {
       usb_user_read_request(bmRequestType, bmRequest);
     }
     break;
@@ -285,7 +289,8 @@ void usb_process_request(void)
   case 0x09:
     if (((0 << 7) | (0 << 5) | (0)) == bmRequestType) {
       usb_set_configuration();
-    } else {
+    }
+    else {
       usb_user_read_request(bmRequestType, bmRequest);
     }
     break;
@@ -293,7 +298,8 @@ void usb_process_request(void)
   case 0x01:
     if (((0 << 7) | (0 << 5) | (2)) >= bmRequestType) {
       usb_clear_feature();
-    } else {
+    }
+    else {
       usb_user_read_request(bmRequestType, bmRequest);
     }
     break;
@@ -301,7 +307,8 @@ void usb_process_request(void)
   case 0x03:
     if (((0 << 7) | (0 << 5) | (2)) >= bmRequestType) {
       usb_set_feature();
-    } else {
+    }
+    else {
       usb_user_read_request(bmRequestType, bmRequest);
     }
     break;
@@ -309,7 +316,8 @@ void usb_process_request(void)
   case 0x00:
     if ((0x7F < bmRequestType) & (0x82 >= bmRequestType)) {
       usb_get_status();
-    } else {
+    }
+    else {
       usb_user_read_request(bmRequestType, bmRequest);
     }
     break;
@@ -317,7 +325,8 @@ void usb_process_request(void)
   case 0x0A:
     if (bmRequestType == ((1 << 7) | (0 << 5) | (1))) {
       usb_get_interface();
-    } else {
+    }
+    else {
       usb_user_read_request(bmRequestType, bmRequest);
     }
     break;
@@ -362,7 +371,8 @@ void usb_set_configuration(void)
   if (configuration_number <= 1) {
     (UEINTX &= ~(1 << RXSTPI));
     usb_configuration_nb = configuration_number;
-  } else {
+  }
+  else {
 
     (UECONX |= (1 << STALLRQ));
     (UEINTX &= ~(1 << RXSTPI));
@@ -414,10 +424,12 @@ void usb_get_descriptor(void)
   if (wLength > data_to_transfer) {
     if ((data_to_transfer % 32) == 0) {
       zlp = (1 == 1);
-    } else {
+    }
+    else {
       zlp = (0 == 1);
     }
-  } else {
+  }
+  else {
     data_to_transfer = (U8) wLength;
   }
 
@@ -426,13 +438,13 @@ void usb_get_descriptor(void)
   while ((data_to_transfer != 0) && (!(UEINTX & (1 << NAKOUTI)))) {
     while (!(UEINTX & (1 << TXINI))) {
       if ((UEINTX & (1 << NAKOUTI)))
-	break;
+        break;
     }
 
     nb_byte = 0;
     while (data_to_transfer != 0) {
       if (nb_byte++ == 32) {
-	break;
+        break;
       }
 
       (UEDATX = (U8) pgm_read_byte_near((unsigned int) pbuffer++));
@@ -518,13 +530,14 @@ void usb_set_feature(void)
     switch (wValue) {
     case 1:
       if ((wValue == 0x01) && (0 == 1)) {
-	device_status |= 0x02;
-	remote_wakeup_feature = 1;
-	(UEINTX &= ~(1 << RXSTPI));
-	(UEINTX &= ~(1 << TXINI));
-      } else {
-	(UECONX |= (1 << STALLRQ));
-	(UEINTX &= ~(1 << RXSTPI));
+        device_status |= 0x02;
+        remote_wakeup_feature = 1;
+        (UEINTX &= ~(1 << RXSTPI));
+        (UEINTX &= ~(1 << TXINI));
+      }
+      else {
+        (UECONX |= (1 << STALLRQ));
+        (UEINTX &= ~(1 << RXSTPI));
       }
       break;
 
@@ -549,23 +562,25 @@ void usb_set_feature(void)
       wIndex = ((UEDATX) & 0x7F);
 
       if (wIndex == 0) {
-	(UECONX |= (1 << STALLRQ));
-	(UEINTX &= ~(1 << RXSTPI));
+        (UECONX |= (1 << STALLRQ));
+        (UEINTX &= ~(1 << RXSTPI));
       }
 
       (UENUM = (U8) wIndex);
       if (((UECONX & (1 << EPEN)) ? (1 == 1) : (0 == 1))) {
-	(UECONX |= (1 << STALLRQ));
-	(UENUM = (U8) 0);
-	endpoint_status[wIndex] = 0x01;
-	(UEINTX &= ~(1 << RXSTPI));
-	(UEINTX &= ~(1 << TXINI));
-      } else {
-	(UENUM = (U8) 0);
-	(UECONX |= (1 << STALLRQ));
-	(UEINTX &= ~(1 << RXSTPI));
+        (UECONX |= (1 << STALLRQ));
+        (UENUM = (U8) 0);
+        endpoint_status[wIndex] = 0x01;
+        (UEINTX &= ~(1 << RXSTPI));
+        (UEINTX &= ~(1 << TXINI));
       }
-    } else {
+      else {
+        (UENUM = (U8) 0);
+        (UECONX |= (1 << STALLRQ));
+        (UEINTX &= ~(1 << RXSTPI));
+      }
+    }
+    else {
       (UECONX |= (1 << STALLRQ));
       (UEINTX &= ~(1 << RXSTPI));
     }
@@ -591,17 +606,20 @@ void usb_clear_feature(void)
       remote_wakeup_feature = 0;
       (UEINTX &= ~(1 << RXSTPI));
       (UEINTX &= ~(1 << TXINI));
-    } else {
+    }
+    else {
       (UECONX |= (1 << STALLRQ));
       (UEINTX &= ~(1 << RXSTPI));
     }
     return;
-  } else if (bmRequestType == ((0 << 7) | (0 << 5) | (1))) {
+  }
+  else if (bmRequestType == ((0 << 7) | (0 << 5) | (1))) {
 
     (UECONX |= (1 << STALLRQ));
     (UEINTX &= ~(1 << RXSTPI));
     return;
-  } else if (bmRequestType == ((0 << 7) | (0 << 5) | (2))) {
+  }
+  else if (bmRequestType == ((0 << 7) | (0 << 5) | (2))) {
     wValue = (UEDATX);
     dummy = (UEDATX);
 
@@ -610,22 +628,24 @@ void usb_clear_feature(void)
 
       (UENUM = (U8) wIndex);
       if (((UECONX & (1 << EPEN)) ? (1 == 1) : (0 == 1))) {
-	if (wIndex != 0) {
-	  (UECONX |= (1 << STALLRQC));
-	  (UERST = 1 << (U8) wIndex, UERST = 0);
-	  (UECONX |= (1 << RSTDT));
-	}
-	(UENUM = (U8) 0);
-	endpoint_status[wIndex] = 0x00;
-	(UEINTX &= ~(1 << RXSTPI));
-	(UEINTX &= ~(1 << TXINI));
-      } else {
-	(UENUM = (U8) 0);
-	(UECONX |= (1 << STALLRQ));
-	(UEINTX &= ~(1 << RXSTPI));
-	return;
+        if (wIndex != 0) {
+          (UECONX |= (1 << STALLRQC));
+          (UERST = 1 << (U8) wIndex, UERST = 0);
+          (UECONX |= (1 << RSTDT));
+        }
+        (UENUM = (U8) 0);
+        endpoint_status[wIndex] = 0x00;
+        (UEINTX &= ~(1 << RXSTPI));
+        (UEINTX &= ~(1 << TXINI));
       }
-    } else {
+      else {
+        (UENUM = (U8) 0);
+        (UECONX |= (1 << STALLRQ));
+        (UEINTX &= ~(1 << RXSTPI));
+        return;
+      }
+    }
+    else {
       (UECONX |= (1 << STALLRQ));
       (UEINTX &= ~(1 << RXSTPI));
       return;
@@ -656,7 +676,7 @@ void usb_generate_remote_wakeup(void)
      ~((1 << PDIV3) | (1 << PDIV2) | (1 << PDIV1) | (1 << PDIV0)),
      PLLFRQ |=
      ((0 << PDIV3) | (1 << PDIV2) | (0 << PDIV1) | (0 << PDIV0)) | (0 <<
-								    PLLUSB),
+                                                                    PLLUSB),
      PLLCSR = ((1 << PINDIV) | (1 << PLLE)));
     while (!(PLLCSR & (1 << PLOCK)));
   }

@@ -51,4 +51,3 @@ void scheduler_init(void);
 void scheduler_tasks(void);
 void scheduler(void);
 void scheduler_empty_fct(void);
-

@@ -44,7 +44,8 @@ U8 flash_read_sig(unsigned long adr);
 
 U8 flash_read_fuse(unsigned long adr);
 typedef enum endpoint_parameter { ep_num, ep_type, ep_direction, ep_size,
-    ep_bank, nyet_status } t_endpoint_parameter;
+  ep_bank, nyet_status
+} t_endpoint_parameter;
 U8 usb_config_ep(U8, U8);
 U8 usb_select_enpoint_interrupt(void);
 U16 usb_get_nb_byte_epw(void);
@@ -191,7 +192,7 @@ U8 uart_usb_test_hit(void)
     if ((UEINTX & (1 << RXOUTI))) {
       rx_counter = ((U8) (UEBCLX));
       if (!rx_counter) {
-	(UEINTX &= ~(1 << RXOUTI), (UEINTX &= ~(1 << FIFOCON)));
+        (UEINTX &= ~(1 << RXOUTI), (UEINTX &= ~(1 << FIFOCON)));
       }
     }
   }
@@ -232,7 +233,8 @@ void uart_usb_send_buffer(U8 * buffer, U8 nb_data)
 
   if (nb_data % 0x20) {
     zlp = (0 == 1);
-  } else {
+  }
+  else {
     zlp = (1 == 1);
   }
 

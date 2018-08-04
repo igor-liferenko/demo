@@ -59,7 +59,8 @@ void usb_task(void);
 
 extern volatile U8 private_sof_counter;
 typedef enum endpoint_parameter { ep_num, ep_type, ep_direction, ep_size,
-    ep_bank, nyet_status } t_endpoint_parameter;
+  ep_bank, nyet_status
+} t_endpoint_parameter;
 U8 usb_config_ep(U8, U8);
 U8 usb_select_enpoint_interrupt(void);
 U16 usb_get_nb_byte_epw(void);
@@ -189,7 +190,7 @@ void usb_start_device(void)
   (PLLFRQ &=
    ~((1 << PDIV3) | (1 << PDIV2) | (1 << PDIV1) | (1 << PDIV0)), PLLFRQ |=
    ((0 << PDIV3) | (1 << PDIV2) | (0 << PDIV1) | (0 << PDIV0)) | (0 <<
-								  PLLUSB),
+                                                                  PLLUSB),
    PLLCSR = ((1 << PINDIV) | (1 << PLLE)));
   while (!(PLLCSR & (1 << PLOCK)));
   (USBCON &= ~(1 << FRZCLK));
@@ -202,4 +203,3 @@ void usb_start_device(void)
   sei();
   usb_init_device();
 }
-

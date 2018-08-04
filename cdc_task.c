@@ -48,7 +48,8 @@ extern void suspend_action(void);
 
 void sof_action(void);
 typedef enum endpoint_parameter { ep_num, ep_type, ep_direction, ep_size,
-    ep_bank, nyet_status } t_endpoint_parameter;
+  ep_bank, nyet_status
+} t_endpoint_parameter;
 U8 usb_config_ep(U8, U8);
 U8 usb_select_enpoint_interrupt(void);
 U16 usb_get_nb_byte_epw(void);
@@ -261,8 +262,8 @@ ISR(USART1_RX_vect)
     (UENUM = (U8) 0x01);
     do {
       if (((UCSR1A) & 0x80)) {
-	rs2usb[i] = ((UDR1));
-	i++;
+        rs2usb[i] = ((UDR1));
+        i++;
       }
     } while ((UEINTX & (1 << RWAL)) == (0 == 1));
     uart_usb_send_buffer((U8 *) & rs2usb, i);

@@ -53,7 +53,8 @@ void usb_task(void);
 
 extern volatile U8 private_sof_counter;
 typedef enum endpoint_parameter { ep_num, ep_type, ep_direction, ep_size,
-    ep_bank, nyet_status } t_endpoint_parameter;
+  ep_bank, nyet_status
+} t_endpoint_parameter;
 U8 usb_config_ep(U8, U8);
 U8 usb_select_enpoint_interrupt(void);
 U16 usb_get_nb_byte_epw(void);
@@ -193,9 +194,3 @@ extern U8 usb_connected;
 extern U8 usb_configuration_nb;
 
 extern U8 remote_wakeup_feature;
-
-
-
-
-
-

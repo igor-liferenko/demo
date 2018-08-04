@@ -46,7 +46,8 @@ U8 flash_read_fuse(unsigned long adr);
 extern void sof_action(void);
 extern void suspend_action(void);
 typedef enum endpoint_parameter { ep_num, ep_type, ep_direction, ep_size,
-    ep_bank, nyet_status } t_endpoint_parameter;
+  ep_bank, nyet_status
+} t_endpoint_parameter;
 U8 usb_config_ep(U8, U8);
 U8 usb_select_enpoint_interrupt(void);
 U16 usb_get_nb_byte_epw(void);
@@ -279,13 +280,13 @@ void usb_user_endpoint_init(U8 conf_nb)
 {
   ((UENUM =
     (U8) 0x03), usb_config_ep(((3 << 6) | (0 << 1) | (1)),
-			      ((2 << 4) | (0 << 2))));
+                              ((2 << 4) | (0 << 2))));
   ((UENUM =
     (U8) 0x01), usb_config_ep(((2 << 6) | (0 << 1) | (1)),
-			      ((2 << 4) | (0 << 2))));
+                              ((2 << 4) | (0 << 2))));
   ((UENUM =
     (U8) 0x02), usb_config_ep(((2 << 6) | (0 << 1) | (0)),
-			      ((2 << 4) | (0 << 2))));
+                              ((2 << 4) | (0 << 2))));
 
   (UERST = 1 << (U8) 0x03, UERST = 0);
   (UERST = 1 << (U8) 0x01, UERST = 0);
@@ -329,7 +330,7 @@ void cdc_set_line_coding(void)
 
   ((UBRR1) =
    (U16) (((U32) 16000 * 1000L) /
-	  ((U32) (line_coding.dwDTERate) / 2 * 16) - 1));
+          ((U32) (line_coding.dwDTERate) / 2 * 16) - 1));
 }
 
 void cdc_set_control_line_state(U16 state)

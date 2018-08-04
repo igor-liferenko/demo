@@ -46,7 +46,8 @@ U8 flash_read_fuse(unsigned long adr);
 extern void sof_action(void);
 extern void suspend_action(void);
 typedef enum endpoint_parameter { ep_num, ep_type, ep_direction, ep_size,
-    ep_bank, nyet_status } t_endpoint_parameter;
+  ep_bank, nyet_status
+} t_endpoint_parameter;
 U8 usb_config_ep(U8, U8);
 U8 usb_select_enpoint_interrupt(void);
 U16 usb_get_nb_byte_epw(void);
@@ -262,23 +263,23 @@ PROGMEM const S_usb_user_configuration_descriptor usb_conf_desc = {
 PROGMEM const S_usb_manufacturer_string_descriptor
   usb_user_manufacturer_string_descriptor = {
   sizeof(usb_user_manufacturer_string_descriptor)
-  , 0x03, {((U16) ('A')), ((U16) ('T')), ((U16) ('M')), ((U16) ('E')),
-	     ((U16) ('L'))}
+    , 0x03, {((U16) ('A')), ((U16) ('T')), ((U16) ('M')), ((U16) ('E')),
+             ((U16) ('L'))}
 };
 
 PROGMEM const S_usb_product_string_descriptor
   usb_user_product_string_descriptor = {
   sizeof(usb_user_product_string_descriptor)
-  , 0x03, {((U16) ('A')), ((U16) ('V')), ((U16) ('R')), ((U16) (' ')),
-	     ((U16) ('U')), ((U16) ('S')), ((U16) ('B')), ((U16) (' ')),
-	     ((U16) ('C')), ((U16) ('D')), ((U16) ('C')), ((U16) (' ')),
-	     ((U16) ('D')), ((U16) ('E')), ((U16) ('M')), ((U16) ('O'))}
+    , 0x03, {((U16) ('A')), ((U16) ('V')), ((U16) ('R')), ((U16) (' ')),
+             ((U16) ('U')), ((U16) ('S')), ((U16) ('B')), ((U16) (' ')),
+             ((U16) ('C')), ((U16) ('D')), ((U16) ('C')), ((U16) (' ')),
+             ((U16) ('D')), ((U16) ('E')), ((U16) ('M')), ((U16) ('O'))}
 };
 
 PROGMEM const S_usb_serial_number usb_user_serial_number = {
   sizeof(usb_user_serial_number)
-  , 0x03, {((U16) ('1')), ((U16) ('.')), ((U16) ('0')), ((U16) ('.')),
-	     ((U16) ('0'))}
+    , 0x03, {((U16) ('1')), ((U16) ('.')), ((U16) ('0')), ((U16) ('.')),
+             ((U16) ('0'))}
 };
 
 PROGMEM const S_usb_language_id usb_user_language_id = {

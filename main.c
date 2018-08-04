@@ -64,7 +64,8 @@ void set_ext_standby_mode(void);
 void Clock_switch_external(void);
 void Clock_switch_internal(void);
 typedef enum endpoint_parameter { ep_num, ep_type, ep_direction, ep_size,
-    ep_bank, nyet_status } t_endpoint_parameter;
+  ep_bank, nyet_status
+} t_endpoint_parameter;
 U8 usb_config_ep(U8, U8);
 U8 usb_select_enpoint_interrupt(void);
 U16 usb_get_nb_byte_epw(void);
@@ -174,44 +175,46 @@ int main(void)
       usb_process_request();
     }
     if (((usb_configuration_nb != 0) ? (1 == 1) : (0 == 1))
-      && line_status.DTR) {
+        && line_status.DTR) {
       if (((UCSR1A) & 0x20)) {
         if (uart_usb_test_hit()) {
-	  while (rx_counter) {
-	    uart_putchar(uart_usb_getchar());
-	    (PIND |= (1 << PIND6));
-	  }
+          while (rx_counter) {
+            uart_putchar(uart_usb_getchar());
+            (PIND |= (1 << PIND6));
+          }
         }
       }
 
       if (cpt_sof >= 100) {
         if (((0 == ((flash_read_fuse(0x0003)) & (1 << 6)))
-	     || (PINF & (1 << PINF6)) ? (0 == 1) : (1 == 1))) {
-	  printf("Select Pressed !\r\n");
+             || (PINF & (1 << PINF6)) ? (0 == 1) : (1 == 1))) {
+          printf("Select Pressed !\r\n");
         }
         if (((0 == ((flash_read_fuse(0x0003)) & (1 << 6)))
-	     || (PINF & (1 << PINF7)) ? (0 == 1) : (1 == 1))) {
-	  printf("Right Pressed !\r\n");
-	  serial_state.bDCD = (1 == 1);
+             || (PINF & (1 << PINF7)) ? (0 == 1) : (1 == 1))) {
+          printf("Right Pressed !\r\n");
+          serial_state.bDCD = (1 == 1);
         }
-        else serial_state.bDCD = (0 == 1);
+        else
+          serial_state.bDCD = (0 == 1);
 
         if (((0 == ((flash_read_fuse(0x0003)) & (1 << 6)))
-	     || (PINF & (1 << PINF4)) ? (0 == 1) : (1 == 1))) {
-	  printf("Left Pressed !\r\n");
-	  serial_state.bDSR = (1 == 1);
+             || (PINF & (1 << PINF4)) ? (0 == 1) : (1 == 1))) {
+          printf("Left Pressed !\r\n");
+          serial_state.bDSR = (1 == 1);
         }
-        else serial_state.bDSR = (0 == 1);
+        else
+          serial_state.bDSR = (0 == 1);
 
         if (((PINC & (1 << PINC6)) ? (0 == 1) : (1 == 1)))
           printf("Down Pressed !\r\n");
 
         if (((0 == ((flash_read_fuse(0x0003)) & (1 << 6)))
-	     || (PINF & (1 << PINF5)) ? (0 == 1) : (1 == 1)))
-	  printf("Up Pressed !\r\n");
+             || (PINF & (1 << PINF5)) ? (0 == 1) : (1 == 1)))
+          printf("Up Pressed !\r\n");
 
         if (((PINE & (1 << PINE2)) ? (0 == 1) : (1 == 1)))
-	  printf("Hello from ATmega32U4 !\r\n");
+          printf("Hello from ATmega32U4 !\r\n");
 
         cdc_update_serial_state();
       }
@@ -244,7 +247,8 @@ ISR(USB_GEN_vect)
       (UDIEN |= (1 << EORSTE));
       usb_start_device();
       (UDCON &= ~(1 << DETACH));
-    } else {
+    }
+    else {
       usb_connected = (0 == 1);
       usb_configuration_nb = 0;
       (g_usb_event |= (1 << 2));
@@ -273,7 +277,7 @@ ISR(USB_GEN_vect)
        ~((1 << PDIV3) | (1 << PDIV2) | (1 << PDIV1) | (1 << PDIV0)),
        PLLFRQ |=
        ((0 << PDIV3) | (1 << PDIV2) | (0 << PDIV1) | (0 << PDIV0)) | (0 <<
-								      PLLUSB),
+                                                                      PLLUSB),
        PLLCSR = ((1 << PINDIV) | (1 << PLLE)));
 
       while (!(PLLCSR & (1 << PLOCK)));

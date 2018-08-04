@@ -46,7 +46,8 @@ U8 flash_read_fuse(unsigned long adr);
 extern void sof_action(void);
 extern void suspend_action(void);
 typedef enum endpoint_parameter { ep_num, ep_type, ep_direction, ep_size,
-    ep_bank, nyet_status } t_endpoint_parameter;
+  ep_bank, nyet_status
+} t_endpoint_parameter;
 U8 usb_config_ep(U8, U8);
 U8 usb_select_enpoint_interrupt(void);
 U16 usb_get_nb_byte_epw(void);
@@ -75,7 +76,8 @@ U8 usb_select_enpoint_interrupt(void)
   while (ep_num < 7) {
     if (interrupt_flags & 1) {
       return (ep_num);
-    } else {
+    }
+    else {
       ep_num++;
       interrupt_flags = interrupt_flags >> 1;
     }
@@ -123,8 +125,8 @@ U8 usb_init_device(void)
   (UENUM = (U8) 0);
   if (!((UECONX & (1 << EPEN)) ? (1 == 1) : (0 == 1))) {
     return ((UENUM =
-	     (U8) 0), usb_config_ep(((0 << 6) | (1 << 1) | (0)),
-				    ((2 << 4) | (0 << 2))));
+             (U8) 0), usb_config_ep(((0 << 6) | (1 << 1) | (0)),
+                                    ((2 << 4) | (0 << 2))));
   }
   return (0 == 1);
 }
