@@ -117,6 +117,7 @@ extern U8 rx_counter;
 int uart_putchar(int uc_wr_byte);
 volatile U8 cpt_sof;
 Bool cdc_update_serial_state();
+void usb_process_request(void);
 
 int main(void)
 {
@@ -158,8 +159,23 @@ int main(void)
   fdevopen((int (*)(char, FILE *)) (uart_usb_putchar),
            (int (*)(FILE *)) uart_usb_getchar);
   while (1) {
-    usb_device_task();
-      if (((usb_configuration_nb != 0) ? (1 == 1) : (0 == 1))
+    if (usb_connected == (0 == 1)) {
+      if (((USBSTA & (1 << VBUS)) ? (1 == 1) : (0 == 1))) {
+        (USBCON |= ((1 << USBE)));
+        usb_connected = (1 == 1);
+        usb_start_device();
+      }
+    }
+    if (((g_usb_event & (1 << 8)) ? (1 == 1) : (0 == 1))) {
+      (g_usb_event &= ~(1 << 8));
+      (UERST = 1 << (U8) 0, UERST = 0);
+      usb_configuration_nb = 0;
+    }
+    (UENUM = (U8) 0);
+    if ((UEINTX & (1 << RXSTPI))) {
+      usb_process_request();
+    }
+    if (((usb_configuration_nb != 0) ? (1 == 1) : (0 == 1))
       && line_status.DTR) {
     if (((UCSR1A) & 0x20)) {
       if (uart_usb_test_hit()) {
