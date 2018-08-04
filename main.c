@@ -40,6 +40,7 @@ typedef char r_uart_ptchar;
 #include  <avr/interrupt.h>
 #include  <avr/pgmspace.h>
 #include  <avr/io.h>
+#include  <stdio.h>
 U8 flash_read_sig(unsigned long adr);
 
 U8 flash_read_fuse(unsigned long adr);
@@ -78,6 +79,8 @@ void start_boot(void);
 
 void (*start_bootloader) (void) = (void (*)(void)) 0x3800;
 extern U8 usb_remote_wup_feature;
+char uart_usb_getchar(void);
+int uart_usb_putchar(int);
 
 int main(void)
 {
@@ -96,7 +99,21 @@ int main(void)
   (clock_prescale_set(0));
   usb_device_task_init();
   usb_remote_wup_feature = 0;
-  cdc_task_init();
+  uart_init();
+  ((UCSR1B) |= 0x80);
+  (DDRD |= (1 << PIND5) | (1 << PIND6) | (1 << PIND7));
+  {
+    DDRC &= ~0x40;
+    PORTC |= 0x40;
+    if (!(0 == ((flash_read_fuse(0x0003)) & (1 << 6)))) {
+      DDRF &= ~0xF0;
+      PORTF |= 0xF0;
+    }
+  };
+  (DDRE &= ~(1 << PINE2), PORTE |= (1 << PINE2));
+  (UDIEN |= (1 << SOFE));
+  fdevopen((int (*)(char, FILE *)) (uart_usb_putchar),
+           (int (*)(FILE *)) uart_usb_getchar);
   while (1) {
     usb_task();
     cdc_task();

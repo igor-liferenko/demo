@@ -249,27 +249,6 @@ S_serial_state serial_state;
 
 volatile U8 rs2usb[10];
 
-void cdc_task_init(void)
-{
-  uart_init();
-  ((UCSR1B) |= 0x80);
-  (DDRD |= (1 << PIND5) | (1 << PIND6) | (1 << PIND7));
-  {
-    DDRC &= ~0x40;
-    PORTC |= 0x40;
-    if (!(0 == ((flash_read_fuse(0x0003)) & (1 << 6)))) {
-      DDRF &= ~0xF0;
-      PORTF |= 0xF0;
-    }
-  };
-  (DDRE &= ~(1 << PINE2), PORTE |= (1 << PINE2));
-  (UDIEN |= (1 << SOFE));
-
-  fdevopen((int (*)(char, FILE *)) (uart_usb_putchar),
-	   (int (*)(FILE *)) uart_usb_getchar);
-
-}
-
 void cdc_task(void)
 {
 
