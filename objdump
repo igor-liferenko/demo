@@ -246,7 +246,7 @@ Disassembly of section .text:
      234:	ff cf       	rjmp	.-2      	; 0x234 <start_boot+0x2a>
 
 00000236 <uart_init>:
-     236:	89 e1       	ldi	r24, 0x19	; 25
+     236:	81 e2       	ldi	r24, 0x21	; 33
      238:	90 e0       	ldi	r25, 0x00	; 0
      23a:	90 93 cd 00 	sts	0x00CD, r25	; 0x8000cd <__TEXT_REGION_LENGTH__+0x7e00cd>
      23e:	80 93 cc 00 	sts	0x00CC, r24	; 0x8000cc <__TEXT_REGION_LENGTH__+0x7e00cc>
@@ -407,9 +407,9 @@ Disassembly of section .text:
      3a4:	80 7f       	andi	r24, 0xF0	; 240
      3a6:	82 bf       	out	0x32, r24	; 50
      3a8:	82 b7       	in	r24, 0x32	; 50
-     3aa:	8a 64       	ori	r24, 0x4A	; 74
+     3aa:	84 60       	ori	r24, 0x04	; 4
      3ac:	82 bf       	out	0x32, r24	; 50
-     3ae:	82 e0       	ldi	r24, 0x02	; 2
+     3ae:	82 e1       	ldi	r24, 0x12	; 18
      3b0:	89 bd       	out	0x29, r24	; 41
      3b2:	09 b4       	in	r0, 0x29	; 41
      3b4:	00 fe       	sbrs	r0, 0
@@ -624,8 +624,8 @@ Disassembly of section .text:
      5e0:	6a 95       	dec	r22
      5e2:	d1 f7       	brne	.-12     	; 0x5d8 <cdc_set_line_coding+0x8e>
      5e4:	60 e0       	ldi	r22, 0x00	; 0
-     5e6:	72 e1       	ldi	r23, 0x12	; 18
-     5e8:	8a e7       	ldi	r24, 0x7A	; 122
+     5e6:	74 e2       	ldi	r23, 0x24	; 36
+     5e8:	84 ef       	ldi	r24, 0xF4	; 244
      5ea:	90 e0       	ldi	r25, 0x00	; 0
      5ec:	b3 d4       	rcall	.+2406   	; 0xf54 <__udivmodsi4>
      5ee:	21 50       	subi	r18, 0x01	; 1
@@ -1520,9 +1520,9 @@ Disassembly of section .text:
      eae:	80 7f       	andi	r24, 0xF0	; 240
      eb0:	82 bf       	out	0x32, r24	; 50
      eb2:	82 b7       	in	r24, 0x32	; 50
-     eb4:	8a 64       	ori	r24, 0x4A	; 74
+     eb4:	84 60       	ori	r24, 0x04	; 4
      eb6:	82 bf       	out	0x32, r24	; 50
-     eb8:	82 e0       	ldi	r24, 0x02	; 2
+     eb8:	82 e1       	ldi	r24, 0x12	; 18
      eba:	89 bd       	out	0x29, r24	; 41
      ebc:	09 b4       	in	r0, 0x29	; 41
      ebe:	00 fe       	sbrs	r0, 0
