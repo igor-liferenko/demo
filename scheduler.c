@@ -52,22 +52,3 @@ void scheduler_tasks(void);
 void scheduler(void);
 void scheduler_empty_fct(void);
 
-void scheduler_tasks(void)
-{
-
-  scheduler_empty_fct();
-
-  for (;;) {
-    ;
-
-    usb_task();
-    ;
-
-    cdc_task();
-    ;
-  }
-}
-
-void scheduler_empty_fct(void)
-{
-}

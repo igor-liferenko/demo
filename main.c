@@ -95,7 +95,10 @@ int main(void)
   (clock_prescale_set(0));
   usb_task_init();
   cdc_task_init();
-  scheduler_tasks();
+  while (1) {
+    usb_task();
+    cdc_task();
+  }
   return 0;
 }
 
