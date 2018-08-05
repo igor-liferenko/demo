@@ -23,3 +23,6 @@ indent:
 
 objdump: all
 	avr-objdump -d EVK527-ATMega32U4-usbdevice_cdc.elf >x
+
+clean:
+	@git clean -X -d -f
