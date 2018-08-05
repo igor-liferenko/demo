@@ -130,6 +130,7 @@ typedef struct {
 S_line_coding line_coding;
 U8 usb_suspended = 0;
 U8 usb_connected = 0;
+Uchar rx_counter;
 int main(void)
 {
   (UHWCON |= (1 << UVREGE));
