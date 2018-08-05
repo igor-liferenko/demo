@@ -323,6 +323,7 @@ void cdc_get_line_coding();
 void cdc_set_control_line_state(U16);
 void cdc_send_break(U16);
 void cdc_set_line_coding();
+S_serial_state serial_state_saved;
 
 int main(void)
 {
@@ -816,7 +817,28 @@ int main(void)
         if (((PINE & (1 << PINE2)) ? (0 == 1) : (1 == 1)))
           printf("Hello from ATmega32U4 !\r\n");
 
-        cdc_update_serial_state();
+  if (serial_state_saved.all != serial_state.all) {
+    serial_state_saved.all = serial_state.all;
+
+    (UENUM = (U8) 0x03);
+    if ((UEINTX & (1 << RWAL))) {
+      (UEDATX = (U8) ((1 << 7) | (1 << 5) | (1)));
+      (UEDATX = (U8) 0x20);
+
+      (UEDATX = (U8) 0x00);
+      (UEDATX = (U8) 0x00);
+
+      (UEDATX = (U8) 0x00);
+      (UEDATX = (U8) 0x00);
+
+      (UEDATX = (U8) 0x02);
+      (UEDATX = (U8) 0x00);
+
+      (UEDATX = (U8) (((U8 *) & serial_state.all)[0]));
+      (UEDATX = (U8) (((U8 *) & serial_state.all)[1]));
+      (UEINTX &= ~(1 << TXINI), (UEINTX &= ~(1 << FIFOCON)));
+    }
+  }
       }
 
       if (usb_request_break_generation == (1 == 1)) {
