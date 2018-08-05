@@ -241,16 +241,6 @@ Bool usb_user_get_descriptor(U8 type, U8 string)
   return (0 == 1);
 }
 
-void cdc_set_control_line_state(U16 state)
-{
-  (UEINTX &= ~(1 << RXSTPI));
-  (UEINTX &= ~(1 << TXINI));
-  line_status.all = state;
-
-  while (!((UEINTX & (1 << TXINI)))) ;
-
-}
-
 Bool cdc_update_serial_state()
 {
   if (serial_state_saved.all != serial_state.all) {
