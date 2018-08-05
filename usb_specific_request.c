@@ -239,13 +239,3 @@ Bool usb_user_get_descriptor(U8 type, U8 string)
 {
   return (0 == 1);
 }
-
-void cdc_send_break(U16 break_duration)
-{
-  (UEINTX &= ~(1 << RXSTPI));
-  (UEINTX &= ~(1 << TXINI));
-  usb_request_break_generation = (1 == 1);
-
-  while (!((UEINTX & (1 << TXINI)))) ;
-
-}
