@@ -324,6 +324,7 @@ void cdc_set_control_line_state(U16);
 void cdc_send_break(U16);
 void cdc_set_line_coding();
 S_serial_state serial_state_saved;
+volatile U8 usb_request_break_generation = 0;
 
 int main(void)
 {
