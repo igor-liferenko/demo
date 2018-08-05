@@ -184,11 +184,3 @@ void uart_usb_init(void)
 {
   rx_counter = 0;
 }
-
-U8 uart_usb_tx_ready(void)
-{
-  if (!(UEINTX & (1 << RWAL))) {
-    return (0 == 1);
-  }
-  return (1 == 1);
-}
