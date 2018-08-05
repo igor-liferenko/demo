@@ -249,17 +249,6 @@ extern PROGMEM const S_usb_user_configuration_descriptor
 
 U8 usb_remote_wup_feature;
 
-void usb_get_configuration(void)
-{
-  (UEINTX &= ~(1 << RXSTPI));
-
-  (UEDATX = (U8) usb_configuration_nb);
-  (UEINTX &= ~(1 << TXINI), (UEINTX &= ~(1 << FIFOCON)));
-
-  while (!(UEINTX & (1 << RXOUTI))) ;
-  (UEINTX &= ~(1 << RXOUTI), (UEINTX &= ~(1 << FIFOCON)));
-}
-
 void usb_get_status(void)
 {
   U8 wIndex;

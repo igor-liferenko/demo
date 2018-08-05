@@ -480,7 +480,11 @@ int main(void)
 
       case 0x08:
         if (((1 << 7) | (0 << 5) | (0)) == bmRequestType) {
-          usb_get_configuration();
+  (UEINTX &= ~(1 << RXSTPI));
+  (UEDATX = (U8) usb_configuration_nb);
+  (UEINTX &= ~(1 << TXINI), (UEINTX &= ~(1 << FIFOCON)));
+  while (!(UEINTX & (1 << RXOUTI))) ;
+  (UEINTX &= ~(1 << RXOUTI), (UEINTX &= ~(1 << FIFOCON)));
         }
         else {
           usb_user_read_request(bmRequestType, bmRequest);
