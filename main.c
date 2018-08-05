@@ -430,12 +430,9 @@ int main(void)
             pbuffer = (&(usb_conf_desc.cfg.bLength));
             break;
           default:
-            if (usb_user_get_descriptor(descriptor_type, string_type) ==
-                (0 == 1)) {
-              (UECONX |= (1 << STALLRQ));
-              (UEINTX &= ~(1 << RXSTPI));
-              goto out_get_descriptor;
-            }
+            (UECONX |= (1 << STALLRQ));
+            (UEINTX &= ~(1 << RXSTPI));
+            goto out_get_descriptor;
           }
           dummy = (UEDATX);
           dummy = (UEDATX);

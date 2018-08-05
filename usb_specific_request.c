@@ -234,8 +234,3 @@ extern S_line_status line_status;
 
 extern S_serial_state serial_state;
 volatile U8 usb_request_break_generation = (0 == 1);
-
-Bool usb_user_get_descriptor(U8 type, U8 string)
-{
-  return (0 == 1);
-}
