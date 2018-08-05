@@ -851,23 +851,23 @@ Bool usb_user_read_request(U8 type, U8 request)
   if (((0 << 7) | (1 << 5) | (1)) == type) {
     switch (request) {
     case 0x20:
-  (UEINTX &= ~(1 << RXSTPI));
-  while (!((UEINTX & (1 << RXOUTI)))) ;
-  (((U8 *) & line_coding.dwDTERate)[0]) = (UEDATX);
-  (((U8 *) & line_coding.dwDTERate)[1]) = (UEDATX);
-  (((U8 *) & line_coding.dwDTERate)[2]) = (UEDATX);
-  (((U8 *) & line_coding.dwDTERate)[3]) = (UEDATX);
-  line_coding.bCharFormat = (UEDATX);
-  line_coding.bParityType = (UEDATX);
-  line_coding.bDataBits = (UEDATX);
-  (UEINTX &= ~(1 << RXOUTI), (UEINTX &= ~(1 << FIFOCON)));
+      (UEINTX &= ~(1 << RXSTPI));
+      while (!((UEINTX & (1 << RXOUTI)))) ;
+      (((U8 *) & line_coding.dwDTERate)[0]) = (UEDATX);
+      (((U8 *) & line_coding.dwDTERate)[1]) = (UEDATX);
+      (((U8 *) & line_coding.dwDTERate)[2]) = (UEDATX);
+      (((U8 *) & line_coding.dwDTERate)[3]) = (UEDATX);
+      line_coding.bCharFormat = (UEDATX);
+      line_coding.bParityType = (UEDATX);
+      line_coding.bDataBits = (UEDATX);
+      (UEINTX &= ~(1 << RXOUTI), (UEINTX &= ~(1 << FIFOCON)));
 
-  (UEINTX &= ~(1 << TXINI));
-  while (!((UEINTX & (1 << TXINI)))) ;
+      (UEINTX &= ~(1 << TXINI));
+      while (!((UEINTX & (1 << TXINI)))) ;
 
-  ((UBRR1) =
-   (U16) (((U32) 16000 * 1000L) /
-          ((U32) (line_coding.dwDTERate) / 2 * 16) - 1));
+      ((UBRR1) =
+       (U16) (((U32) 16000 * 1000L) /
+              ((U32) (line_coding.dwDTERate) / 2 * 16) - 1));
 
       return (1 == 1);
       break;
