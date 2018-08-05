@@ -231,7 +231,12 @@ int main(void)
       if (usb_request_break_generation == (1 == 1)) {
         usb_request_break_generation = (0 == 1);
         (PIND |= (1 << PIND7));
-        start_boot();
+// !! this is used to reset the chip?
+        boot_key = 0x55AAAA55;
+        wdt_reset();
+        (WDTCSR |= (1 << WDCE));
+        (WDTCSR = (1 << WDE));
+        while (1) ;
       }
     }
   }

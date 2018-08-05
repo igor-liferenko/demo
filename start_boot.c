@@ -51,13 +51,3 @@ void start_boot(void);
 
 U32 boot_key __attribute__ ((section(".noinit")));
 
-void start_boot(void)
-{
-  boot_key = 0x55AAAA55;
-
-  wdt_reset();
-  (WDTCSR |= (1 << WDCE));
-  (WDTCSR = (1 << WDE));
-
-  while (1) ;
-}
