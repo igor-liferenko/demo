@@ -74,7 +74,7 @@ U8 usb_read_packet(U8, U8 *, U8);
 void usb_halt_endpoint(U8);
 void usb_reset_endpoint(U8);
 U8 usb_init_device(void);
-extern U32 boot_key __attribute__ ((section(".noinit")));
+U32 boot_key __attribute__ ((section(".noinit")));
 void start_boot_if_required(void);
 void start_boot(void);
 
