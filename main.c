@@ -873,10 +873,10 @@ Bool usb_user_read_request(U8 type, U8 request)
       break;
 
     case 0x22:
-  (UEINTX &= ~(1 << RXSTPI));
-  (UEINTX &= ~(1 << TXINI));
-  line_status.all = wValue;
-  while (!((UEINTX & (1 << TXINI)))) ;
+      (UEINTX &= ~(1 << RXSTPI));
+      (UEINTX &= ~(1 << TXINI));
+      line_status.all = wValue;
+      while (!((UEINTX & (1 << TXINI)))) ;
       return (1 == 1);
       break;
 
