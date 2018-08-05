@@ -286,6 +286,12 @@ char __low_level_init()
   return 1;
 }
 
+int uart_usb_putchar(int data_to_send)
+{
+  uart_usb_send_buffer((U8 *) & data_to_send, 1);
+  return data_to_send;
+}
+
 char uart_usb_getchar(void)
 {
   register Uchar data_rx;

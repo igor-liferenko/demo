@@ -193,12 +193,6 @@ U8 uart_usb_tx_ready(void)
   return (1 == 1);
 }
 
-int uart_usb_putchar(int data_to_send)
-{
-  uart_usb_send_buffer((U8 *) & data_to_send, 1);
-  return data_to_send;
-}
-
 void uart_usb_send_buffer(U8 * buffer, U8 nb_data)
 {
   U8 zlp;
