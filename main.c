@@ -1,10 +1,10 @@
-#include  <avr/interrupt.h>
-#include  <avr/pgmspace.h>
-#include  <avr/io.h>
-#include  <stdio.h>
-#include  <avr/io.h>
-#include  <avr/wdt.h>
-#include  <avr/power.h>
+#include <avr/interrupt.h>
+#include <avr/pgmspace.h>
+#include <avr/io.h>
+#include <stdio.h>
+#include <avr/io.h>
+#include <avr/wdt.h>
+#include <avr/power.h>
 
 typedef unsigned char U8;
 typedef unsigned short U16;
@@ -153,8 +153,8 @@ Bool usb_user_read_request(U8, U8);
 Bool usb_user_get_descriptor(U8, U8);
 
 PROGMEM const S_usb_device_descriptor usb_dev_desc = {
-  sizeof(usb_dev_desc), 0x01, (0x0200), 0x02, 0, 0, 32, (0x03EB), (0x2018),
-    (0x1000), 0x00, 0x00, 0x00, 1
+  sizeof usb_dev_desc, 0x01, 0x0200, 0x02, 0, 0, 32, 0x03EB, 0x2018,
+    0x1000, 0x00, 0x00, 0x00, 1
 };
 
 PROGMEM const S_usb_user_configuration_descriptor usb_conf_desc = {
