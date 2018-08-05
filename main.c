@@ -154,58 +154,66 @@ Bool usb_user_get_descriptor(U8, U8);
 
 PROGMEM const S_usb_device_descriptor usb_dev_desc = {
   sizeof usb_dev_desc, 0x01, 0x0200, 0x02, 0, 0, 32, 0x03EB, 0x2018,
-    0x1000, 0x00, 0x00, 0x00, 1
+  0x1000, 0x00, 0x00, 0x00, 1
 };
 
 PROGMEM const S_usb_user_configuration_descriptor usb_conf_desc = {
-  {sizeof(S_usb_configuration_descriptor), 0x02, 0x0043, 2, 1, 0,
-   (0x80 | 0x00), 50},
-  {sizeof(S_usb_interface_descriptor), 0x04, 0, 0, 1, 0x02, 0x02, 0x01, 0},
+  {sizeof (S_usb_configuration_descriptor), 0x02, 0x0043, 2, 1, 0,
+   (0x80 | 0x00), 50}
+  ,
+  {sizeof (S_usb_interface_descriptor), 0x04, 0, 0, 1, 0x02, 0x02, 0x01, 0}
+  ,
   {0x05, 0x24, 0x00, 0x10, 0x01, 0x05, 0x24, 0x01, 0x03, 0x01, 0x04, 0x24,
-   0x02, 0x06, 0x05, 0x24, 0x06, 0x00, 0x01},
-  {sizeof(S_usb_endpoint_descriptor), 0x05, 0x80 | 0x03, 0x03, (0x20), 0xFF},
-  {sizeof(S_usb_interface_descriptor), 0x04, 1, 0, 2, 0x0A, 0x00, 0x00, 0},
-  {sizeof(S_usb_endpoint_descriptor), 0x05, 0x80 | 0x01, 0x02, (0x20), 0x00},
-  {sizeof(S_usb_endpoint_descriptor), 0x05, 0x02, 0x02, (0x20), 0x00}
+   0x02, 0x06, 0x05, 0x24, 0x06, 0x00, 0x01}
+  ,
+  {sizeof (S_usb_endpoint_descriptor), 0x05, 0x80 | 0x03, 0x03, (0x20),
+   0xFF}
+  ,
+  {sizeof (S_usb_interface_descriptor), 0x04, 1, 0, 2, 0x0A, 0x00, 0x00, 0}
+  ,
+  {sizeof (S_usb_endpoint_descriptor), 0x05, 0x80 | 0x01, 0x02, (0x20),
+   0x00}
+  ,
+  {sizeof (S_usb_endpoint_descriptor), 0x05, 0x02, 0x02, (0x20), 0x00}
 };
 
 PROGMEM const S_usb_manufacturer_string_descriptor
   usb_user_manufacturer_string_descriptor = {
-  sizeof(usb_user_manufacturer_string_descriptor), 0x03, {((U16) ('A')),
-                                                          ((U16) ('T')),
-                                                          ((U16) ('M')),
-                                                          ((U16) ('E')),
-                                                          ((U16) ('L'))}
+  sizeof (usb_user_manufacturer_string_descriptor), 0x03, {((U16) ('A')),
+                                                           ((U16) ('T')),
+                                                           ((U16) ('M')),
+                                                           ((U16) ('E')),
+                                                           ((U16) ('L'))}
 };
 
 PROGMEM const S_usb_product_string_descriptor
   usb_user_product_string_descriptor = {
-  sizeof(usb_user_product_string_descriptor), 0x03, {((U16) ('A')),
-                                                     ((U16) ('V')),
-                                                     ((U16) ('R')),
-                                                     ((U16) (' ')),
-                                                     ((U16) ('U')),
-                                                     ((U16) ('S')),
-                                                     ((U16) ('B')),
-                                                     ((U16) (' ')),
-                                                     ((U16) ('C')),
-                                                     ((U16) ('D')),
-                                                     ((U16) ('C')),
-                                                     ((U16) (' ')),
-                                                     ((U16) ('D')),
-                                                     ((U16) ('E')),
-                                                     ((U16) ('M')),
-                                                     ((U16) ('O'))}
+  sizeof (usb_user_product_string_descriptor), 0x03, {((U16) ('A')),
+                                                      ((U16) ('V')),
+                                                      ((U16) ('R')),
+                                                      ((U16) (' ')),
+                                                      ((U16) ('U')),
+                                                      ((U16) ('S')),
+                                                      ((U16) ('B')),
+                                                      ((U16) (' ')),
+                                                      ((U16) ('C')),
+                                                      ((U16) ('D')),
+                                                      ((U16) ('C')),
+                                                      ((U16) (' ')),
+                                                      ((U16) ('D')),
+                                                      ((U16) ('E')),
+                                                      ((U16) ('M')),
+                                                      ((U16) ('O'))}
 };
 
 PROGMEM const S_usb_serial_number usb_user_serial_number = {
-  sizeof(usb_user_serial_number), 0x03, {((U16) ('1')), ((U16) ('.')),
-                                         ((U16) ('0')), ((U16) ('.')),
-                                         ((U16) ('0'))}
+  sizeof (usb_user_serial_number), 0x03, {((U16) ('1')), ((U16) ('.')),
+                                          ((U16) ('0')), ((U16) ('.')),
+                                          ((U16) ('0'))}
 };
 
 PROGMEM const S_usb_language_id usb_user_language_id = {
-  sizeof(usb_user_language_id), 0x03, (0x0409)
+  sizeof (usb_user_language_id), 0x03, (0x0409)
 };
 
 U8 bmRequestType;
@@ -323,11 +331,11 @@ int main(void)
           descriptor_type = (UEDATX);
           switch (descriptor_type) {
           case 0x01:
-            data_to_transfer = (sizeof(usb_dev_desc));
+            data_to_transfer = (sizeof (usb_dev_desc));
             pbuffer = (&(usb_dev_desc.bLength));
             break;
           case 0x02:
-            data_to_transfer = (sizeof(usb_conf_desc));
+            data_to_transfer = (sizeof (usb_conf_desc));
             pbuffer = (&(usb_conf_desc.cfg.bLength));
             break;
           default:
