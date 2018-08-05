@@ -320,7 +320,7 @@ int main(void)
       bmRequest = (UEDATX);
       switch (bmRequest) {
       case 0x06:
-        if (((1 << 7) | (0 << 5) | (0)) == bmRequestType) {
+        if (0x80 == bmRequestType) {
           U16 wLength;
           U8 descriptor_type;
           U8 string_type;
@@ -392,7 +392,7 @@ int main(void)
         }
         break;
       case 0x08:
-        if (((1 << 7) | (0 << 5) | (0)) == bmRequestType) {
+        if (0x80 == bmRequestType) {
           (UEINTX &= ~(1 << RXSTPI));
           (UEDATX = (U8) usb_configuration_nb);
           (UEINTX &= ~(1 << TXINI), (UEINTX &= ~(1 << FIFOCON)));
@@ -404,7 +404,7 @@ int main(void)
         }
         break;
       case 0x05:
-        if (((0 << 7) | (0 << 5) | (0)) == bmRequestType) {
+        if (0x00 == bmRequestType) {
           U8 addr = (UEDATX);
           (UDADDR = (UDADDR & (1 << ADDEN)) | ((U8) addr & 0x7F));
           (UEINTX &= ~(1 << RXSTPI));
@@ -417,7 +417,7 @@ int main(void)
         }
         break;
       case 0x09:
-        if (((0 << 7) | (0 << 5) | (0)) == bmRequestType) {
+        if (0x00 == bmRequestType) {
           U8 configuration_number;
           configuration_number = (UEDATX);
           if (configuration_number <= 1) {
@@ -453,7 +453,7 @@ int main(void)
         }
         break;
       case 0x01:
-        if (((0 << 7) | (0 << 5) | (2)) >= bmRequestType) {
+        if (0x02 >= bmRequestType) {
           U8 wValue;
           U8 wIndex;
           U8 dummy;
@@ -470,17 +470,17 @@ int main(void)
               (UEINTX &= ~(1 << RXSTPI));
             }
           }
-          else if (bmRequestType == ((0 << 7) | (0 << 5) | (1))) {
+          else if (bmRequestType == 0x01) {
             (UECONX |= (1 << STALLRQ));
             (UEINTX &= ~(1 << RXSTPI));
           }
-          else if (bmRequestType == ((0 << 7) | (0 << 5) | (2))) {
+          else if (bmRequestType == 0x02) {
             wValue = (UEDATX);
             dummy = (UEDATX);
             if (wValue == 0x00) {
-              wIndex = ((UEDATX) & 0x7F);
-              (UENUM = (U8) wIndex);
-              if (((UECONX & (1 << EPEN)) ? (1 == 1) : (0 == 1))) {
+              wIndex = UEDATX & 0x7F;
+              UENUM = (U8) wIndex;
+              if (UECONX & 1 << EPEN) {
                 if (wIndex != 0) {
                   (UECONX |= (1 << STALLRQC));
                   (UERST = 1 << (U8) wIndex, UERST = 0);
