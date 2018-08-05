@@ -120,13 +120,3 @@ void usb_halt_endpoint(U8 ep_num)
   (UECONX |= (1 << STALLRQ));
 }
 
-U8 usb_init_device(void)
-{
-  (UENUM = (U8) 0);
-  if (!((UECONX & (1 << EPEN)) ? (1 == 1) : (0 == 1))) {
-    return ((UENUM =
-             (U8) 0), usb_config_ep(((0 << 6) | (1 << 1) | (0)),
-                                    ((2 << 4) | (0 << 2))));
-  }
-  return (0 == 1);
-}

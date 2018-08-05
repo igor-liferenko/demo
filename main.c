@@ -191,7 +191,11 @@ int main(void)
         (UDIEN |= (1 << SUSPE));
         (UDIEN |= (1 << EORSTE));
         sei();
-        usb_init_device();
+  (UENUM = (U8) 0);
+  if (!(UECONX & 1 << EPEN)) {
+    UENUM = (U8) 0;
+    usb_config_ep(0 << 6 | 1 << 1 | 0, 2 << 4 | 0 << 2);
+  }
       }
     }
     if (((g_usb_event & (1 << 8)) ? (1 == 1) : (0 == 1))) {
@@ -296,8 +300,11 @@ ISR(USB_GEN_vect)
       (UDIEN |= (1 << SUSPE));
       (UDIEN |= (1 << EORSTE));
       sei();
-      usb_init_device();
-
+  (UENUM = (U8) 0);
+  if (!(UECONX & 1 << EPEN)) {
+    UENUM = (U8) 0;
+    usb_config_ep(0 << 6 | 1 << 1 | 0, 2 << 4 | 0 << 2);
+  }
       (UDCON &= ~(1 << DETACH));
     }
     else {
@@ -359,7 +366,11 @@ ISR(USB_GEN_vect)
       && ((UDIEN & (1 << EORSTE)) ? (1 == 1) : (0 == 1))) {
     usb_remote_wup_feature = 0;
     (UDINT = ~(1 << EORSTI));
-    usb_init_device();
+  (UENUM = (U8) 0);
+  if (!(UECONX & 1 << EPEN)) {
+    UENUM = (U8) 0;
+    usb_config_ep(0 << 6 | 1 << 1 | 0, 2 << 4 | 0 << 2);
+  }
     (g_usb_event |= (1 << 8));
   }
 }
