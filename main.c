@@ -286,6 +286,29 @@ char __low_level_init()
   return 1;
 }
 
+char uart_usb_getchar(void)
+{
+  register Uchar data_rx;
+
+  (UENUM = (U8) 0x02);
+  if (!rx_counter) {
+    do {
+      (UENUM = (U8) 0x02);
+      if ((UEINTX & (1 << RXOUTI))) {
+        rx_counter = ((U8) (UEBCLX));
+        if (!rx_counter) {
+          (UEINTX &= ~(1 << RXOUTI), (UEINTX &= ~(1 << FIFOCON)));
+        }
+      }
+    } while (!rx_counter);
+  }
+  data_rx = (UEDATX);
+  rx_counter--;
+  if (!rx_counter)
+    (UEINTX &= ~(1 << RXOUTI), (UEINTX &= ~(1 << FIFOCON)));
+  return data_rx;
+}
+
 ISR(USB_GEN_vect)
 {
   if (((USBINT & (1 << VBUSTI)) ? (1 == 1) : (0 == 1))

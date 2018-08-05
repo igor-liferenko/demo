@@ -185,29 +185,6 @@ void uart_usb_init(void)
   rx_counter = 0;
 }
 
-char uart_usb_getchar(void)
-{
-  register Uchar data_rx;
-
-  (UENUM = (U8) 0x02);
-  if (!rx_counter) {
-    do {
-      (UENUM = (U8) 0x02);
-      if ((UEINTX & (1 << RXOUTI))) {
-        rx_counter = ((U8) (UEBCLX));
-        if (!rx_counter) {
-          (UEINTX &= ~(1 << RXOUTI), (UEINTX &= ~(1 << FIFOCON)));
-        }
-      }
-    } while (!rx_counter);
-  }
-  data_rx = (UEDATX);
-  rx_counter--;
-  if (!rx_counter)
-    (UEINTX &= ~(1 << RXOUTI), (UEINTX &= ~(1 << FIFOCON)));
-  return data_rx;
-}
-
 U8 uart_usb_tx_ready(void)
 {
   if (!(UEINTX & (1 << RWAL))) {
