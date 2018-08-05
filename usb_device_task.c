@@ -182,4 +182,3 @@ U8 usb_connected = 0;
 U8 usb_suspended = 0;
 
 extern U8 usb_configuration_nb;
-
