@@ -180,7 +180,3 @@ void uart_usb_flush(void);
 void uart_usb_send_buffer(U8 * buffer, U8 nb_data);
 
 Uchar rx_counter;
-void uart_usb_init(void)
-{
-  rx_counter = 0;
-}
