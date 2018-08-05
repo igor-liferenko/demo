@@ -251,19 +251,6 @@ extern PROGMEM const S_usb_user_configuration_descriptor
 
 U8 usb_remote_wup_feature;
 
-void usb_set_address(void)
-{
-  U8 addr = (UEDATX);
-  (UDADDR = (UDADDR & (1 << ADDEN)) | ((U8) addr & 0x7F));
-
-  (UEINTX &= ~(1 << RXSTPI));
-
-  (UEINTX &= ~(1 << TXINI));
-  while (!(UEINTX & (1 << TXINI))) ;
-
-  (UDADDR |= (1 << ADDEN));
-}
-
 void usb_set_configuration(void)
 {
   U8 configuration_number;
