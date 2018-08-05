@@ -25,7 +25,7 @@ typedef union {
     U16 reserved:9;
   };
 } S_serial_state;
-S_serial_state serial_state;
+
 typedef union {
   U8 all;
   struct {
@@ -34,17 +34,14 @@ typedef union {
     U8 unused:6;
   };
 } S_line_status;
-S_line_status line_status;
+
 typedef struct {
   U32 dwDTERate;
   U8 bCharFormat;
   U8 bParityType;
   U8 bDataBits;
 } S_line_coding;
-S_line_coding line_coding;
-U8 usb_suspended = 0;
-U8 usb_connected = 0;
-Uchar rx_counter;
+
 typedef struct {
   U8 bmRequestType;
   U8 bRequest;
@@ -148,6 +145,13 @@ typedef struct {
   S_usb_endpoint_descriptor ep2;
 } S_usb_user_configuration_descriptor;
 
+void (*start_bootloader) (void) = (void (*)(void)) 0x3800;
+int uart_usb_putchar(int);
+char uart_usb_getchar(void);
+U8 flash_read_fuse(unsigned long adr);
+Bool usb_user_read_request(U8, U8);
+Bool usb_user_get_descriptor(U8, U8);
+
 PROGMEM const S_usb_device_descriptor usb_dev_desc = {
   sizeof(usb_dev_desc)
     , 0x01, (0x0200)
@@ -212,28 +216,27 @@ PROGMEM const S_usb_language_id usb_user_language_id = {
     , 0x03, (0x0409)
 };
 
-void (*start_bootloader) (void) = (void (*)(void)) 0x3800;
-int uart_usb_putchar(int);
-char uart_usb_getchar(void);
-U8 flash_read_fuse(unsigned long adr);
-Bool usb_user_read_request(U8, U8);
-
 U8 bmRequestType;
 U8 zlp;
 U8 endpoint_status[7];
 U8 device_status = 1;
 U8 data_to_transfer;
 PGM_VOID_P pbuffer;
-Bool usb_user_get_descriptor(U8, U8);
 U8 remote_wakeup_feature = 0;
 U8 usb_configuration_nb;
 U8 usb_remote_wup_feature;
+S_serial_state serial_state;
 S_serial_state serial_state_saved;
 volatile U8 usb_request_break_generation = 0;
 volatile U8 rs2usb[10];
 volatile U8 cpt_sof;
 volatile U16 g_usb_event = 0;
 U32 boot_key __attribute__ ((section(".noinit")));
+S_line_coding line_coding;
+U8 usb_suspended = 0;
+U8 usb_connected = 0;
+Uchar rx_counter;
+S_line_status line_status;
 
 int main(void)
 {
