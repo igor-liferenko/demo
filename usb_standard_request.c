@@ -382,7 +382,6 @@ void usb_set_configuration(void)
   (UEINTX &= ~(1 << TXINI));
 
   usb_user_endpoint_init(usb_configuration_nb);
-  ;
 }
 
 void usb_get_descriptor(void)

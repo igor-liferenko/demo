@@ -56,7 +56,6 @@ U8 uart_test_hit(void)
 int uart_putchar(int ch)
 {
   while (!((UCSR1A) & 0x20));
-  ;
   ((UDR1) = ch);
 
   return ch;
@@ -68,6 +67,5 @@ char uart_getchar(void)
 
   while (!((UCSR1A) & 0x80));
   c = ((UDR1));
-  ;
   return c;
 }
