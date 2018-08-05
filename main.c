@@ -312,6 +312,7 @@ void usb_get_configuration(void);
 void usb_get_interface(void);
 void usb_set_interface(void);
 Bool usb_user_read_request(U8, U8);
+void usb_user_endpoint_init(U8);
 
 int main(void)
 {
@@ -435,7 +436,20 @@ int main(void)
 
       case 0x09:
         if (((0 << 7) | (0 << 5) | (0)) == bmRequestType) {
-          usb_set_configuration();
+  U8 configuration_number;
+
+  configuration_number = (UEDATX);
+
+  if (configuration_number <= 1) {
+    (UEINTX &= ~(1 << RXSTPI));
+    usb_configuration_nb = configuration_number;
+  (UEINTX &= ~(1 << TXINI));
+  usb_user_endpoint_init(usb_configuration_nb);
+  }
+  else {
+    (UECONX |= (1 << STALLRQ));
+    (UEINTX &= ~(1 << RXSTPI));
+  }
         }
         else {
           usb_user_read_request(bmRequestType, bmRequest);

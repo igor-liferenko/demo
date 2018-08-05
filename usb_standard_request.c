@@ -251,28 +251,6 @@ extern PROGMEM const S_usb_user_configuration_descriptor
 
 U8 usb_remote_wup_feature;
 
-void usb_set_configuration(void)
-{
-  U8 configuration_number;
-
-  configuration_number = (UEDATX);
-
-  if (configuration_number <= 1) {
-    (UEINTX &= ~(1 << RXSTPI));
-    usb_configuration_nb = configuration_number;
-  }
-  else {
-
-    (UECONX |= (1 << STALLRQ));
-    (UEINTX &= ~(1 << RXSTPI));
-    return;
-  }
-
-  (UEINTX &= ~(1 << TXINI));
-
-  usb_user_endpoint_init(usb_configuration_nb);
-}
-
 void usb_get_descriptor(void)
 {
   U16 wLength;
