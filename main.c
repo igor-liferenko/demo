@@ -297,6 +297,7 @@ PROGMEM const S_usb_language_id usb_user_language_id = {
   sizeof(usb_user_language_id)
     , 0x03, (0x0409)
 };
+
 U8 bmRequestType;
 U8 zlp;
 U8 endpoint_status[7];
@@ -390,99 +391,99 @@ int main(void)
     }
     (UENUM = (U8) 0);
     if ((UEINTX & (1 << RXSTPI))) {
-        U8 bmRequest;
+      U8 bmRequest;
 
-  (UEINTX &= ~(1 << RXOUTI));
-  bmRequestType = (UEDATX);
-  bmRequest = (UEDATX);
+      (UEINTX &= ~(1 << RXOUTI));
+      bmRequestType = (UEDATX);
+      bmRequest = (UEDATX);
 
-  switch (bmRequest) {
-  case 0x06:
-    if (((1 << 7) | (0 << 5) | (0)) == bmRequestType) {
-      usb_get_descriptor();
-    }
-    else {
-      usb_user_read_request(bmRequestType, bmRequest);
-    }
-    break;
+      switch (bmRequest) {
+      case 0x06:
+        if (((1 << 7) | (0 << 5) | (0)) == bmRequestType) {
+          usb_get_descriptor();
+        }
+        else {
+          usb_user_read_request(bmRequestType, bmRequest);
+        }
+        break;
 
-  case 0x08:
-    if (((1 << 7) | (0 << 5) | (0)) == bmRequestType) {
-      usb_get_configuration();
-    }
-    else {
-      usb_user_read_request(bmRequestType, bmRequest);
-    }
-    break;
+      case 0x08:
+        if (((1 << 7) | (0 << 5) | (0)) == bmRequestType) {
+          usb_get_configuration();
+        }
+        else {
+          usb_user_read_request(bmRequestType, bmRequest);
+        }
+        break;
 
-  case 0x05:
-    if (((0 << 7) | (0 << 5) | (0)) == bmRequestType) {
-      usb_set_address();
-    }
-    else {
-      usb_user_read_request(bmRequestType, bmRequest);
-    }
-    break;
+      case 0x05:
+        if (((0 << 7) | (0 << 5) | (0)) == bmRequestType) {
+          usb_set_address();
+        }
+        else {
+          usb_user_read_request(bmRequestType, bmRequest);
+        }
+        break;
 
-  case 0x09:
-    if (((0 << 7) | (0 << 5) | (0)) == bmRequestType) {
-      usb_set_configuration();
-    }
-    else {
-      usb_user_read_request(bmRequestType, bmRequest);
-    }
-    break;
+      case 0x09:
+        if (((0 << 7) | (0 << 5) | (0)) == bmRequestType) {
+          usb_set_configuration();
+        }
+        else {
+          usb_user_read_request(bmRequestType, bmRequest);
+        }
+        break;
 
-  case 0x01:
-    if (((0 << 7) | (0 << 5) | (2)) >= bmRequestType) {
-      usb_clear_feature();
-    }
-    else {
-      usb_user_read_request(bmRequestType, bmRequest);
-    }
-    break;
+      case 0x01:
+        if (((0 << 7) | (0 << 5) | (2)) >= bmRequestType) {
+          usb_clear_feature();
+        }
+        else {
+          usb_user_read_request(bmRequestType, bmRequest);
+        }
+        break;
 
-  case 0x03:
-    if (((0 << 7) | (0 << 5) | (2)) >= bmRequestType) {
-      usb_set_feature();
-    }
-    else {
-      usb_user_read_request(bmRequestType, bmRequest);
-    }
-    break;
+      case 0x03:
+        if (((0 << 7) | (0 << 5) | (2)) >= bmRequestType) {
+          usb_set_feature();
+        }
+        else {
+          usb_user_read_request(bmRequestType, bmRequest);
+        }
+        break;
 
-  case 0x00:
-    if ((0x7F < bmRequestType) & (0x82 >= bmRequestType)) {
-      usb_get_status();
-    }
-    else {
-      usb_user_read_request(bmRequestType, bmRequest);
-    }
-    break;
+      case 0x00:
+        if ((0x7F < bmRequestType) & (0x82 >= bmRequestType)) {
+          usb_get_status();
+        }
+        else {
+          usb_user_read_request(bmRequestType, bmRequest);
+        }
+        break;
 
-  case 0x0A:
-    if (bmRequestType == ((1 << 7) | (0 << 5) | (1))) {
-      usb_get_interface();
-    }
-    else {
-      usb_user_read_request(bmRequestType, bmRequest);
-    }
-    break;
+      case 0x0A:
+        if (bmRequestType == ((1 << 7) | (0 << 5) | (1))) {
+          usb_get_interface();
+        }
+        else {
+          usb_user_read_request(bmRequestType, bmRequest);
+        }
+        break;
 
-  case 0x0B:
-    if (bmRequestType == ((0 << 7) | (0 << 5) | (1))) {
-      usb_set_interface();
-    }
-    break;
+      case 0x0B:
+        if (bmRequestType == ((0 << 7) | (0 << 5) | (1))) {
+          usb_set_interface();
+        }
+        break;
 
-  case 0x07:
-  case 0x0C:
-  default:
-    if (usb_user_read_request(bmRequestType, bmRequest) == (0 == 1)) {
-      (UECONX |= (1 << STALLRQ));
-      (UEINTX &= ~(1 << RXSTPI));
-    }
-  }
+      case 0x07:
+      case 0x0C:
+      default:
+        if (usb_user_read_request(bmRequestType, bmRequest) == (0 == 1)) {
+          (UECONX |= (1 << STALLRQ));
+          (UEINTX &= ~(1 << RXSTPI));
+        }
+      }
     }
     if (((usb_configuration_nb != 0) ? (1 == 1) : (0 == 1))
         && line_status.DTR) {
