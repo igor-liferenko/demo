@@ -213,7 +213,16 @@ int main(void)
     if (((usb_configuration_nb != 0) ? (1 == 1) : (0 == 1))
         && line_status.DTR) {
       if (((UCSR1A) & 0x20)) {
-        if (uart_usb_test_hit()) {
+        if (!rx_counter) {
+          (UENUM = (U8) 0x02);
+          if ((UEINTX & (1 << RXOUTI))) {
+            rx_counter = ((U8) (UEBCLX));
+            if (!rx_counter) {
+              (UEINTX &= ~(1 << RXOUTI), (UEINTX &= ~(1 << FIFOCON)));
+            }
+          }
+        }
+        if (rx_counter) {
           while (rx_counter) {
             uart_putchar(uart_usb_getchar());
             (PIND |= (1 << PIND6));
