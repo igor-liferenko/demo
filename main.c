@@ -238,6 +238,11 @@ U8 usb_connected = 0;
 Uchar rx_counter;
 S_line_status line_status;
 
+#define EP0 0
+#define EP1 1
+#define EP2 2
+#define EP3 3
+
 int main(void)
 {
   (UHWCON |= (1 << UVREGE));
@@ -307,16 +312,16 @@ int main(void)
         }
       }
     }
-    if (((g_usb_event & (1 << 8)) ? (1 == 1) : (0 == 1))) {
-      (g_usb_event &= ~(1 << 8));
-      (UERST = 1 << (U8) 0, UERST = 0);
+    if (g_usb_event & 1 << 8) {
+      g_usb_event &= ~(1 << 8);
+      UERST = 1 << EP0, UERST = 0;
       usb_configuration_nb = 0;
     }
-    (UENUM = (U8) 0);
-    if ((UEINTX & (1 << RXSTPI))) {
+    UENUM = (U8) 0;
+    if (UEINTX & 1 << RXSTPI) {
       U8 bmRequest;
-      (UEINTX &= ~(1 << RXOUTI));
-      bmRequestType = (UEDATX);
+      UEINTX &= ~(1 << RXOUTI);
+      bmRequestType = UEDATX;
       bmRequest = (UEDATX);
       switch (bmRequest) {
       case 0x06:
@@ -326,43 +331,43 @@ int main(void)
           U8 string_type;
           U8 dummy;
           U8 nb_byte;
-          zlp = (0 == 1);
-          string_type = (UEDATX);
-          descriptor_type = (UEDATX);
+          zlp = 0;
+          string_type = UEDATX;
+          descriptor_type = UEDATX;
           switch (descriptor_type) {
           case 0x01:
-            data_to_transfer = (sizeof (usb_dev_desc));
-            pbuffer = (&(usb_dev_desc.bLength));
+            data_to_transfer = sizeof usb_dev_desc;
+            pbuffer = &usb_dev_desc.bLength;
             break;
           case 0x02:
-            data_to_transfer = (sizeof (usb_conf_desc));
-            pbuffer = (&(usb_conf_desc.cfg.bLength));
+            data_to_transfer = sizeof usb_conf_desc;
+            pbuffer = &usb_conf_desc.cfg.bLength;
             break;
           default:
-            (UECONX |= (1 << STALLRQ));
-            (UEINTX &= ~(1 << RXSTPI));
+            UECONX |= 1 << STALLRQ;
+            UEINTX &= ~(1 << RXSTPI);
             goto out_get_descriptor;
           }
-          dummy = (UEDATX);
-          dummy = (UEDATX);
-          (((U8 *) & wLength)[0]) = (UEDATX);
-          (((U8 *) & wLength)[1]) = (UEDATX);
-          (UEINTX &= ~(1 << RXSTPI));
+          dummy = UEDATX;
+          dummy = UEDATX;
+          ((U8 *) &wLength)[0] = UEDATX;
+          ((U8 *) &wLength)[1] = UEDATX;
+          UEINTX &= ~(1 << RXSTPI);
           if (wLength > data_to_transfer) {
-            if ((data_to_transfer % 32) == 0) {
-              zlp = (1 == 1);
+            if (data_to_transfer % 32 == 0) {
+              zlp = 1;
             }
             else {
-              zlp = (0 == 1);
+              zlp = 0;
             }
           }
           else {
             data_to_transfer = (U8) wLength;
           }
-          (UEINTX &= ~(1 << NAKOUTI));
-          while ((data_to_transfer != 0) && (!(UEINTX & (1 << NAKOUTI)))) {
-            while (!(UEINTX & (1 << TXINI))) {
-              if ((UEINTX & (1 << NAKOUTI)))
+          UEINTX &= ~(1 << NAKOUTI);
+          while (data_to_transfer != 0 && !(UEINTX & 1 << NAKOUTI)) {
+            while (!(UEINTX & 1 << TXINI)) {
+              if (UEINTX & 1 << NAKOUTI)
                 break;
             }
             nb_byte = 0;
@@ -370,21 +375,21 @@ int main(void)
               if (nb_byte++ == 32) {
                 break;
               }
-              (UEDATX = (U8) pgm_read_byte_near((unsigned int) pbuffer++));
+              UEDATX = (U8) pgm_read_byte_near((unsigned int) pbuffer++);
               data_to_transfer--;
             }
-            if ((UEINTX & (1 << NAKOUTI)))
+            if (UEINTX & 1 << NAKOUTI)
               break;
             else
-              (UEINTX &= ~(1 << TXINI));
+              UEINTX &= ~(1 << TXINI);
           }
-          if ((zlp == (1 == 1)) && (!(UEINTX & (1 << NAKOUTI)))) {
-            while (!(UEINTX & (1 << TXINI))) ;
-            (UEINTX &= ~(1 << TXINI));
+          if (zlp == 1 && !(UEINTX & 1 << NAKOUTI)) {
+            while (!(UEINTX & 1 << TXINI)) ;
+            UEINTX &= ~(1 << TXINI);
           }
-          while (!((UEINTX & (1 << NAKOUTI)))) ;
-          (UEINTX &= ~(1 << NAKOUTI));
-          (UEINTX &= ~(1 << RXOUTI));
+          while (!(UEINTX & 1 << NAKOUTI)) ;
+          UEINTX &= ~(1 << NAKOUTI);
+          UEINTX &= ~(1 << RXOUTI);
         out_get_descriptor:;
         }
         else {
@@ -393,11 +398,11 @@ int main(void)
         break;
       case 0x08:
         if (0x80 == bmRequestType) {
-          (UEINTX &= ~(1 << RXSTPI));
-          (UEDATX = (U8) usb_configuration_nb);
-          (UEINTX &= ~(1 << TXINI), (UEINTX &= ~(1 << FIFOCON)));
-          while (!(UEINTX & (1 << RXOUTI))) ;
-          (UEINTX &= ~(1 << RXOUTI), (UEINTX &= ~(1 << FIFOCON)));
+          UEINTX &= ~(1 << RXSTPI);
+          UEDATX = (U8) usb_configuration_nb;
+          UEINTX &= ~(1 << TXINI), UEINTX &= ~(1 << FIFOCON);
+          while (!(UEINTX & 1 << RXOUTI)) ;
+          UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
         }
         else {
           usb_user_read_request(bmRequestType, bmRequest);
@@ -405,12 +410,12 @@ int main(void)
         break;
       case 0x05:
         if (0x00 == bmRequestType) {
-          U8 addr = (UEDATX);
-          (UDADDR = (UDADDR & (1 << ADDEN)) | ((U8) addr & 0x7F));
-          (UEINTX &= ~(1 << RXSTPI));
-          (UEINTX &= ~(1 << TXINI));
-          while (!(UEINTX & (1 << TXINI))) ;
-          (UDADDR |= (1 << ADDEN));
+          U8 addr = UEDATX;
+          UDADDR = (UDADDR & 1 << ADDEN) | ((U8) addr & 0x7F);
+          UEINTX &= ~(1 << RXSTPI);
+          UEINTX &= ~(1 << TXINI);
+          while (!(UEINTX & 1 << TXINI)) ;
+          UDADDR |= 1 << ADDEN;
         }
         else {
           usb_user_read_request(bmRequestType, bmRequest);
@@ -419,33 +424,37 @@ int main(void)
       case 0x09:
         if (0x00 == bmRequestType) {
           U8 configuration_number;
-          configuration_number = (UEDATX);
+          configuration_number = UEDATX;
           if (configuration_number <= 1) {
-            (UEINTX &= ~(1 << RXSTPI));
+            UEINTX &= ~(1 << RXSTPI);
             usb_configuration_nb = configuration_number;
-            (UEINTX &= ~(1 << TXINI));
-            (UENUM = (U8) 0x03);
-            (UECONX |= (1 << EPEN));
-            UECFG0X = 3 << 6 | 0 << 1 | 1;
-            UECFG1X = (UECFG1X & 1 << ALLOC) | 2 << 4 | 0 << 2;
-            (UECFG1X |= (1 << ALLOC));
-            (UENUM = (U8) 0x01);
-            (UECONX |= (1 << EPEN));
-            UECFG0X = 2 << 6 | 0 << 1 | 1;
-            UECFG1X = (UECFG1X & 1 << ALLOC) | 2 << 4 | 0 << 2;
-            (UECFG1X |= (1 << ALLOC));
-            (UENUM = (U8) 0x02);
-            (UECONX |= (1 << EPEN));
-            UECFG0X = 2 << 6 | 0 << 1 | 0;
-            UECFG1X = (UECFG1X & 1 << ALLOC) | 2 << 4 | 0 << 2;
-            (UECFG1X |= (1 << ALLOC));
-            (UERST = 1 << (U8) 0x03, UERST = 0);
-            (UERST = 1 << (U8) 0x01, UERST = 0);
-            (UERST = 1 << (U8) 0x02, UERST = 0);
+            UEINTX &= ~(1 << TXINI);
+
+            UENUM = (U8) 0x03;
+            UECONX |= 1 << EPEN;
+            UECFG0X = 1 << EPTYPE1 | 1 << EPTYPE0 | 1 << EPDIR; /* interrupt, IN */
+            UECFG1X = (UECFG1X & 1 << ALLOC) | 1 << EPSIZE1; /* TODO: remove & */
+            UECFG1X |= 1 << ALLOC;
+
+            UENUM = (U8) 0x01;
+            UECONX |= 1 << EPEN;
+            UECFG0X = 1 << EPTYPE1 | 1 << EPDIR; /* bulk, IN */
+            UECFG1X = (UECFG1X & 1 << ALLOC) | 1 << EPSIZE1; /* TODO: remove & */
+            UECFG1X |= 1 << ALLOC;
+
+            UENUM = (U8) 0x02;
+            UECONX |= 1 << EPEN;
+            UECFG0X = 1 << EPTYPE1; /* bulk, OUT */
+            UECFG1X = (UECFG1X & 1 << ALLOC) | 1 << EPSIZE1; /* TODO: remove & */
+            UECFG1X |= 1 << ALLOC;
+
+            UERST = 1 << EP3, UERST = 0;
+            UERST = 1 << EP1, UERST = 0;
+            UERST = 1 << EP2, UERST = 0;
           }
           else {
-            (UECONX |= (1 << STALLRQ));
-            (UEINTX &= ~(1 << RXSTPI));
+            UECONX |= 1 << STALLRQ;
+            UEINTX &= ~(1 << RXSTPI);
           }
         }
         else {
@@ -457,7 +466,7 @@ int main(void)
           U8 wValue;
           U8 wIndex;
           U8 dummy;
-          if (bmRequestType == ((0 << 7) | (0 << 5) | (0))) {
+          if (bmRequestType == 0x00) {
             wValue = (UEDATX);
             UECONX |= 1 << STALLRQ;
             UEINTX &= ~(1 << RXSTPI);
