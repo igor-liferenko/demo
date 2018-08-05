@@ -459,20 +459,12 @@ int main(void)
           U8 dummy;
           if (bmRequestType == ((0 << 7) | (0 << 5) | (0))) {
             wValue = (UEDATX);
-            if ((wValue == 0x01) && (0 == 1)) {
-              device_status &= ~0x02;
-              remote_wakeup_feature = 0;
-              (UEINTX &= ~(1 << RXSTPI));
-              (UEINTX &= ~(1 << TXINI));
-            }
-            else {
-              (UECONX |= (1 << STALLRQ));
-              (UEINTX &= ~(1 << RXSTPI));
-            }
+            UECONX |= 1 << STALLRQ;
+            UEINTX &= ~(1 << RXSTPI);
           }
           else if (bmRequestType == 0x01) {
-            (UECONX |= (1 << STALLRQ));
-            (UEINTX &= ~(1 << RXSTPI));
+            UECONX |= 1 << STALLRQ;
+            UEINTX &= ~(1 << RXSTPI);
           }
           else if (bmRequestType == 0x02) {
             wValue = (UEDATX);
@@ -482,24 +474,24 @@ int main(void)
               UENUM = (U8) wIndex;
               if (UECONX & 1 << EPEN) {
                 if (wIndex != 0) {
-                  (UECONX |= (1 << STALLRQC));
-                  (UERST = 1 << (U8) wIndex, UERST = 0);
-                  (UECONX |= (1 << RSTDT));
+                  UECONX |= 1 << STALLRQC;
+                  UERST = 1 << (U8) wIndex, UERST = 0;
+                  UECONX |= 1 << RSTDT;
                 }
-                (UENUM = (U8) 0);
+                UENUM = (U8) 0;
                 endpoint_status[wIndex] = 0x00;
-                (UEINTX &= ~(1 << RXSTPI));
-                (UEINTX &= ~(1 << TXINI));
+                UEINTX &= ~(1 << RXSTPI);
+                UEINTX &= ~(1 << TXINI);
               }
               else {
-                (UENUM = (U8) 0);
-                (UECONX |= (1 << STALLRQ));
-                (UEINTX &= ~(1 << RXSTPI));
+                UENUM = (U8) 0;
+                UECONX |= 1 << STALLRQ;
+                UEINTX &= ~(1 << RXSTPI);
               }
             }
             else {
-              (UECONX |= (1 << STALLRQ));
-              (UEINTX &= ~(1 << RXSTPI));
+              UECONX |= (1 << STALLRQ);
+              UEINTX &= ~(1 << RXSTPI);
             }
           }
         }
