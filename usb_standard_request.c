@@ -240,7 +240,6 @@ extern U8 device_status;
 U16 wInterface;
 
 extern U8 bmRequestType;
-U8 remote_wakeup_feature = 0;
 U8 usb_configuration_nb;
 extern U8 usb_connected;
 extern PROGMEM const S_usb_device_descriptor usb_user_device_descriptor;
@@ -248,81 +247,6 @@ extern PROGMEM const S_usb_user_configuration_descriptor
   usb_user_configuration_descriptor;
 
 U8 usb_remote_wup_feature;
-
-void usb_set_feature(void)
-{
-  U8 wValue;
-  U8 wIndex;
-  U8 dummy;
-
-  switch (bmRequestType) {
-  case ((0 << 7) | (0 << 5) | (0)):
-    wValue = (UEDATX);
-    switch (wValue) {
-    case 1:
-      if ((wValue == 0x01) && (0 == 1)) {
-        device_status |= 0x02;
-        remote_wakeup_feature = 1;
-        (UEINTX &= ~(1 << RXSTPI));
-        (UEINTX &= ~(1 << TXINI));
-      }
-      else {
-        (UECONX |= (1 << STALLRQ));
-        (UEINTX &= ~(1 << RXSTPI));
-      }
-      break;
-
-    default:
-      (UECONX |= (1 << STALLRQ));
-      (UEINTX &= ~(1 << RXSTPI));
-      break;
-    }
-    break;
-
-  case ((0 << 7) | (0 << 5) | (1)):
-
-    (UECONX |= (1 << STALLRQ));
-    (UEINTX &= ~(1 << RXSTPI));
-    break;
-
-  case ((0 << 7) | (0 << 5) | (2)):
-    wValue = (UEDATX);
-    dummy = (UEDATX);
-
-    if (wValue == 0x00) {
-      wIndex = ((UEDATX) & 0x7F);
-
-      if (wIndex == 0) {
-        (UECONX |= (1 << STALLRQ));
-        (UEINTX &= ~(1 << RXSTPI));
-      }
-
-      (UENUM = (U8) wIndex);
-      if (((UECONX & (1 << EPEN)) ? (1 == 1) : (0 == 1))) {
-        (UECONX |= (1 << STALLRQ));
-        (UENUM = (U8) 0);
-        endpoint_status[wIndex] = 0x01;
-        (UEINTX &= ~(1 << RXSTPI));
-        (UEINTX &= ~(1 << TXINI));
-      }
-      else {
-        (UENUM = (U8) 0);
-        (UECONX |= (1 << STALLRQ));
-        (UEINTX &= ~(1 << RXSTPI));
-      }
-    }
-    else {
-      (UECONX |= (1 << STALLRQ));
-      (UEINTX &= ~(1 << RXSTPI));
-    }
-    break;
-
-  default:
-    (UECONX |= (1 << STALLRQ));
-    (UEINTX &= ~(1 << RXSTPI));
-    break;
-  }
-}
 
 void usb_clear_feature(void)
 {

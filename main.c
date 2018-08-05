@@ -316,6 +316,7 @@ void usb_user_endpoint_init(U8);
 U8 data_to_transfer;
 PGM_VOID_P pbuffer;
 Bool usb_user_get_descriptor(U8, U8);
+U8 remote_wakeup_feature = 0;
 
 int main(void)
 {
@@ -541,7 +542,76 @@ int main(void)
 
       case 0x03:
         if (((0 << 7) | (0 << 5) | (2)) >= bmRequestType) {
-          usb_set_feature();
+            U8 wValue;
+  U8 wIndex;
+  U8 dummy;
+
+  switch (bmRequestType) {
+  case ((0 << 7) | (0 << 5) | (0)):
+    wValue = (UEDATX);
+    switch (wValue) {
+    case 1:
+      if ((wValue == 0x01) && (0 == 1)) {
+        device_status |= 0x02;
+        remote_wakeup_feature = 1;
+        (UEINTX &= ~(1 << RXSTPI));
+        (UEINTX &= ~(1 << TXINI));
+      }
+      else {
+        (UECONX |= (1 << STALLRQ));
+        (UEINTX &= ~(1 << RXSTPI));
+      }
+      break;
+
+    default:
+      (UECONX |= (1 << STALLRQ));
+      (UEINTX &= ~(1 << RXSTPI));
+    }
+    break;
+
+  case ((0 << 7) | (0 << 5) | (1)):
+
+    (UECONX |= (1 << STALLRQ));
+    (UEINTX &= ~(1 << RXSTPI));
+    break;
+
+  case ((0 << 7) | (0 << 5) | (2)):
+    wValue = (UEDATX);
+    dummy = (UEDATX);
+
+    if (wValue == 0x00) {
+      wIndex = ((UEDATX) & 0x7F);
+
+      if (wIndex == 0) {
+        (UECONX |= (1 << STALLRQ));
+        (UEINTX &= ~(1 << RXSTPI));
+      }
+
+      (UENUM = (U8) wIndex);
+      if (((UECONX & (1 << EPEN)) ? (1 == 1) : (0 == 1))) {
+        (UECONX |= (1 << STALLRQ));
+        (UENUM = (U8) 0);
+        endpoint_status[wIndex] = 0x01;
+        (UEINTX &= ~(1 << RXSTPI));
+        (UEINTX &= ~(1 << TXINI));
+      }
+      else {
+        (UENUM = (U8) 0);
+        (UECONX |= (1 << STALLRQ));
+        (UEINTX &= ~(1 << RXSTPI));
+      }
+    }
+    else {
+      (UECONX |= (1 << STALLRQ));
+      (UEINTX &= ~(1 << RXSTPI));
+    }
+    break;
+
+  default:
+    (UECONX |= (1 << STALLRQ));
+    (UEINTX &= ~(1 << RXSTPI));
+  }
+
         }
         else {
           usb_user_read_request(bmRequestType, bmRequest);
