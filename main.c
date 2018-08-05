@@ -313,6 +313,9 @@ void usb_get_interface(void);
 void usb_set_interface(void);
 Bool usb_user_read_request(U8, U8);
 void usb_user_endpoint_init(U8);
+U8 data_to_transfer;
+PGM_VOID_P pbuffer;
+Bool usb_user_get_descriptor(U8, U8);
 
 int main(void)
 {
@@ -401,7 +404,73 @@ int main(void)
       switch (bmRequest) {
       case 0x06:
         if (((1 << 7) | (0 << 5) | (0)) == bmRequestType) {
-          usb_get_descriptor();
+  U16 wLength;
+  U8 descriptor_type;
+  U8 string_type;
+  U8 dummy;
+  U8 nb_byte;
+  zlp = (0 == 1);
+  string_type = (UEDATX);
+  descriptor_type = (UEDATX);
+  switch (descriptor_type) {
+  case 0x01:
+    data_to_transfer = (sizeof(usb_dev_desc));
+    pbuffer = (&(usb_dev_desc.bLength));
+    break;
+  case 0x02:
+    data_to_transfer = (sizeof(usb_conf_desc));
+    pbuffer = (&(usb_conf_desc.cfg.bLength));
+    break;
+  default:
+    if (usb_user_get_descriptor(descriptor_type, string_type) == (0 == 1)) {
+      (UECONX |= (1 << STALLRQ));
+      (UEINTX &= ~(1 << RXSTPI));
+      goto out_get_descriptor;
+    }
+  }
+  dummy = (UEDATX);
+  dummy = (UEDATX);
+  (((U8 *) & wLength)[0]) = (UEDATX);
+  (((U8 *) & wLength)[1]) = (UEDATX);
+  (UEINTX &= ~(1 << RXSTPI));
+  if (wLength > data_to_transfer) {
+    if ((data_to_transfer % 32) == 0) {
+      zlp = (1 == 1);
+    }
+    else {
+      zlp = (0 == 1);
+    }
+  }
+  else {
+    data_to_transfer = (U8) wLength;
+  }
+  (UEINTX &= ~(1 << NAKOUTI));
+  while ((data_to_transfer != 0) && (!(UEINTX & (1 << NAKOUTI)))) {
+    while (!(UEINTX & (1 << TXINI))) {
+      if ((UEINTX & (1 << NAKOUTI)))
+        break;
+    }
+    nb_byte = 0;
+    while (data_to_transfer != 0) {
+      if (nb_byte++ == 32) {
+        break;
+      }
+      (UEDATX = (U8) pgm_read_byte_near((unsigned int) pbuffer++));
+      data_to_transfer--;
+    }
+    if ((UEINTX & (1 << NAKOUTI)))
+      break;
+    else
+      (UEINTX &= ~(1 << TXINI));
+  }
+  if ((zlp == (1 == 1)) && (!(UEINTX & (1 << NAKOUTI)))) {
+    while (!(UEINTX & (1 << TXINI))) ;
+    (UEINTX &= ~(1 << TXINI));
+  }
+  while (!((UEINTX & (1 << NAKOUTI)))) ;
+  (UEINTX &= ~(1 << NAKOUTI));
+  (UEINTX &= ~(1 << RXOUTI));
+out_get_descriptor:;
         }
         else {
           usb_user_read_request(bmRequestType, bmRequest);

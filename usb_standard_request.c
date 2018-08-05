@@ -236,8 +236,6 @@ extern U8 zlp;
 extern U8 endpoint_status[7];
 extern U8 device_status;
 
-PGM_VOID_P pbuffer;
-U8 data_to_transfer;
 
 U16 wInterface;
 
@@ -250,90 +248,6 @@ extern PROGMEM const S_usb_user_configuration_descriptor
   usb_user_configuration_descriptor;
 
 U8 usb_remote_wup_feature;
-
-void usb_get_descriptor(void)
-{
-  U16 wLength;
-  U8 descriptor_type;
-  U8 string_type;
-  U8 dummy;
-  U8 nb_byte;
-
-  zlp = (0 == 1);
-  string_type = (UEDATX);
-  descriptor_type = (UEDATX);
-
-  switch (descriptor_type) {
-  case 0x01:
-    data_to_transfer = (sizeof(usb_dev_desc));
-    pbuffer = (&(usb_dev_desc.bLength));
-    break;
-  case 0x02:
-    data_to_transfer = (sizeof(usb_conf_desc));
-    pbuffer = (&(usb_conf_desc.cfg.bLength));
-    break;
-  default:
-    if (usb_user_get_descriptor(descriptor_type, string_type) == (0 == 1)) {
-      (UECONX |= (1 << STALLRQ));
-      (UEINTX &= ~(1 << RXSTPI));
-      return;
-    }
-    break;
-  }
-
-  dummy = (UEDATX);
-  dummy = (UEDATX);
-  (((U8 *) & wLength)[0]) = (UEDATX);
-  (((U8 *) & wLength)[1]) = (UEDATX);
-  (UEINTX &= ~(1 << RXSTPI));
-
-  if (wLength > data_to_transfer) {
-    if ((data_to_transfer % 32) == 0) {
-      zlp = (1 == 1);
-    }
-    else {
-      zlp = (0 == 1);
-    }
-  }
-  else {
-    data_to_transfer = (U8) wLength;
-  }
-
-  (UEINTX &= ~(1 << NAKOUTI));
-
-  while ((data_to_transfer != 0) && (!(UEINTX & (1 << NAKOUTI)))) {
-    while (!(UEINTX & (1 << TXINI))) {
-      if ((UEINTX & (1 << NAKOUTI)))
-        break;
-    }
-
-    nb_byte = 0;
-    while (data_to_transfer != 0) {
-      if (nb_byte++ == 32) {
-        break;
-      }
-
-      (UEDATX = (U8) pgm_read_byte_near((unsigned int) pbuffer++));
-
-      data_to_transfer--;
-    }
-
-    if ((UEINTX & (1 << NAKOUTI)))
-      break;
-    else
-      (UEINTX &= ~(1 << TXINI));
-  }
-
-  if ((zlp == (1 == 1)) && (!(UEINTX & (1 << NAKOUTI)))) {
-    while (!(UEINTX & (1 << TXINI))) ;
-    (UEINTX &= ~(1 << TXINI));
-  }
-
-  while (!((UEINTX & (1 << NAKOUTI)))) ;
-  (UEINTX &= ~(1 << NAKOUTI));
-  (UEINTX &= ~(1 << RXOUTI));
-
-}
 
 void usb_get_configuration(void)
 {
