@@ -306,16 +306,16 @@ void cdc_get_line_coding(void)
   (UEDATX = (U8) line_coding.bDataBits);
 
   (UEINTX &= ~(1 << TXINI));
-  while (!((UEINTX & (1 << TXINI))));
+  while (!((UEINTX & (1 << TXINI)))) ;
 
-  while (!(UEINTX & (1 << RXOUTI)));
+  while (!(UEINTX & (1 << RXOUTI))) ;
   (UEINTX &= ~(1 << RXOUTI), (UEINTX &= ~(1 << FIFOCON)));
 }
 
 void cdc_set_line_coding(void)
 {
   (UEINTX &= ~(1 << RXSTPI));
-  while (!((UEINTX & (1 << RXOUTI))));
+  while (!((UEINTX & (1 << RXOUTI)))) ;
   (((U8 *) & line_coding.dwDTERate)[0]) = (UEDATX);
   (((U8 *) & line_coding.dwDTERate)[1]) = (UEDATX);
   (((U8 *) & line_coding.dwDTERate)[2]) = (UEDATX);
@@ -326,7 +326,7 @@ void cdc_set_line_coding(void)
   (UEINTX &= ~(1 << RXOUTI), (UEINTX &= ~(1 << FIFOCON)));
 
   (UEINTX &= ~(1 << TXINI));
-  while (!((UEINTX & (1 << TXINI))));
+  while (!((UEINTX & (1 << TXINI)))) ;
 
   ((UBRR1) =
    (U16) (((U32) 16000 * 1000L) /
@@ -339,7 +339,7 @@ void cdc_set_control_line_state(U16 state)
   (UEINTX &= ~(1 << TXINI));
   line_status.all = state;
 
-  while (!((UEINTX & (1 << TXINI))));
+  while (!((UEINTX & (1 << TXINI)))) ;
 
 }
 
@@ -377,6 +377,6 @@ void cdc_send_break(U16 break_duration)
   (UEINTX &= ~(1 << TXINI));
   usb_request_break_generation = (1 == 1);
 
-  while (!((UEINTX & (1 << TXINI))));
+  while (!((UEINTX & (1 << TXINI)))) ;
 
 }

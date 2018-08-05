@@ -289,7 +289,7 @@ ISR(USB_GEN_vect)
                                                                       PLLUSB),
        PLLCSR = ((1 << PINDIV) | (1 << PLLE)));
 
-      while (!(PLLCSR & (1 << PLOCK)));
+      while (!(PLLCSR & (1 << PLOCK))) ;
     }
     (USBCON &= ~(1 << FRZCLK));
     (UDINT = ~(1 << WAKEUPI));

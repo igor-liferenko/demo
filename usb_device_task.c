@@ -192,7 +192,7 @@ void usb_start_device(void)
    ((0 << PDIV3) | (1 << PDIV2) | (0 << PDIV1) | (0 << PDIV0)) | (0 <<
                                                                   PLLUSB),
    PLLCSR = ((1 << PINDIV) | (1 << PLLE)));
-  while (!(PLLCSR & (1 << PLOCK)));
+  while (!(PLLCSR & (1 << PLOCK))) ;
   (USBCON &= ~(1 << FRZCLK));
   (UDCON &= ~(1 << DETACH));
 

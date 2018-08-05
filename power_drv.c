@@ -103,7 +103,7 @@ void set_ext_standby_mode(void)
 void Clock_switch_external(void)
 {
   (CLKSEL0 |= (1 << EXTE));
-  while (!(((CLKSTA & (1 << EXTON)) != 0) ? (1 == 1) : (0 == 1)));
+  while (!(((CLKSTA & (1 << EXTON)) != 0) ? (1 == 1) : (0 == 1))) ;
   (CLKSEL0 |= (1 << CLKS));
   (CLKSEL0 &= ~(1 << RCE));
 }
@@ -111,7 +111,7 @@ void Clock_switch_external(void)
 void Clock_switch_internal(void)
 {
   (CLKSEL0 |= (1 << RCE));
-  while (!(((CLKSTA & (1 << RCON)) != 0) ? (1 == 1) : (0 == 1)));
+  while (!(((CLKSTA & (1 << RCON)) != 0) ? (1 == 1) : (0 == 1))) ;
   (CLKSEL0 &= ~(1 << CLKS));
   (CLKSEL0 &= ~(1 << EXTE));
 }

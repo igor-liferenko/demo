@@ -357,7 +357,7 @@ void usb_set_address(void)
   (UEINTX &= ~(1 << RXSTPI));
 
   (UEINTX &= ~(1 << TXINI));
-  while (!(UEINTX & (1 << TXINI)));
+  while (!(UEINTX & (1 << TXINI))) ;
 
   (UDADDR |= (1 << ADDEN));
 }
@@ -458,11 +458,11 @@ void usb_get_descriptor(void)
   }
 
   if ((zlp == (1 == 1)) && (!(UEINTX & (1 << NAKOUTI)))) {
-    while (!(UEINTX & (1 << TXINI)));
+    while (!(UEINTX & (1 << TXINI))) ;
     (UEINTX &= ~(1 << TXINI));
   }
 
-  while (!((UEINTX & (1 << NAKOUTI))));
+  while (!((UEINTX & (1 << NAKOUTI)))) ;
   (UEINTX &= ~(1 << NAKOUTI));
   (UEINTX &= ~(1 << RXOUTI));
 
@@ -475,7 +475,7 @@ void usb_get_configuration(void)
   (UEDATX = (U8) usb_configuration_nb);
   (UEINTX &= ~(1 << TXINI), (UEINTX &= ~(1 << FIFOCON)));
 
-  while (!(UEINTX & (1 << RXOUTI)));
+  while (!(UEINTX & (1 << RXOUTI))) ;
   (UEINTX &= ~(1 << RXOUTI), (UEINTX &= ~(1 << FIFOCON)));
 }
 
@@ -513,7 +513,7 @@ void usb_get_status(void)
   (UEDATX = (U8) 0x00);
   (UEINTX &= ~(1 << TXINI));
 
-  while (!(UEINTX & (1 << RXOUTI)));
+  while (!(UEINTX & (1 << RXOUTI))) ;
   (UEINTX &= ~(1 << RXOUTI), (UEINTX &= ~(1 << FIFOCON)));
 }
 
@@ -657,7 +657,7 @@ void usb_get_interface(void)
   (UEINTX &= ~(1 << RXSTPI));
   (UEINTX &= ~(1 << TXINI));
 
-  while (!(UEINTX & (1 << RXOUTI)));
+  while (!(UEINTX & (1 << RXOUTI))) ;
   (UEINTX &= ~(1 << RXOUTI), (UEINTX &= ~(1 << FIFOCON)));
 }
 
@@ -665,7 +665,7 @@ void usb_set_interface(void)
 {
   (UEINTX &= ~(1 << RXSTPI));
   (UEINTX &= ~(1 << TXINI));
-  while (!(UEINTX & (1 << TXINI)));
+  while (!(UEINTX & (1 << TXINI))) ;
 }
 
 void usb_generate_remote_wakeup(void)
@@ -677,7 +677,7 @@ void usb_generate_remote_wakeup(void)
      ((0 << PDIV3) | (1 << PDIV2) | (0 << PDIV1) | (0 << PDIV0)) | (0 <<
                                                                     PLLUSB),
      PLLCSR = ((1 << PINDIV) | (1 << PLLE)));
-    while (!(PLLCSR & (1 << PLOCK)));
+    while (!(PLLCSR & (1 << PLOCK))) ;
   }
   (USBCON &= ~(1 << FRZCLK));
   if (remote_wakeup_feature == 1) {

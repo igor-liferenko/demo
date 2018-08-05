@@ -19,7 +19,7 @@ flash:
 
 indent:
 	git diff --exit-code HEAD
-	for i in *.c; do indent -kr -i2 -ci2 -lp -ss --no-tabs -nce $$i; done; #rm *.c~
+	for i in *.c; do indent -kr -i2 -ci2 -lp -ss --no-tabs -nce $$i; done; rm *.c~
 
 objdump:
 	avr-objdump -d EVK527-ATMega32U4-usbdevice_cdc.elf >x

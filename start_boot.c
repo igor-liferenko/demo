@@ -59,5 +59,5 @@ void start_boot(void)
   (WDTCSR |= (1 << WDCE));
   (WDTCSR = (1 << WDE));
 
-  while (1);
+  while (1) ;
 }

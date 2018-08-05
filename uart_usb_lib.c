@@ -205,7 +205,7 @@ char uart_usb_getchar(void)
 
   (UENUM = (U8) 0x02);
   if (!rx_counter)
-    while (!uart_usb_test_hit());
+    while (!uart_usb_test_hit()) ;
   data_rx = (UEDATX);
   rx_counter--;
   if (!rx_counter)
@@ -240,7 +240,7 @@ void uart_usb_send_buffer(U8 * buffer, U8 nb_data)
 
   (UENUM = (U8) 0x01);
   while (nb_data) {
-    while ((UEINTX & (1 << RWAL)) == (0 == 1));
+    while ((UEINTX & (1 << RWAL)) == (0 == 1)) ;
     while ((UEINTX & (1 << RWAL)) && nb_data) {
       (UEDATX = (U8) * buffer);
       buffer++;
@@ -249,7 +249,7 @@ void uart_usb_send_buffer(U8 * buffer, U8 nb_data)
     (UEINTX &= ~(1 << TXINI), (UEINTX &= ~(1 << FIFOCON)));
   }
   if (zlp) {
-    while ((UEINTX & (1 << RWAL)) == (0 == 1));
+    while ((UEINTX & (1 << RWAL)) == (0 == 1)) ;
     (UEINTX &= ~(1 << TXINI), (UEINTX &= ~(1 << FIFOCON)));
   }
 }
