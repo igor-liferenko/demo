@@ -194,7 +194,10 @@ int main(void)
         (UENUM = (U8) 0);
         if (!(UECONX & 1 << EPEN)) {
           UENUM = (U8) 0;
-          usb_config_ep(0 << 6 | 1 << 1 | 0, 2 << 4 | 0 << 2);
+          (UECONX |= (1 << EPEN));
+          UECFG0X = 0 << 6 | 1 << 1 | 0;
+          UECFG1X = (UECFG1X & 1 << ALLOC) | 2 << 4 | 0 << 2;
+          (UECFG1X |= (1 << ALLOC));
         }
       }
     }
@@ -303,7 +306,10 @@ ISR(USB_GEN_vect)
       (UENUM = (U8) 0);
       if (!(UECONX & 1 << EPEN)) {
         UENUM = (U8) 0;
-        usb_config_ep(0 << 6 | 1 << 1 | 0, 2 << 4 | 0 << 2);
+        (UECONX |= (1 << EPEN));
+        UECFG0X = 0 << 6 | 1 << 1 | 0;
+        UECFG1X = (UECFG1X & 1 << ALLOC) | 2 << 4 | 0 << 2;
+        (UECFG1X |= (1 << ALLOC));
       }
       (UDCON &= ~(1 << DETACH));
     }
@@ -369,7 +375,10 @@ ISR(USB_GEN_vect)
     (UENUM = (U8) 0);
     if (!(UECONX & 1 << EPEN)) {
       UENUM = (U8) 0;
-      usb_config_ep(0 << 6 | 1 << 1 | 0, 2 << 4 | 0 << 2);
+      (UECONX |= (1 << EPEN));
+      UECFG0X = 0 << 6 | 1 << 1 | 0;
+      UECFG1X = (UECFG1X & (1 << ALLOC)) | 2 << 4 | 0 << 2;
+      (UECFG1X |= (1 << ALLOC));
     }
     (g_usb_event |= (1 << 8));
   }

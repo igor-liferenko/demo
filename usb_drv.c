@@ -56,14 +56,6 @@ U8 usb_read_packet(U8, U8 *, U8);
 void usb_halt_endpoint(U8);
 void usb_reset_endpoint(U8);
 U8 usb_init_device(void);
-U8 usb_config_ep(U8 config0, U8 config1)
-{
-  (UECONX |= (1 << EPEN));
-  UECFG0X = config0;
-  UECFG1X = (UECFG1X & (1 << ALLOC)) | config1;
-  (UECFG1X |= (1 << ALLOC));
-  return (((UESTA0X & (1 << CFGOK)) ? (1 == 1) : (0 == 1)));
-}
 
 U8 usb_select_enpoint_interrupt(void)
 {
