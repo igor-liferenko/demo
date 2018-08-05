@@ -448,21 +448,3 @@ void usb_set_interface(void)
   (UEINTX &= ~(1 << TXINI));
   while (!(UEINTX & (1 << TXINI))) ;
 }
-
-void usb_generate_remote_wakeup(void)
-{
-  if ((PLLCSR & (1 << PLOCK)) == (0 == 1)) {
-    (PLLFRQ &=
-     ~((1 << PDIV3) | (1 << PDIV2) | (1 << PDIV1) | (1 << PDIV0)),
-     PLLFRQ |=
-     ((0 << PDIV3) | (1 << PDIV2) | (0 << PDIV1) | (0 << PDIV0)) | (0 <<
-                                                                    PLLUSB),
-     PLLCSR = ((1 << PINDIV) | (1 << PLLE)));
-    while (!(PLLCSR & (1 << PLOCK))) ;
-  }
-  (USBCON &= ~(1 << FRZCLK));
-  if (remote_wakeup_feature == 1) {
-    (UDCON |= (1 << RMWKUP));
-    remote_wakeup_feature = 0;
-  }
-}
