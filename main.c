@@ -317,6 +317,8 @@ U8 data_to_transfer;
 PGM_VOID_P pbuffer;
 Bool usb_user_get_descriptor(U8, U8);
 U8 remote_wakeup_feature = 0;
+U8 usb_configuration_nb;
+U8 usb_remote_wup_feature;
 
 int main(void)
 {
