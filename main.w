@@ -1,3 +1,4 @@
+@ @c
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
 #include <avr/io.h>
@@ -303,8 +304,7 @@ int main(void)
         if (!(UECONX & 1 << EPEN)) {
           UENUM = EP0;
           UECONX |= 1 << EPEN;
-          UECFG0X = 1 << 1; /* TODO: remove this */
-          UECFG1X = (UECFG1X & 1 << ALLOC) | 1 << EPSIZE1; /* TODO: remove & */
+          UECFG1X = 1 << EPSIZE1;
           UECFG1X |= 1 << ALLOC;
         }
       }
@@ -565,7 +565,8 @@ int main(void)
         }
         break;
       case 0x00:
-        if ((0x7F < bmRequestType) & (0x82 >= bmRequestType)) { /* FIXME: && ? */
+        if ((0x7F < bmRequestType) & (0x82 >= bmRequestType)) { /* TODO:
+            check this via objdump again and change */
           U8 wIndex;
           U8 dummy;
           dummy = UEDATX;
@@ -857,8 +858,7 @@ ISR(USB_GEN_vect)
       if (!(UECONX & 1 << EPEN)) {
         UENUM = EP0;
         UECONX |= 1 << EPEN;
-        UECFG0X = 1 << 1; /* TODO: remove this */
-        UECFG1X = (UECFG1X & 1 << ALLOC) | 1 << EPSIZE1; /* TODO: remove & */
+        UECFG1X = 1 << EPSIZE1;
         UECFG1X |= 1 << ALLOC;
       }
       UDCON &= ~(1 << DETACH);
@@ -918,8 +918,7 @@ ISR(USB_GEN_vect)
     if (!(UECONX & 1 << EPEN)) {
       UENUM = EP0;
       UECONX |= 1 << EPEN;
-      UECFG0X = 1 << 1; /* TODO: remove this */
-      UECFG1X = (UECFG1X & 1 << ALLOC) | 1 << EPSIZE1; /* TODO: remove & */
+      UECFG1X = 1 << EPSIZE1;
       UECFG1X |= 1 << ALLOC;
     }
     g_usb_event |= 1 << 8;
