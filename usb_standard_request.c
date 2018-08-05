@@ -249,44 +249,6 @@ extern PROGMEM const S_usb_user_configuration_descriptor
 
 U8 usb_remote_wup_feature;
 
-void usb_get_status(void)
-{
-  U8 wIndex;
-  U8 dummy;
-
-  dummy = (UEDATX);
-  dummy = (UEDATX);
-  wIndex = (UEDATX);
-
-  switch (bmRequestType) {
-  case ((1 << 7) | (0 << 5) | (0)):
-    (UEINTX &= ~(1 << RXSTPI));
-    (UEDATX = (U8) device_status);
-    break;
-
-  case ((1 << 7) | (0 << 5) | (1)):
-    (UEINTX &= ~(1 << RXSTPI));
-    (UEDATX = (U8) 0x00);
-    break;
-
-  case ((1 << 7) | (0 << 5) | (2)):
-    (UEINTX &= ~(1 << RXSTPI));
-    wIndex = wIndex & 0x7F;
-    (UEDATX = (U8) endpoint_status[wIndex]);
-    break;
-  default:
-    (UECONX |= (1 << STALLRQ));
-    (UEINTX &= ~(1 << RXSTPI));
-    return;
-  }
-
-  (UEDATX = (U8) 0x00);
-  (UEINTX &= ~(1 << TXINI));
-
-  while (!(UEINTX & (1 << RXOUTI))) ;
-  (UEINTX &= ~(1 << RXOUTI), (UEINTX &= ~(1 << FIFOCON)));
-}
-
 void usb_set_feature(void)
 {
   U8 wValue;
