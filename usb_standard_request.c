@@ -441,10 +441,3 @@ void usb_get_interface(void)
   while (!(UEINTX & (1 << RXOUTI))) ;
   (UEINTX &= ~(1 << RXOUTI), (UEINTX &= ~(1 << FIFOCON)));
 }
-
-void usb_set_interface(void)
-{
-  (UEINTX &= ~(1 << RXSTPI));
-  (UEINTX &= ~(1 << TXINI));
-  while (!(UEINTX & (1 << TXINI))) ;
-}

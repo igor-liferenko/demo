@@ -564,7 +564,9 @@ int main(void)
 
       case 0x0B:
         if (bmRequestType == ((0 << 7) | (0 << 5) | (1))) {
-          usb_set_interface();
+          (UEINTX &= ~(1 << RXSTPI));
+          (UEINTX &= ~(1 << TXINI));
+          while (!(UEINTX & (1 << TXINI))) ;
         }
         break;
 
