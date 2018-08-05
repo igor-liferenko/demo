@@ -436,20 +436,20 @@ int main(void)
 
       case 0x09:
         if (((0 << 7) | (0 << 5) | (0)) == bmRequestType) {
-  U8 configuration_number;
+          U8 configuration_number;
 
-  configuration_number = (UEDATX);
+          configuration_number = (UEDATX);
 
-  if (configuration_number <= 1) {
-    (UEINTX &= ~(1 << RXSTPI));
-    usb_configuration_nb = configuration_number;
-  (UEINTX &= ~(1 << TXINI));
-  usb_user_endpoint_init(usb_configuration_nb);
-  }
-  else {
-    (UECONX |= (1 << STALLRQ));
-    (UEINTX &= ~(1 << RXSTPI));
-  }
+          if (configuration_number <= 1) {
+            (UEINTX &= ~(1 << RXSTPI));
+            usb_configuration_nb = configuration_number;
+            (UEINTX &= ~(1 << TXINI));
+            usb_user_endpoint_init(usb_configuration_nb);
+          }
+          else {
+            (UECONX |= (1 << STALLRQ));
+            (UEINTX &= ~(1 << RXSTPI));
+          }
         }
         else {
           usb_user_read_request(bmRequestType, bmRequest);
