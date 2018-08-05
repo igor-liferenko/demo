@@ -179,7 +179,7 @@ PROGMEM const S_usb_user_configuration_descriptor usb_conf_desc = {
 
 PROGMEM const S_usb_manufacturer_string_descriptor
   usb_user_manufacturer_string_descriptor = {
-  sizeof (usb_user_manufacturer_string_descriptor), 0x03, {((U16) ('A')),
+  sizeof usb_user_manufacturer_string_descriptor, 0x03, {((U16) ('A')),
                                                            ((U16) ('T')),
                                                            ((U16) ('M')),
                                                            ((U16) ('E')),
@@ -188,7 +188,7 @@ PROGMEM const S_usb_manufacturer_string_descriptor
 
 PROGMEM const S_usb_product_string_descriptor
   usb_user_product_string_descriptor = {
-  sizeof (usb_user_product_string_descriptor), 0x03, {((U16) ('A')),
+  sizeof usb_user_product_string_descriptor, 0x03, {((U16) ('A')),
                                                       ((U16) ('V')),
                                                       ((U16) ('R')),
                                                       ((U16) (' ')),
@@ -207,13 +207,13 @@ PROGMEM const S_usb_product_string_descriptor
 };
 
 PROGMEM const S_usb_serial_number usb_user_serial_number = {
-  sizeof (usb_user_serial_number), 0x03, {((U16) ('1')), ((U16) ('.')),
+  sizeof usb_user_serial_number, 0x03, {((U16) ('1')), ((U16) ('.')),
                                           ((U16) ('0')), ((U16) ('.')),
                                           ((U16) ('0'))}
 };
 
 PROGMEM const S_usb_language_id usb_user_language_id = {
-  sizeof (usb_user_language_id), 0x03, (0x0409)
+  sizeof usb_user_language_id, 0x03, 0x0409
 };
 
 U8 bmRequestType;
@@ -245,70 +245,67 @@ S_line_status line_status;
 
 int main(void)
 {
-  (UHWCON |= (1 << UVREGE));
+  UHWCON |= 1 << UVREGE;
 
   wdt_reset();
-  ((MCUSR = ~(1 << WDRF)));
-  (WDTCSR |= (1 << WDCE));
-  (WDTCSR = 0x00);
+  MCUSR = ~(1 << WDRF);
+  WDTCSR |= 1 << WDCE;
+  WDTCSR = 0x00;
 
   if (boot_key == 0x55AAAA55) {
     boot_key = 0;
     (*start_bootloader) ();
   }
 
-  (clock_prescale_set(0));
-  (USBCON &= ~((1 << USBE)));
-  (USBCON |= ((1 << USBE)));
-  (USBCON |= (1 << OTGPADE));
-  (USBCON |= (1 << VBUSTE));
+  clock_prescale_set(0);
+  USBCON &= ~(1 << USBE);
+  USBCON |= 1 << USBE;
+  USBCON |= 1 << OTGPADE;
+  USBCON |= 1 << VBUSTE;
   sei();
   usb_remote_wup_feature = 0;
-  ((UBRR1) = (U16) (((U32) 16000 * 1000L) / ((U32) 57600 / 2 * 16) - 1));
-  ((UCSR1A) |= (1 << U2X1));
-  ((UCSR1C) = 0x06);
-  ((UCSR1B) |= 0x10 | 0x08);
-  ((UCSR1B) |= 0x80);
-  (DDRD |= (1 << PIND5) | (1 << PIND6) | (1 << PIND7));
-  DDRC &= ~0x40;
-  PORTC |= 0x40;
-  if (!(0 == ((flash_read_fuse(0x0003)) & (1 << 6)))) {
-    DDRF &= ~0xF0;
-    PORTF |= 0xF0;
+  UBRR1 = (U16) (((U32) 16000 * 1000L) / ((U32) 57600 / 2 * 16) - 1);
+  UCSR1A |= 1 << U2X1;
+  UCSR1C = 1 << UCSZ11 | 1 << UCSZ10;
+  UCSR1B |= 1 << RXEN1 | 1 << TXEN1;
+  UCSR1B |= 1 << RXCIE1;
+  DDRD |= 1 << PIND5 | 1 << PIND6 | 1 << PIND7;
+  DDRC &= ~(1 << PC6);
+  PORTC |= 1 << PC6;
+  if (flash_read_fuse(0x0003) & 1 << 6) {
+    DDRF &= ~(1 << PF4 | 1 << PF5 | 1 << PF6 | 1 << PF7);
+    PORTF |= 1 << PF4 | 1 << PF5 | 1 << PF6 | 1 << PF7;
   }
-  (DDRE &= ~(1 << PINE2), PORTE |= (1 << PINE2));
-  (UDIEN |= (1 << SOFE));
-  fdevopen((int (*)(char, FILE *)) (uart_usb_putchar),
+  DDRE &= ~(1 << PINE2), PORTE |= 1 << PINE2;
+  UDIEN |= 1 << SOFE;
+  fdevopen((int (*)(char, FILE *)) uart_usb_putchar,
            (int (*)(FILE *)) uart_usb_getchar);
 
   while (1) {
-    if (usb_connected == (0 == 1)) {
-      if (((USBSTA & (1 << VBUS)) ? (1 == 1) : (0 == 1))) {
-        (USBCON |= ((1 << USBE)));
-        usb_connected = (1 == 1);
-        (USBCON |= (1 << FRZCLK));
+    if (!usb_connected) {
+      if (USBSTA & 1 << VBUS) {
+        USBCON |= 1 << USBE;
+        usb_connected = 1;
+        USBCON |= 1 << FRZCLK;
 
-        (PLLFRQ &=
-         ~((1 << PDIV3) | (1 << PDIV2) | (1 << PDIV1) | (1 << PDIV0)),
-         PLLFRQ |=
-         ((0 << PDIV3) | (1 << PDIV2) | (0 << PDIV1) | (0 << PDIV0)) | (0
-                                                                        <<
-                                                                        PLLUSB),
-         PLLCSR = ((1 << PINDIV) | (1 << PLLE)));
-        while (!(PLLCSR & (1 << PLOCK))) ;
-        (USBCON &= ~(1 << FRZCLK));
-        (UDCON &= ~(1 << DETACH));
-        (UDCON &= ~(1 << RSTCPU));
-        (UDIEN |= (1 << SUSPE));
-        (UDIEN |= (1 << EORSTE));
+        PLLFRQ &=
+         ~(1 << PDIV3 | 1 << PDIV2 | 1 << PDIV1 | 1 << PDIV0),
+         PLLFRQ |= 1 << PDIV2,
+         PLLCSR = 1 << PINDIV | 1 << PLLE;
+        while (!(PLLCSR & 1 << PLOCK)) ;
+        USBCON &= ~(1 << FRZCLK);
+        UDCON &= ~(1 << DETACH);
+        UDCON &= ~(1 << RSTCPU);
+        UDIEN |= 1 << SUSPE;
+        UDIEN |= 1 << EORSTE;
         sei();
-        (UENUM = (U8) 0);
+        UENUM = EP0;
         if (!(UECONX & 1 << EPEN)) {
-          UENUM = (U8) 0;
-          (UECONX |= (1 << EPEN));
-          UECFG0X = 0 << 6 | 1 << 1 | 0;
-          UECFG1X = (UECFG1X & 1 << ALLOC) | 2 << 4 | 0 << 2;
-          (UECFG1X |= (1 << ALLOC));
+          UENUM = EP0;
+          UECONX |= 1 << EPEN;
+          UECFG0X = 1 << 1; /* TODO: remove this */
+          UECFG1X = (UECFG1X & 1 << ALLOC) | 1 << EPSIZE1; /* TODO: remove & */
+          UECFG1X |= 1 << ALLOC;
         }
       }
     }
@@ -476,8 +473,8 @@ int main(void)
             UEINTX &= ~(1 << RXSTPI);
           }
           else if (bmRequestType == 0x02) {
-            wValue = (UEDATX);
-            dummy = (UEDATX);
+            wValue = UEDATX;
+            dummy = UEDATX;
             if (wValue == 0x00) {
               wIndex = UEDATX & 0x7F;
               UENUM = (U8) wIndex;
@@ -487,19 +484,19 @@ int main(void)
                   UERST = 1 << (U8) wIndex, UERST = 0;
                   UECONX |= 1 << RSTDT;
                 }
-                UENUM = (U8) 0;
+                UENUM = EP0;
                 endpoint_status[wIndex] = 0x00;
                 UEINTX &= ~(1 << RXSTPI);
                 UEINTX &= ~(1 << TXINI);
               }
               else {
-                UENUM = (U8) 0;
+                UENUM = EP0;
                 UECONX |= 1 << STALLRQ;
                 UEINTX &= ~(1 << RXSTPI);
               }
             }
             else {
-              UECONX |= (1 << STALLRQ);
+              UECONX |= 1 << STALLRQ;
               UEINTX &= ~(1 << RXSTPI);
             }
           }
@@ -509,66 +506,58 @@ int main(void)
         }
         break;
       case 0x03:
-        if (((0 << 7) | (0 << 5) | (2)) >= bmRequestType) {
+        if (0x02 >= bmRequestType) {
           U8 wValue;
           U8 wIndex;
           U8 dummy;
           switch (bmRequestType) {
-          case ((0 << 7) | (0 << 5) | (0)):
-            wValue = (UEDATX);
+          case 0x00:
+            wValue = UEDATX;
             switch (wValue) {
             case 1:
-              if ((wValue == 0x01) && (0 == 1)) {
-                device_status |= 0x02;
-                remote_wakeup_feature = 1;
-                (UEINTX &= ~(1 << RXSTPI));
-                (UEINTX &= ~(1 << TXINI));
-              }
-              else {
-                (UECONX |= (1 << STALLRQ));
-                (UEINTX &= ~(1 << RXSTPI));
-              }
+              UECONX |= 1 << STALLRQ;
+              UEINTX &= ~(1 << RXSTPI);
               break;
             default:
-              (UECONX |= (1 << STALLRQ));
-              (UEINTX &= ~(1 << RXSTPI));
+              UECONX |= 1 << STALLRQ;
+              UEINTX &= ~(1 << RXSTPI);
             }
             break;
-          case ((0 << 7) | (0 << 5) | (1)):
-            (UECONX |= (1 << STALLRQ));
-            (UEINTX &= ~(1 << RXSTPI));
+          case 0x01:
+            UECONX |= 1 << STALLRQ;
+            UEINTX &= ~(1 << RXSTPI);
             break;
-          case ((0 << 7) | (0 << 5) | (2)):
-            wValue = (UEDATX);
-            dummy = (UEDATX);
+          case 0x02:
+            wValue = UEDATX;
+            dummy = UEDATX;
             if (wValue == 0x00) {
-              wIndex = ((UEDATX) & 0x7F);
+              wIndex = UEDATX & 0x7F;
               if (wIndex == 0) {
-                (UECONX |= (1 << STALLRQ));
-                (UEINTX &= ~(1 << RXSTPI));
+                UECONX |= 1 << STALLRQ;
+                UEINTX &= ~(1 << RXSTPI);
               }
-              (UENUM = (U8) wIndex);
-              if (((UECONX & (1 << EPEN)) ? (1 == 1) : (0 == 1))) {
-                (UECONX |= (1 << STALLRQ));
-                (UENUM = (U8) 0);
+              UENUM = (U8) wIndex;
+              if (UECONX & 1 << EPEN) {
+                UECONX |= 1 << STALLRQ;
+                UENUM = EP0;
                 endpoint_status[wIndex] = 0x01;
-                (UEINTX &= ~(1 << RXSTPI));
-                (UEINTX &= ~(1 << TXINI));
+                UEINTX &= ~(1 << RXSTPI);
+                UEINTX &= ~(1 << TXINI);
               }
               else {
-                (UENUM = (U8) 0);
-                (UECONX |= (1 << STALLRQ));
-                (UEINTX &= ~(1 << RXSTPI));
+                UENUM = EP0;
+                UECONX |= 1 << STALLRQ;
+                UEINTX &= ~(1 << RXSTPI);
               }
             }
             else {
-              (UECONX |= (1 << STALLRQ));
-              (UEINTX &= ~(1 << RXSTPI));
+              UECONX |= 1 << STALLRQ;
+              UEINTX &= ~(1 << RXSTPI);
             }
             break;
           default:
-            (UECONX |= (1 << STALLRQ));
-            (UEINTX &= ~(1 << RXSTPI));
+            UECONX |= 1 << STALLRQ;
+            UEINTX &= ~(1 << RXSTPI);
           }
         }
         else {
@@ -576,35 +565,35 @@ int main(void)
         }
         break;
       case 0x00:
-        if ((0x7F < bmRequestType) & (0x82 >= bmRequestType)) {
+        if ((0x7F < bmRequestType) & (0x82 >= bmRequestType)) { /* FIXME: && ? */
           U8 wIndex;
           U8 dummy;
-          dummy = (UEDATX);
-          dummy = (UEDATX);
-          wIndex = (UEDATX);
+          dummy = UEDATX;
+          dummy = UEDATX;
+          wIndex = UEDATX;
           switch (bmRequestType) {
-          case ((1 << 7) | (0 << 5) | (0)):
-            (UEINTX &= ~(1 << RXSTPI));
-            (UEDATX = (U8) device_status);
+          case 0x80:
+            UEINTX &= ~(1 << RXSTPI);
+            UEDATX = (U8) device_status;
             break;
-          case ((1 << 7) | (0 << 5) | (1)):
-            (UEINTX &= ~(1 << RXSTPI));
-            (UEDATX = (U8) 0x00);
+          case 0x81:
+            UEINTX &= ~(1 << RXSTPI);
+            UEDATX = (U8) 0x00;
             break;
-          case ((1 << 7) | (0 << 5) | (2)):
-            (UEINTX &= ~(1 << RXSTPI));
+          case 0x82:
+            UEINTX &= ~(1 << RXSTPI);
             wIndex = wIndex & 0x7F;
-            (UEDATX = (U8) endpoint_status[wIndex]);
+            UEDATX = (U8) endpoint_status[wIndex];
             break;
           default:
-            (UECONX |= (1 << STALLRQ));
-            (UEINTX &= ~(1 << RXSTPI));
+            UECONX |= 1 << STALLRQ;
+            UEINTX &= ~(1 << RXSTPI);
             goto out_get_status;
           }
-          (UEDATX = (U8) 0x00);
-          (UEINTX &= ~(1 << TXINI));
-          while (!(UEINTX & (1 << RXOUTI))) ;
-          (UEINTX &= ~(1 << RXOUTI), (UEINTX &= ~(1 << FIFOCON)));
+          UEDATX = (U8) 0x00;
+          UEINTX &= ~(1 << TXINI);
+          while (!(UEINTX & 1 << RXOUTI)) ;
+          UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
         out_get_status:;
         }
         else {
@@ -612,41 +601,40 @@ int main(void)
         }
         break;
       case 0x0A:
-        if (bmRequestType == ((1 << 7) | (0 << 5) | (1))) {
-          (UEINTX &= ~(1 << RXSTPI));
-          (UEINTX &= ~(1 << TXINI));
-          while (!(UEINTX & (1 << RXOUTI))) ;
-          (UEINTX &= ~(1 << RXOUTI), (UEINTX &= ~(1 << FIFOCON)));
+        if (bmRequestType == 0x81) {
+          UEINTX &= ~(1 << RXSTPI);
+          UEINTX &= ~(1 << TXINI);
+          while (!(UEINTX & 1 << RXOUTI)) ;
+          UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
         }
         else {
           usb_user_read_request(bmRequestType, bmRequest);
         }
         break;
       case 0x0B:
-        if (bmRequestType == ((0 << 7) | (0 << 5) | (1))) {
-          (UEINTX &= ~(1 << RXSTPI));
-          (UEINTX &= ~(1 << TXINI));
-          while (!(UEINTX & (1 << TXINI))) ;
+        if (bmRequestType == 0x01) {
+          UEINTX &= ~(1 << RXSTPI);
+          UEINTX &= ~(1 << TXINI);
+          while (!(UEINTX & 1 << TXINI)) ;
         }
         break;
       case 0x07:
       case 0x0C:
       default:
         if (usb_user_read_request(bmRequestType, bmRequest) == (0 == 1)) {
-          (UECONX |= (1 << STALLRQ));
-          (UEINTX &= ~(1 << RXSTPI));
+          UECONX |= 1 << STALLRQ;
+          UEINTX &= ~(1 << RXSTPI);
         }
       }
     }
-    if (((usb_configuration_nb != 0) ? (1 == 1) : (0 == 1))
-        && line_status.DTR) {
-      if (((UCSR1A) & 0x20)) {
+    if (usb_configuration_nb != 0 && line_status.DTR) {
+      if (UCSR1A & 0x20) {
         if (!rx_counter) {
-          (UENUM = (U8) 0x02);
-          if ((UEINTX & (1 << RXOUTI))) {
-            rx_counter = ((U8) (UEBCLX));
+          UENUM = EP2;
+          if (UEINTX & 1 << RXOUTI) {
+            rx_counter = (U8) (UEBCLX);
             if (!rx_counter) {
-              (UEINTX &= ~(1 << RXOUTI), (UEINTX &= ~(1 << FIFOCON)));
+              UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
             }
           }
         }
@@ -654,62 +642,58 @@ int main(void)
           while (rx_counter) {
             while (!(UCSR1A & 0x20)) ;
             UDR1 = uart_usb_getchar();
-            (PIND |= (1 << PIND6));
+            PIND |= 1 << PIND6;
           }
         }
       }
       if (cpt_sof >= 100) {
-        if (((0 == ((flash_read_fuse(0x0003)) & (1 << 6)))
-             || (PINF & (1 << PINF6)) ? (0 == 1) : (1 == 1))) {
+        if ((0 == (flash_read_fuse(0x0003) & 1 << 6)) || PINF & 1 << PINF6 ? 0 : 1) {
           printf("Select Pressed !\r\n");
         }
-        if (((0 == ((flash_read_fuse(0x0003)) & (1 << 6)))
-             || (PINF & (1 << PINF7)) ? (0 == 1) : (1 == 1))) {
+        if ((0 == (flash_read_fuse(0x0003) & 1 << 6)) || PINF & 1 << PINF7 ? 0 : 1) {
           printf("Right Pressed !\r\n");
-          serial_state.bDCD = (1 == 1);
+          serial_state.bDCD = 1;
         }
         else
-          serial_state.bDCD = (0 == 1);
-        if (((0 == ((flash_read_fuse(0x0003)) & (1 << 6)))
-             || (PINF & (1 << PINF4)) ? (0 == 1) : (1 == 1))) {
+          serial_state.bDCD = 0;
+        if ((0 == (flash_read_fuse(0x0003) & 1 << 6)) || PINF & 1 << PINF4 ? 0 : 1) {
           printf("Left Pressed !\r\n");
-          serial_state.bDSR = (1 == 1);
+          serial_state.bDSR = 1;
         }
         else
-          serial_state.bDSR = (0 == 1);
-        if (((PINC & (1 << PINC6)) ? (0 == 1) : (1 == 1)))
+          serial_state.bDSR = 0;
+        if (!(PINC & 1 << PINC6))
           printf("Down Pressed !\r\n");
-        if (((0 == ((flash_read_fuse(0x0003)) & (1 << 6)))
-             || (PINF & (1 << PINF5)) ? (0 == 1) : (1 == 1)))
+        if ((0 == (flash_read_fuse(0x0003) & 1 << 6)) || PINF & 1 << PINF5 ? 0 : 1)
           printf("Up Pressed !\r\n");
-        if (((PINE & (1 << PINE2)) ? (0 == 1) : (1 == 1)))
+        if (!(PINE & 1 << PINE2))
           printf("Hello from ATmega32U4 !\r\n");
         if (serial_state_saved.all != serial_state.all) {
           serial_state_saved.all = serial_state.all;
-          (UENUM = (U8) 0x03);
-          if ((UEINTX & (1 << RWAL))) {
-            (UEDATX = (U8) ((1 << 7) | (1 << 5) | (1)));
-            (UEDATX = (U8) 0x20);
-            (UEDATX = (U8) 0x00);
-            (UEDATX = (U8) 0x00);
-            (UEDATX = (U8) 0x00);
-            (UEDATX = (U8) 0x00);
-            (UEDATX = (U8) 0x02);
-            (UEDATX = (U8) 0x00);
-            (UEDATX = (U8) (((U8 *) & serial_state.all)[0]));
-            (UEDATX = (U8) (((U8 *) & serial_state.all)[1]));
-            (UEINTX &= ~(1 << TXINI), (UEINTX &= ~(1 << FIFOCON)));
+          UENUM = EP3;
+          if (UEINTX & 1 << RWAL) {
+            UEDATX = (U8) 0xA1;
+            UEDATX = (U8) 0x20;
+            UEDATX = (U8) 0x00;
+            UEDATX = (U8) 0x00;
+            UEDATX = (U8) 0x00;
+            UEDATX = (U8) 0x00;
+            UEDATX = (U8) 0x02;
+            UEDATX = (U8) 0x00;
+            UEDATX = (U8) ((U8 *) &serial_state.all)[0];
+            UEDATX = (U8) ((U8 *) &serial_state.all)[1];
+            UEINTX &= ~(1 << TXINI), UEINTX &= ~(1 << FIFOCON);
           }
         }
       }
-      if (usb_request_break_generation == (1 == 1)) {
-        usb_request_break_generation = (0 == 1);
-        (PIND |= (1 << PIND7));
+      if (usb_request_break_generation == 1) {
+        usb_request_break_generation = 0;
+        PIND |= 1 << PIND7;
 // !! this is used to reset the chip?
         boot_key = 0x55AAAA55;
         wdt_reset();
-        (WDTCSR |= (1 << WDCE));
-        (WDTCSR = (1 << WDE));
+        WDTCSR |= 1 << WDCE;
+        WDTCSR = 1 << WDE;
         while (1) ;
       }
     }
@@ -720,7 +704,7 @@ int main(void)
 char __low_level_init(void) __attribute__ ((section(".init3"), naked));
 char __low_level_init()
 {
-  (clock_prescale_set(0));
+  clock_prescale_set(0);
   return 1;
 }
 
@@ -728,67 +712,67 @@ Bool usb_user_read_request(U8 type, U8 request)
 {
   U16 wValue;
 
-  (((U8 *) & wValue)[0]) = (UEDATX);
-  (((U8 *) & wValue)[1]) = (UEDATX);
+  ((U8 *) &wValue)[0] = UEDATX;
+  ((U8 *) &wValue)[1] = UEDATX;
 
-  if (((0 << 7) | (1 << 5) | (1)) == type) {
+  if (0x21 == type) {
     switch (request) {
     case 0x20:
-      (UEINTX &= ~(1 << RXSTPI));
-      while (!((UEINTX & (1 << RXOUTI)))) ;
-      (((U8 *) & line_coding.dwDTERate)[0]) = (UEDATX);
-      (((U8 *) & line_coding.dwDTERate)[1]) = (UEDATX);
-      (((U8 *) & line_coding.dwDTERate)[2]) = (UEDATX);
-      (((U8 *) & line_coding.dwDTERate)[3]) = (UEDATX);
-      line_coding.bCharFormat = (UEDATX);
-      line_coding.bParityType = (UEDATX);
-      line_coding.bDataBits = (UEDATX);
-      (UEINTX &= ~(1 << RXOUTI), (UEINTX &= ~(1 << FIFOCON)));
-      (UEINTX &= ~(1 << TXINI));
-      while (!((UEINTX & (1 << TXINI)))) ;
-      ((UBRR1) =
+      UEINTX &= ~(1 << RXSTPI);
+      while (!(UEINTX & 1 << RXOUTI)) ;
+      ((U8 *) &line_coding.dwDTERate)[0] = UEDATX;
+      ((U8 *) &line_coding.dwDTERate)[1] = UEDATX;
+      ((U8 *) &line_coding.dwDTERate)[2] = UEDATX;
+      ((U8 *) &line_coding.dwDTERate)[3] = UEDATX;
+      line_coding.bCharFormat = UEDATX;
+      line_coding.bParityType = UEDATX;
+      line_coding.bDataBits = UEDATX;
+      UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
+      UEINTX &= ~(1 << TXINI);
+      while (!(UEINTX & 1 << TXINI)) ;
+      UBRR1 =
        (U16) (((U32) 16000 * 1000L) /
-              ((U32) (line_coding.dwDTERate) / 2 * 16) - 1));
-      return (1 == 1);
+              ((U32) line_coding.dwDTERate / 2 * 16) - 1);
+      return 1;
       break;
     case 0x22:
-      (UEINTX &= ~(1 << RXSTPI));
-      (UEINTX &= ~(1 << TXINI));
+      UEINTX &= ~(1 << RXSTPI);
+      UEINTX &= ~(1 << TXINI);
       line_status.all = wValue;
-      while (!((UEINTX & (1 << TXINI)))) ;
-      return (1 == 1);
+      while (!(UEINTX & 1 << TXINI)) ;
+      return 1;
       break;
     case 0x23:
-      (UEINTX &= ~(1 << RXSTPI));
-      (UEINTX &= ~(1 << TXINI));
-      usb_request_break_generation = (1 == 1);
-      while (!((UEINTX & (1 << TXINI)))) ;
-      return (1 == 1);
+      UEINTX &= ~(1 << RXSTPI);
+      UEINTX &= ~(1 << TXINI);
+      usb_request_break_generation = 1;
+      while (!(UEINTX & 1 << TXINI)) ;
+      return 1;
       break;
     }
   }
-  if (((1 << 7) | (1 << 5) | (1)) == type) {
+  if (0xA1 == type) {
     switch (request) {
     case 0x21:
-      (UEINTX &= ~(1 << RXSTPI));
-      (UEDATX = (U8) (((U8 *) & line_coding.dwDTERate)[0]));
-      (UEDATX = (U8) (((U8 *) & line_coding.dwDTERate)[1]));
-      (UEDATX = (U8) (((U8 *) & line_coding.dwDTERate)[2]));
-      (UEDATX = (U8) (((U8 *) & line_coding.dwDTERate)[3]));
-      (UEDATX = (U8) line_coding.bCharFormat);
-      (UEDATX = (U8) line_coding.bParityType);
-      (UEDATX = (U8) line_coding.bDataBits);
+      UEINTX &= ~(1 << RXSTPI);
+      UEDATX = (U8) ((U8 *) & line_coding.dwDTERate)[0];
+      UEDATX = (U8) ((U8 *) & line_coding.dwDTERate)[1];
+      UEDATX = (U8) ((U8 *) & line_coding.dwDTERate)[2];
+      UEDATX = (U8) ((U8 *) & line_coding.dwDTERate)[3];
+      UEDATX = (U8) line_coding.bCharFormat;
+      UEDATX = (U8) line_coding.bParityType;
+      UEDATX = (U8) line_coding.bDataBits;
 
-      (UEINTX &= ~(1 << TXINI));
-      while (!((UEINTX & (1 << TXINI)))) ;
+      UEINTX &= ~(1 << TXINI);
+      while (!(UEINTX & 1 << TXINI)) ;
 
-      while (!(UEINTX & (1 << RXOUTI))) ;
-      (UEINTX &= ~(1 << RXOUTI), (UEINTX &= ~(1 << FIFOCON)));
-      return (1 == 1);
+      while (!(UEINTX & 1 << RXOUTI)) ;
+      UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
+      return 1;
       break;
     }
   }
-  return (0 == 1);
+  return 0;
 }
 
 void uart_usb_send_buffer(U8 * buffer, U8 nb_data)
@@ -796,31 +780,31 @@ void uart_usb_send_buffer(U8 * buffer, U8 nb_data)
   U8 zlp;
 
   if (nb_data % 0x20) {
-    zlp = (0 == 1);
+    zlp = 0;
   }
   else {
-    zlp = (1 == 1);
+    zlp = 1;
   }
 
-  (UENUM = (U8) 0x01);
+  UENUM = EP1;
   while (nb_data) {
-    while ((UEINTX & (1 << RWAL)) == (0 == 1)) ;
-    while ((UEINTX & (1 << RWAL)) && nb_data) {
-      (UEDATX = (U8) * buffer);
+    while (!(UEINTX & 1 << RWAL)) ;
+    while (UEINTX & 1 << RWAL && nb_data) {
+      UEDATX = (U8) *buffer;
       buffer++;
       nb_data--;
     }
-    (UEINTX &= ~(1 << TXINI), (UEINTX &= ~(1 << FIFOCON)));
+    UEINTX &= ~(1 << TXINI), UEINTX &= ~(1 << FIFOCON);
   }
   if (zlp) {
-    while ((UEINTX & (1 << RWAL)) == (0 == 1)) ;
-    (UEINTX &= ~(1 << TXINI), (UEINTX &= ~(1 << FIFOCON)));
+    while (!(UEINTX & 1 << RWAL)) ;
+    UEINTX &= ~(1 << TXINI), UEINTX &= ~(1 << FIFOCON);
   }
 }
 
 int uart_usb_putchar(int data_to_send)
 {
-  uart_usb_send_buffer((U8 *) & data_to_send, 1);
+  uart_usb_send_buffer((U8 *) &data_to_send, 1);
   return data_to_send;
 }
 
@@ -828,129 +812,117 @@ char uart_usb_getchar(void)
 {
   register Uchar data_rx;
 
-  (UENUM = (U8) 0x02);
+  UENUM = EP2;
   if (!rx_counter) {
     do {
-      (UENUM = (U8) 0x02);
-      if ((UEINTX & (1 << RXOUTI))) {
-        rx_counter = ((U8) (UEBCLX));
+      UENUM = EP2;
+      if (UEINTX & 1 << RXOUTI) {
+        rx_counter = (U8) UEBCLX;
         if (!rx_counter) {
-          (UEINTX &= ~(1 << RXOUTI), (UEINTX &= ~(1 << FIFOCON)));
+          UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
         }
       }
     } while (!rx_counter);
   }
-  data_rx = (UEDATX);
+  data_rx = UEDATX;
   rx_counter--;
   if (!rx_counter)
-    (UEINTX &= ~(1 << RXOUTI), (UEINTX &= ~(1 << FIFOCON)));
+    UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
   return data_rx;
 }
 
 ISR(USB_GEN_vect)
 {
-  if (((USBINT & (1 << VBUSTI)) ? (1 == 1) : (0 == 1))
-      && ((USBCON & (1 << VBUSTE)) ? (1 == 1) : (0 == 1))) {
-    (USBINT = ~(1 << VBUSTI));
-    if (((USBSTA & (1 << VBUS)) ? (1 == 1) : (0 == 1))) {
-      usb_connected = (1 == 1);
-      (g_usb_event |= (1 << 1));
-      (UDIEN |= (1 << EORSTE));
-      (USBCON |= (1 << FRZCLK));
+  if (USBINT & 1 << VBUSTI && USBCON & 1 << VBUSTE) {
+    USBINT = ~(1 << VBUSTI);
+    if (USBSTA & 1 << VBUS) {
+      usb_connected = 1;
+      g_usb_event |= 1 << 1;
+      UDIEN |= 1 << EORSTE;
+      USBCON |= 1 << FRZCLK;
 
-      (PLLFRQ &=
-       ~((1 << PDIV3) | (1 << PDIV2) | (1 << PDIV1) | (1 << PDIV0)),
-       PLLFRQ |=
-       ((0 << PDIV3) | (1 << PDIV2) | (0 << PDIV1) | (0 << PDIV0)) | (0 <<
-                                                                      PLLUSB),
-       PLLCSR = ((1 << PINDIV) | (1 << PLLE)));
-      while (!(PLLCSR & (1 << PLOCK))) ;
-      (USBCON &= ~(1 << FRZCLK));
-      (UDCON &= ~(1 << DETACH));
+      PLLFRQ &= ~(1 << PDIV3 | 1 << PDIV2 | 1 << PDIV1 | 1 << PDIV0),
+       PLLFRQ |= 1 << PDIV2,
+       PLLCSR = 1 << PINDIV | 1 << PLLE;
+      while (!(PLLCSR & 1 << PLOCK)) ;
+      USBCON &= ~(1 << FRZCLK);
+      UDCON &= ~(1 << DETACH);
 
-      (UDCON &= ~(1 << RSTCPU));
+      UDCON &= ~(1 << RSTCPU);
 
-      (UDIEN |= (1 << SUSPE));
-      (UDIEN |= (1 << EORSTE));
+      UDIEN |= 1 << SUSPE;
+      UDIEN |= 1 << EORSTE;
       sei();
-      (UENUM = (U8) 0);
+      UENUM = EP0;
       if (!(UECONX & 1 << EPEN)) {
-        UENUM = (U8) 0;
-        (UECONX |= (1 << EPEN));
-        UECFG0X = 0 << 6 | 1 << 1 | 0;
-        UECFG1X = (UECFG1X & 1 << ALLOC) | 2 << 4 | 0 << 2;
-        (UECFG1X |= (1 << ALLOC));
+        UENUM = EP0;
+        UECONX |= 1 << EPEN;
+        UECFG0X = 1 << 1; /* TODO: remove this */
+        UECFG1X = (UECFG1X & 1 << ALLOC) | 1 << EPSIZE1; /* TODO: remove & */
+        UECFG1X |= 1 << ALLOC;
       }
-      (UDCON &= ~(1 << DETACH));
+      UDCON &= ~(1 << DETACH);
     }
     else {
-      usb_connected = (0 == 1);
+      usb_connected = 0;
       usb_configuration_nb = 0;
-      (g_usb_event |= (1 << 2));
+      g_usb_event |= 1 << 2;
     }
   }
-  if (((UDINT & (1 << SOFI)) ? (1 == 1) : (0 == 1))
-      && ((UDIEN & (1 << SOFE)) ? (1 == 1) : (0 == 1))) {
-    (UDINT = ~(1 << SOFI));
+  if (UDINT & 1 << SOFI && UDIEN & 1 << SOFE) {
+    UDINT = ~(1 << SOFI);
     cpt_sof++;
   }
-  if (((UDINT & (1 << SUSPI)) ? (1 == 1) : (0 == 1))
-      && ((UDIEN & (1 << SUSPE)) ? (1 == 1) : (0 == 1))) {
-    usb_suspended = (1 == 1);
-    (UDINT = ~(1 << WAKEUPI));
-    (g_usb_event |= (1 << 5));
-    (UDINT = ~(1 << SUSPI));
-    (UDIEN |= (1 << WAKEUPE));
-    (UDIEN &= ~(1 << EORSME));
-    (USBCON |= (1 << FRZCLK));
-    (PLLCSR &= (~(1 << PLLE)), PLLCSR = 0);
+  if (UDINT & 1 << SUSPI && UDIEN & 1 << SUSPE) {
+    usb_suspended = 1;
+    UDINT = ~(1 << WAKEUPI);
+    g_usb_event |= 1 << 5;
+    UDINT = ~(1 << SUSPI);
+    UDIEN |= 1 << WAKEUPE;
+    UDIEN &= ~(1 << EORSME);
+    USBCON |= 1 << FRZCLK;
+    PLLCSR &= ~(1 << PLLE), PLLCSR = 0;
   }
-  if (((UDINT & (1 << WAKEUPI)) ? (1 == 1) : (0 == 1))
-      && ((UDIEN & (1 << WAKEUPE)) ? (1 == 1) : (0 == 1))) {
-    if ((PLLCSR & (1 << PLOCK)) == (0 == 1)) {
-      (PLLFRQ &=
-       ~((1 << PDIV3) | (1 << PDIV2) | (1 << PDIV1) | (1 << PDIV0)),
-       PLLFRQ |=
-       ((0 << PDIV3) | (1 << PDIV2) | (0 << PDIV1) | (0 << PDIV0)) | (0 <<
-                                                                      PLLUSB),
-       PLLCSR = ((1 << PINDIV) | (1 << PLLE)));
-
+  if (UDINT & 1 << WAKEUPI && UDIEN & 1 << WAKEUPE) {
+    if (!(PLLCSR & 1 << PLOCK)) {
+      PLLFRQ &=
+       ~(1 << PDIV3 | 1 << PDIV2 | 1 << PDIV1 | 1 << PDIV0),
+       PLLFRQ |= 1 << PDIV2,
+       PLLCSR = 1 << PINDIV | 1 << PLLE;
       while (!(PLLCSR & (1 << PLOCK))) ;
     }
-    (USBCON &= ~(1 << FRZCLK));
-    (UDINT = ~(1 << WAKEUPI));
+    USBCON &= ~(1 << FRZCLK);
+    UDINT = ~(1 << WAKEUPI);
     if (usb_suspended) {
-      (UDIEN |= (1 << EORSME));
-      (UDIEN |= (1 << EORSTE));
-      (UDINT = ~(1 << WAKEUPI));
-      (UDIEN &= ~(1 << WAKEUPE));
-      (g_usb_event |= (1 << 6));
-      (UDIEN |= (1 << SUSPE));
-      (UDIEN |= (1 << EORSME));
-      (UDIEN |= (1 << EORSTE));
+      UDIEN |= 1 << EORSME;
+      UDIEN |= 1 << EORSTE;
+      UDINT = ~(1 << WAKEUPI);
+      UDIEN &= ~(1 << WAKEUPE);
+      g_usb_event |= 1 << 6;
+      UDIEN |= 1 << SUSPE;
+      UDIEN |= 1 << EORSME;
+      UDIEN |= 1 << EORSTE;
     }
   }
-  if (((UDINT & (1 << EORSMI)) ? (1 == 1) : (0 == 1))
-      && ((UDIEN & (1 << EORSME)) ? (1 == 1) : (0 == 1))) {
-    usb_suspended = (0 == 1);
-    (UDIEN &= ~(1 << WAKEUPE));
-    (UDINT = ~(1 << EORSMI));
-    (UDIEN &= ~(1 << EORSME));
-    (g_usb_event |= (1 << 7));
+  if (UDINT & 1 << EORSMI && UDIEN & 1 << EORSME) {
+    usb_suspended = 0;
+    UDIEN &= ~(1 << WAKEUPE);
+    UDINT = ~(1 << EORSMI);
+    UDIEN &= ~(1 << EORSME);
+    g_usb_event |= 1 << 7;
   }
-  if (((UDINT & (1 << EORSTI)) ? (1 == 1) : (0 == 1))
-      && ((UDIEN & (1 << EORSTE)) ? (1 == 1) : (0 == 1))) {
+  if (UDINT & 1 << EORSTI && UDIEN & 1 << EORSTE) {
     usb_remote_wup_feature = 0;
-    (UDINT = ~(1 << EORSTI));
-    (UENUM = (U8) 0);
+    UDINT = ~(1 << EORSTI);
+    UENUM = EP0;
     if (!(UECONX & 1 << EPEN)) {
-      UENUM = (U8) 0;
-      (UECONX |= (1 << EPEN));
-      UECFG0X = 0 << 6 | 1 << 1 | 0;
-      UECFG1X = (UECFG1X & (1 << ALLOC)) | 2 << 4 | 0 << 2;
-      (UECFG1X |= (1 << ALLOC));
+      UENUM = EP0;
+      UECONX |= 1 << EPEN;
+      UECFG0X = 1 << 1; /* TODO: remove this */
+      UECFG1X = (UECFG1X & 1 << ALLOC) | 1 << EPSIZE1; /* TODO: remove & */
+      UECFG1X |= 1 << ALLOC;
     }
-    (g_usb_event |= (1 << 8));
+    g_usb_event |= 1 << 8;
   }
 }
 
@@ -959,16 +931,16 @@ ISR(USART1_RX_vect)
   U8 i = 0;
   U8 save_ep;
 
-  if (((usb_configuration_nb != 0) ? (1 == 1) : (0 == 1))) {
-    save_ep = (UENUM);
-    (UENUM = (U8) 0x01);
+  if (usb_configuration_nb != 0) {
+    save_ep = UENUM;
+    UENUM = EP1;
     do {
-      if (((UCSR1A) & 0x80)) {
-        rs2usb[i] = ((UDR1));
+      if (UCSR1A & 0x80) {
+        rs2usb[i] = UDR1;
         i++;
       }
-    } while ((UEINTX & (1 << RWAL)) == (0 == 1));
-    uart_usb_send_buffer((U8 *) & rs2usb, i);
-    (UENUM = (U8) save_ep);
+    } while (!(UEINTX & 1 << RWAL));
+    uart_usb_send_buffer((U8 *) &rs2usb, i);
+    UENUM = (U8) save_ep;
   }
 }
