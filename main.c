@@ -128,7 +128,8 @@ typedef struct {
   U8 bDataBits;
 } S_line_coding;
 S_line_coding line_coding;
-
+U8 usb_suspended = 0;
+U8 usb_connected = 0;
 int main(void)
 {
   (UHWCON |= (1 << UVREGE));
