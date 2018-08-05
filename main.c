@@ -433,19 +433,19 @@ int main(void)
             UENUM = (U8) 0x03;
             UECONX |= 1 << EPEN;
             UECFG0X = 1 << EPTYPE1 | 1 << EPTYPE0 | 1 << EPDIR; /* interrupt, IN */
-            UECFG1X = (UECFG1X & 1 << ALLOC) | 1 << EPSIZE1; /* TODO: remove & */
+            UECFG1X = 1 << EPSIZE1; /* 32 bytes */
             UECFG1X |= 1 << ALLOC;
 
             UENUM = (U8) 0x01;
             UECONX |= 1 << EPEN;
             UECFG0X = 1 << EPTYPE1 | 1 << EPDIR; /* bulk, IN */
-            UECFG1X = (UECFG1X & 1 << ALLOC) | 1 << EPSIZE1; /* TODO: remove & */
+            UECFG1X = 1 << EPSIZE1; /* 32 bytes */
             UECFG1X |= 1 << ALLOC;
 
             UENUM = (U8) 0x02;
             UECONX |= 1 << EPEN;
             UECFG0X = 1 << EPTYPE1; /* bulk, OUT */
-            UECFG1X = (UECFG1X & 1 << ALLOC) | 1 << EPSIZE1; /* TODO: remove & */
+            UECFG1X = 1 << EPSIZE1; /* 32 bytes */
             UECFG1X |= 1 << ALLOC;
 
             UERST = 1 << EP3, UERST = 0;
