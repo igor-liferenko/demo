@@ -525,27 +525,27 @@ int main(void)
             (UEINTX &= ~(1 << RXSTPI));
             usb_configuration_nb = configuration_number;
             (UEINTX &= ~(1 << TXINI));
-  (UENUM = (U8) 0x03);
-  (UECONX |= (1 << EPEN));
-  UECFG0X = 3 << 6 | 0 << 1 | 1;
-  UECFG1X = (UECFG1X & 1 << ALLOC) | 2 << 4 | 0 << 2;
-  (UECFG1X |= (1 << ALLOC));
+            (UENUM = (U8) 0x03);
+            (UECONX |= (1 << EPEN));
+            UECFG0X = 3 << 6 | 0 << 1 | 1;
+            UECFG1X = (UECFG1X & 1 << ALLOC) | 2 << 4 | 0 << 2;
+            (UECFG1X |= (1 << ALLOC));
 
-  (UENUM = (U8) 0x01);
-  (UECONX |= (1 << EPEN));
-  UECFG0X = 2 << 6 | 0 << 1 | 1;
-  UECFG1X = (UECFG1X & 1 << ALLOC) | 2 << 4 | 0 << 2;
-  (UECFG1X |= (1 << ALLOC));
+            (UENUM = (U8) 0x01);
+            (UECONX |= (1 << EPEN));
+            UECFG0X = 2 << 6 | 0 << 1 | 1;
+            UECFG1X = (UECFG1X & 1 << ALLOC) | 2 << 4 | 0 << 2;
+            (UECFG1X |= (1 << ALLOC));
 
-  (UENUM = (U8) 0x02);
-  (UECONX |= (1 << EPEN));
-  UECFG0X = 2 << 6 | 0 << 1 | 0;
-  UECFG1X = (UECFG1X & 1 << ALLOC) | 2 << 4 | 0 << 2;
-  (UECFG1X |= (1 << ALLOC));
+            (UENUM = (U8) 0x02);
+            (UECONX |= (1 << EPEN));
+            UECFG0X = 2 << 6 | 0 << 1 | 0;
+            UECFG1X = (UECFG1X & 1 << ALLOC) | 2 << 4 | 0 << 2;
+            (UECFG1X |= (1 << ALLOC));
 
-  (UERST = 1 << (U8) 0x03, UERST = 0);
-  (UERST = 1 << (U8) 0x01, UERST = 0);
-  (UERST = 1 << (U8) 0x02, UERST = 0);
+            (UERST = 1 << (U8) 0x03, UERST = 0);
+            (UERST = 1 << (U8) 0x01, UERST = 0);
+            (UERST = 1 << (U8) 0x02, UERST = 0);
           }
           else {
             (UECONX |= (1 << STALLRQ));
