@@ -418,15 +418,15 @@ int main(void)
 
       case 0x05:
         if (((0 << 7) | (0 << 5) | (0)) == bmRequestType) {
-  U8 addr = (UEDATX);
-  (UDADDR = (UDADDR & (1 << ADDEN)) | ((U8) addr & 0x7F));
+          U8 addr = (UEDATX);
+          (UDADDR = (UDADDR & (1 << ADDEN)) | ((U8) addr & 0x7F));
 
-  (UEINTX &= ~(1 << RXSTPI));
+          (UEINTX &= ~(1 << RXSTPI));
 
-  (UEINTX &= ~(1 << TXINI));
-  while (!(UEINTX & (1 << TXINI))) ;
+          (UEINTX &= ~(1 << TXINI));
+          while (!(UEINTX & (1 << TXINI))) ;
 
-  (UDADDR |= (1 << ADDEN));
+          (UDADDR |= (1 << ADDEN));
         }
         else {
           usb_user_read_request(bmRequestType, bmRequest);
