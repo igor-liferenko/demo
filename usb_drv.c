@@ -119,4 +119,3 @@ void usb_halt_endpoint(U8 ep_num)
   (UENUM = (U8) ep_num);
   (UECONX |= (1 << STALLRQ));
 }
-
