@@ -235,41 +235,6 @@ extern S_line_status line_status;
 extern S_serial_state serial_state;
 static S_serial_state serial_state_saved;
 volatile U8 usb_request_break_generation = (0 == 1);
-Bool usb_user_read_request(U8 type, U8 request)
-{
-  U16 wValue;
-
-  (((U8 *) & wValue)[0]) = (UEDATX);
-  (((U8 *) & wValue)[1]) = (UEDATX);
-
-  if (((0 << 7) | (1 << 5) | (1)) == type) {
-    switch (request) {
-    case 0x20:
-      cdc_set_line_coding();
-      return (1 == 1);
-      break;
-
-    case 0x22:
-      cdc_set_control_line_state(wValue);
-      return (1 == 1);
-      break;
-
-    case 0x23:
-      cdc_send_break(wValue);
-      return (1 == 1);
-      break;
-    }
-  }
-  if (((1 << 7) | (1 << 5) | (1)) == type) {
-    switch (request) {
-    case 0x21:
-      cdc_get_line_coding();
-      return (1 == 1);
-      break;
-    }
-  }
-  return (0 == 1);
-}
 
 Bool usb_user_get_descriptor(U8 type, U8 string)
 {

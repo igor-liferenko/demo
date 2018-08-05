@@ -319,6 +319,10 @@ Bool usb_user_get_descriptor(U8, U8);
 U8 remote_wakeup_feature = 0;
 U8 usb_configuration_nb;
 U8 usb_remote_wup_feature;
+void cdc_get_line_coding();
+void cdc_set_control_line_state(U16);
+void cdc_send_break(U16);
+void cdc_set_line_coding();
 
 int main(void)
 {
@@ -815,6 +819,42 @@ char __low_level_init()
 {
   (clock_prescale_set(0));
   return 1;
+}
+
+Bool usb_user_read_request(U8 type, U8 request)
+{
+  U16 wValue;
+
+  (((U8 *) & wValue)[0]) = (UEDATX);
+  (((U8 *) & wValue)[1]) = (UEDATX);
+
+  if (((0 << 7) | (1 << 5) | (1)) == type) {
+    switch (request) {
+    case 0x20:
+      cdc_set_line_coding();
+      return (1 == 1);
+      break;
+
+    case 0x22:
+      cdc_set_control_line_state(wValue);
+      return (1 == 1);
+      break;
+
+    case 0x23:
+      cdc_send_break(wValue);
+      return (1 == 1);
+      break;
+    }
+  }
+  if (((1 << 7) | (1 << 5) | (1)) == type) {
+    switch (request) {
+    case 0x21:
+      cdc_get_line_coding();
+      return (1 == 1);
+      break;
+    }
+  }
+  return (0 == 1);
 }
 
 void uart_usb_send_buffer(U8 * buffer, U8 nb_data)
