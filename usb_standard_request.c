@@ -247,6 +247,3 @@ extern PROGMEM const S_usb_user_configuration_descriptor
   usb_user_configuration_descriptor;
 
 U8 usb_remote_wup_feature;
-
-
-
