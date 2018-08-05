@@ -432,12 +432,3 @@ void usb_clear_feature(void)
     }
   }
 }
-
-void usb_get_interface(void)
-{
-  (UEINTX &= ~(1 << RXSTPI));
-  (UEINTX &= ~(1 << TXINI));
-
-  while (!(UEINTX & (1 << RXOUTI))) ;
-  (UEINTX &= ~(1 << RXOUTI), (UEINTX &= ~(1 << FIFOCON)));
-}

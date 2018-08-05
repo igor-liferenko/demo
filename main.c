@@ -555,7 +555,10 @@ int main(void)
 
       case 0x0A:
         if (bmRequestType == ((1 << 7) | (0 << 5) | (1))) {
-          usb_get_interface();
+          (UEINTX &= ~(1 << RXSTPI));
+          (UEINTX &= ~(1 << TXINI));
+          while (!(UEINTX & (1 << RXOUTI))) ;
+          (UEINTX &= ~(1 << RXOUTI), (UEINTX &= ~(1 << FIFOCON)));
         }
         else {
           usb_user_read_request(bmRequestType, bmRequest);
