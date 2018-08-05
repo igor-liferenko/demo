@@ -52,11 +52,3 @@ U8 uart_test_hit(void)
 {
   return ((UCSR1A) & 0x80);
 }
-
-int uart_putchar(int ch)
-{
-  while (!((UCSR1A) & 0x20)) ;
-  ((UDR1) = ch);
-
-  return ch;
-}

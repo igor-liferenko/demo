@@ -225,7 +225,8 @@ int main(void)
         }
         if (rx_counter) {
           while (rx_counter) {
-            uart_putchar(uart_usb_getchar());
+            while (!(UCSR1A & 0x20)) ;
+            UDR1 = uart_usb_getchar();
             (PIND |= (1 << PIND6));
           }
         }
