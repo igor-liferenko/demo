@@ -183,23 +183,3 @@ U8 usb_suspended = 0;
 
 extern U8 usb_configuration_nb;
 
-void usb_start_device(void)
-{
-  (USBCON |= (1 << FRZCLK));
-
-  (PLLFRQ &=
-   ~((1 << PDIV3) | (1 << PDIV2) | (1 << PDIV1) | (1 << PDIV0)), PLLFRQ |=
-   ((0 << PDIV3) | (1 << PDIV2) | (0 << PDIV1) | (0 << PDIV0)) | (0 <<
-                                                                  PLLUSB),
-   PLLCSR = ((1 << PINDIV) | (1 << PLLE)));
-  while (!(PLLCSR & (1 << PLOCK))) ;
-  (USBCON &= ~(1 << FRZCLK));
-  (UDCON &= ~(1 << DETACH));
-
-  (UDCON &= ~(1 << RSTCPU));
-
-  (UDIEN |= (1 << SUSPE));
-  (UDIEN |= (1 << EORSTE));
-  sei();
-  usb_init_device();
-}

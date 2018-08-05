@@ -166,12 +166,29 @@ int main(void)
   (UDIEN |= (1 << SOFE));
   fdevopen((int (*)(char, FILE *)) (uart_usb_putchar),
            (int (*)(FILE *)) uart_usb_getchar);
+
   while (1) {
     if (usb_connected == (0 == 1)) {
       if (((USBSTA & (1 << VBUS)) ? (1 == 1) : (0 == 1))) {
         (USBCON |= ((1 << USBE)));
         usb_connected = (1 == 1);
-        usb_start_device();
+  (USBCON |= (1 << FRZCLK));
+
+  (PLLFRQ &=
+   ~((1 << PDIV3) | (1 << PDIV2) | (1 << PDIV1) | (1 << PDIV0)), PLLFRQ |=
+   ((0 << PDIV3) | (1 << PDIV2) | (0 << PDIV1) | (0 << PDIV0)) | (0 <<
+                                                                  PLLUSB),
+   PLLCSR = ((1 << PINDIV) | (1 << PLLE)));
+  while (!(PLLCSR & (1 << PLOCK))) ;
+  (USBCON &= ~(1 << FRZCLK));
+  (UDCON &= ~(1 << DETACH));
+
+  (UDCON &= ~(1 << RSTCPU));
+
+  (UDIEN |= (1 << SUSPE));
+  (UDIEN |= (1 << EORSTE));
+  sei();
+  usb_init_device();
       }
     }
     if (((g_usb_event & (1 << 8)) ? (1 == 1) : (0 == 1))) {
@@ -259,7 +276,24 @@ ISR(USB_GEN_vect)
       usb_connected = (1 == 1);
       (g_usb_event |= (1 << 1));
       (UDIEN |= (1 << EORSTE));
-      usb_start_device();
+  (USBCON |= (1 << FRZCLK));
+
+  (PLLFRQ &=
+   ~((1 << PDIV3) | (1 << PDIV2) | (1 << PDIV1) | (1 << PDIV0)), PLLFRQ |=
+   ((0 << PDIV3) | (1 << PDIV2) | (0 << PDIV1) | (0 << PDIV0)) | (0 <<
+                                                                  PLLUSB),
+   PLLCSR = ((1 << PINDIV) | (1 << PLLE)));
+  while (!(PLLCSR & (1 << PLOCK))) ;
+  (USBCON &= ~(1 << FRZCLK));
+  (UDCON &= ~(1 << DETACH));
+
+  (UDCON &= ~(1 << RSTCPU));
+
+  (UDIEN |= (1 << SUSPE));
+  (UDIEN |= (1 << EORSTE));
+  sei();
+  usb_init_device();
+
       (UDCON &= ~(1 << DETACH));
     }
     else {
