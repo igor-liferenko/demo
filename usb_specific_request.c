@@ -241,24 +241,6 @@ Bool usb_user_get_descriptor(U8 type, U8 string)
   return (0 == 1);
 }
 
-void cdc_get_line_coding(void)
-{
-  (UEINTX &= ~(1 << RXSTPI));
-  (UEDATX = (U8) (((U8 *) & line_coding.dwDTERate)[0]));
-  (UEDATX = (U8) (((U8 *) & line_coding.dwDTERate)[1]));
-  (UEDATX = (U8) (((U8 *) & line_coding.dwDTERate)[2]));
-  (UEDATX = (U8) (((U8 *) & line_coding.dwDTERate)[3]));
-  (UEDATX = (U8) line_coding.bCharFormat);
-  (UEDATX = (U8) line_coding.bParityType);
-  (UEDATX = (U8) line_coding.bDataBits);
-
-  (UEINTX &= ~(1 << TXINI));
-  while (!((UEINTX & (1 << TXINI)))) ;
-
-  while (!(UEINTX & (1 << RXOUTI))) ;
-  (UEINTX &= ~(1 << RXOUTI), (UEINTX &= ~(1 << FIFOCON)));
-}
-
 void cdc_set_line_coding(void)
 {
   (UEINTX &= ~(1 << RXSTPI));

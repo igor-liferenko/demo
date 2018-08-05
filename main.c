@@ -869,7 +869,20 @@ Bool usb_user_read_request(U8 type, U8 request)
   if (((1 << 7) | (1 << 5) | (1)) == type) {
     switch (request) {
     case 0x21:
-      cdc_get_line_coding();
+  (UEINTX &= ~(1 << RXSTPI));
+  (UEDATX = (U8) (((U8 *) & line_coding.dwDTERate)[0]));
+  (UEDATX = (U8) (((U8 *) & line_coding.dwDTERate)[1]));
+  (UEDATX = (U8) (((U8 *) & line_coding.dwDTERate)[2]));
+  (UEDATX = (U8) (((U8 *) & line_coding.dwDTERate)[3]));
+  (UEDATX = (U8) line_coding.bCharFormat);
+  (UEDATX = (U8) line_coding.bParityType);
+  (UEDATX = (U8) line_coding.bDataBits);
+
+  (UEINTX &= ~(1 << TXINI));
+  while (!((UEINTX & (1 << TXINI)))) ;
+
+  while (!(UEINTX & (1 << RXOUTI))) ;
+  (UEINTX &= ~(1 << RXOUTI), (UEINTX &= ~(1 << FIFOCON)));
       return (1 == 1);
       break;
     }
