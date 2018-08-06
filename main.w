@@ -634,83 +634,37 @@ ISR(USART1_RX_vect)
   }
 }
 
-@ @<Process SETUP...@>=
+@ The following big switch just dispatches SETUP request.
+
+@<Process SETUP request@>=
 U8 bmRequest;
-UEINTX &= ~(1 << RXOUTI);
-bmRequestType = UEDATX;
-bmRequest = (UEDATX);
-switch (bmRequest) {
-case 0x06:
-  if (0x80 == bmRequestType) {
-    U16 wLength;
-    U8 descriptor_type;
-    U8 string_type;
-    U8 dummy;
-    U8 nb_byte;
-    zlp = 0;
-    string_type = UEDATX;
-    descriptor_type = UEDATX;
-    switch (descriptor_type) {
-    case 0x01:
+UEINTX &= ~(1 << RXOUTI); /* TODO: ??? - check if it is non-zero here */
+bmRequestType = 0;
+bmRequest = 0;
+U16 wLength;
+U8 dummy;
+U8 nb_byte;
+zlp = 0;
+switch (UEDATX | UEDATX << 8) {
+case 0x0680: @/
+    switch (UEDATX | UEDATX << 8) {
+    case 0x0100:
       data_to_transfer = sizeof usb_dev_desc;
       pbuffer = &usb_dev_desc.bLength;
+      @<Code which is executed in |0x0680| for both |0x0100| and |0x0200|@>@;
       break;
-    case 0x02:
+    case 0x0200:
       data_to_transfer = sizeof usb_conf_desc;
       pbuffer = &usb_conf_desc.cfg.bLength;
+      @<Code which is executed in |0x0680| for both |0x0100| and |0x0200|@>@;
       break;
     default:
       UECONX |= 1 << STALLRQ;
       UEINTX &= ~(1 << RXSTPI);
-      goto out_get_descriptor;
     }
-    dummy = UEDATX;
-    dummy = UEDATX;
-    ((U8 *) & wLength)[0] = UEDATX;
-    ((U8 *) & wLength)[1] = UEDATX;
-    UEINTX &= ~(1 << RXSTPI);
-    if (wLength > data_to_transfer) {
-      if (data_to_transfer % 32 == 0) {
-        zlp = 1;
-      }
-      else {
-        zlp = 0;
-      }
-    }
-    else {
-      data_to_transfer = (U8) wLength;
-    }
-    UEINTX &= ~(1 << NAKOUTI);
-    while (data_to_transfer != 0 && !(UEINTX & 1 << NAKOUTI)) {
-      while (!(UEINTX & 1 << TXINI)) {
-        if (UEINTX & 1 << NAKOUTI)
-          break;
-      }
-      nb_byte = 0;
-      while (data_to_transfer != 0) {
-        if (nb_byte++ == 32) {
-          break;
-        }
-        UEDATX = (U8) pgm_read_byte_near((unsigned int) pbuffer++);
-        data_to_transfer--;
-      }
-      if (UEINTX & 1 << NAKOUTI)
-        break;
-      else
-        UEINTX &= ~(1 << TXINI);
-    }
-    if (zlp == 1 && !(UEINTX & 1 << NAKOUTI)) {
-      while (!(UEINTX & 1 << TXINI)) ;
-      UEINTX &= ~(1 << TXINI);
-    }
-    while (!(UEINTX & 1 << NAKOUTI)) ;
-    UEINTX &= ~(1 << NAKOUTI);
-    UEINTX &= ~(1 << RXOUTI);
-  out_get_descriptor:;
-  }
-  else {
+  break;
+case 0x06: /* here go all cases for bmRequestType different from 0x80 */
     usb_user_read_request(bmRequestType, bmRequest);
-  }
   break;
 case 0x08:
   if (0x80 == bmRequestType) {
@@ -945,3 +899,47 @@ default:
     UEINTX &= ~(1 << RXSTPI);
   }
 }
+
+@ @<Code which is executed in |0x0680| for both |0x0100| and |0x0200|@>=
+    dummy = UEDATX;
+    dummy = UEDATX;
+    ((U8 *) & wLength)[0] = UEDATX;
+    ((U8 *) & wLength)[1] = UEDATX;
+    UEINTX &= ~(1 << RXSTPI);
+    if (wLength > data_to_transfer) {
+      if (data_to_transfer % 32 == 0) {
+        zlp = 1;
+      }
+      else {
+        zlp = 0;
+      }
+    }
+    else {
+      data_to_transfer = (U8) wLength;
+    }
+    UEINTX &= ~(1 << NAKOUTI);
+    while (data_to_transfer != 0 && !(UEINTX & 1 << NAKOUTI)) {
+      while (!(UEINTX & 1 << TXINI)) {
+        if (UEINTX & 1 << NAKOUTI)
+          break;
+      }
+      nb_byte = 0;
+      while (data_to_transfer != 0) {
+        if (nb_byte++ == 32) {
+          break;
+        }
+        UEDATX = (U8) pgm_read_byte_near((unsigned int) pbuffer++);
+        data_to_transfer--;
+      }
+      if (UEINTX & 1 << NAKOUTI)
+        break;
+      else
+        UEINTX &= ~(1 << TXINI);
+    }
+    if (zlp == 1 && !(UEINTX & 1 << NAKOUTI)) {
+      while (!(UEINTX & 1 << TXINI)) ;
+      UEINTX &= ~(1 << TXINI);
+    }
+    while (!(UEINTX & 1 << NAKOUTI)) ;
+    UEINTX &= ~(1 << NAKOUTI);
+    UEINTX &= ~(1 << RXOUTI);
