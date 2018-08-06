@@ -315,316 +315,7 @@ int main(void)
     }
     UENUM = EP0;
     if (UEINTX & 1 << RXSTPI) {
-      U8 bmRequest;
-      UEINTX &= ~(1 << RXOUTI);
-      bmRequestType = UEDATX;
-      bmRequest = (UEDATX);
-      switch (bmRequest) {
-      case 0x06:
-        if (0x80 == bmRequestType) {
-          U16 wLength;
-          U8 descriptor_type;
-          U8 string_type;
-          U8 dummy;
-          U8 nb_byte;
-          zlp = 0;
-          string_type = UEDATX;
-          descriptor_type = UEDATX;
-          switch (descriptor_type) {
-          case 0x01:
-            data_to_transfer = sizeof usb_dev_desc;
-            pbuffer = &usb_dev_desc.bLength;
-            break;
-          case 0x02:
-            data_to_transfer = sizeof usb_conf_desc;
-            pbuffer = &usb_conf_desc.cfg.bLength;
-            break;
-          default:
-            UECONX |= 1 << STALLRQ;
-            UEINTX &= ~(1 << RXSTPI);
-            goto out_get_descriptor;
-          }
-          dummy = UEDATX;
-          dummy = UEDATX;
-          ((U8 *) & wLength)[0] = UEDATX;
-          ((U8 *) & wLength)[1] = UEDATX;
-          UEINTX &= ~(1 << RXSTPI);
-          if (wLength > data_to_transfer) {
-            if (data_to_transfer % 32 == 0) {
-              zlp = 1;
-            }
-            else {
-              zlp = 0;
-            }
-          }
-          else {
-            data_to_transfer = (U8) wLength;
-          }
-          UEINTX &= ~(1 << NAKOUTI);
-          while (data_to_transfer != 0 && !(UEINTX & 1 << NAKOUTI)) {
-            while (!(UEINTX & 1 << TXINI)) {
-              if (UEINTX & 1 << NAKOUTI)
-                break;
-            }
-            nb_byte = 0;
-            while (data_to_transfer != 0) {
-              if (nb_byte++ == 32) {
-                break;
-              }
-              UEDATX = (U8) pgm_read_byte_near((unsigned int) pbuffer++);
-              data_to_transfer--;
-            }
-            if (UEINTX & 1 << NAKOUTI)
-              break;
-            else
-              UEINTX &= ~(1 << TXINI);
-          }
-          if (zlp == 1 && !(UEINTX & 1 << NAKOUTI)) {
-            while (!(UEINTX & 1 << TXINI)) ;
-            UEINTX &= ~(1 << TXINI);
-          }
-          while (!(UEINTX & 1 << NAKOUTI)) ;
-          UEINTX &= ~(1 << NAKOUTI);
-          UEINTX &= ~(1 << RXOUTI);
-        out_get_descriptor:;
-        }
-        else {
-          usb_user_read_request(bmRequestType, bmRequest);
-        }
-        break;
-      case 0x08:
-        if (0x80 == bmRequestType) {
-          UEINTX &= ~(1 << RXSTPI);
-          UEDATX = (U8) usb_configuration_nb;
-          UEINTX &= ~(1 << TXINI), UEINTX &= ~(1 << FIFOCON);
-          while (!(UEINTX & 1 << RXOUTI)) ;
-          UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
-        }
-        else {
-          usb_user_read_request(bmRequestType, bmRequest);
-        }
-        break;
-      case 0x05:
-        if (0x00 == bmRequestType) {
-          U8 addr = UEDATX;
-          UDADDR = (UDADDR & 1 << ADDEN) | ((U8) addr & 0x7F);
-          UEINTX &= ~(1 << RXSTPI);
-          UEINTX &= ~(1 << TXINI);
-          while (!(UEINTX & 1 << TXINI)) ;
-          UDADDR |= 1 << ADDEN;
-        }
-        else {
-          usb_user_read_request(bmRequestType, bmRequest);
-        }
-        break;
-      case 0x09:
-        if (0x00 == bmRequestType) {
-          U8 configuration_number;
-          configuration_number = UEDATX;
-          if (configuration_number <= 1) {
-            UEINTX &= ~(1 << RXSTPI);
-            usb_configuration_nb = configuration_number;
-            UEINTX &= ~(1 << TXINI);
-
-            UENUM = EP3;
-            UECONX |= 1 << EPEN;
-            UECFG0X = 1 << EPTYPE1 | 1 << EPTYPE0 | 1 << EPDIR; /* interrupt, IN */
-            UECFG1X = 1 << EPSIZE1;     /* 32 bytes */
-            UECFG1X |= 1 << ALLOC;
-
-            UENUM = EP1;
-            UECONX |= 1 << EPEN;
-            UECFG0X = 1 << EPTYPE1 | 1 << EPDIR;        /* bulk, IN */
-            UECFG1X = 1 << EPSIZE1;     /* 32 bytes */
-            UECFG1X |= 1 << ALLOC;
-
-            UENUM = EP2;
-            UECONX |= 1 << EPEN;
-            UECFG0X = 1 << EPTYPE1;     /* bulk, OUT */
-            UECFG1X = 1 << EPSIZE1;     /* 32 bytes */
-            UECFG1X |= 1 << ALLOC;
-
-            UERST = 1 << EP3, UERST = 0;
-            UERST = 1 << EP1, UERST = 0;
-            UERST = 1 << EP2, UERST = 0;
-          }
-          else {
-            UECONX |= 1 << STALLRQ;
-            UEINTX &= ~(1 << RXSTPI);
-          }
-        }
-        else {
-          usb_user_read_request(bmRequestType, bmRequest);
-        }
-        break;
-      case 0x01:
-        if (0x02 >= bmRequestType) {
-          U8 wValue;
-          U8 wIndex;
-          U8 dummy;
-          if (bmRequestType == 0x00) {
-            wValue = (UEDATX);
-            UECONX |= 1 << STALLRQ;
-            UEINTX &= ~(1 << RXSTPI);
-          }
-          else if (bmRequestType == 0x01) {
-            UECONX |= 1 << STALLRQ;
-            UEINTX &= ~(1 << RXSTPI);
-          }
-          else if (bmRequestType == 0x02) {
-            wValue = UEDATX;
-            dummy = UEDATX;
-            if (wValue == 0x00) {
-              wIndex = UEDATX & 0x7F;
-              UENUM = (U8) wIndex;
-              if (UECONX & 1 << EPEN) {
-                if (wIndex != 0) {
-                  UECONX |= 1 << STALLRQC;
-                  UERST = 1 << (U8) wIndex, UERST = 0;
-                  UECONX |= 1 << RSTDT;
-                }
-                UENUM = EP0;
-                endpoint_status[wIndex] = 0x00;
-                UEINTX &= ~(1 << RXSTPI);
-                UEINTX &= ~(1 << TXINI);
-              }
-              else {
-                UENUM = EP0;
-                UECONX |= 1 << STALLRQ;
-                UEINTX &= ~(1 << RXSTPI);
-              }
-            }
-            else {
-              UECONX |= 1 << STALLRQ;
-              UEINTX &= ~(1 << RXSTPI);
-            }
-          }
-        }
-        else {
-          usb_user_read_request(bmRequestType, bmRequest);
-        }
-        break;
-      case 0x03:
-        if (0x02 >= bmRequestType) {
-          U8 wValue;
-          U8 wIndex;
-          U8 dummy;
-          switch (bmRequestType) {
-          case 0x00:
-            wValue = UEDATX;
-            switch (wValue) {
-            case 1:
-              UECONX |= 1 << STALLRQ;
-              UEINTX &= ~(1 << RXSTPI);
-              break;
-            default:
-              UECONX |= 1 << STALLRQ;
-              UEINTX &= ~(1 << RXSTPI);
-            }
-            break;
-          case 0x01:
-            UECONX |= 1 << STALLRQ;
-            UEINTX &= ~(1 << RXSTPI);
-            break;
-          case 0x02:
-            wValue = UEDATX;
-            dummy = UEDATX;
-            if (wValue == 0x00) {
-              wIndex = UEDATX & 0x7F;
-              if (wIndex == 0) {
-                UECONX |= 1 << STALLRQ;
-                UEINTX &= ~(1 << RXSTPI);
-              }
-              UENUM = (U8) wIndex;
-              if (UECONX & 1 << EPEN) {
-                UECONX |= 1 << STALLRQ;
-                UENUM = EP0;
-                endpoint_status[wIndex] = 0x01;
-                UEINTX &= ~(1 << RXSTPI);
-                UEINTX &= ~(1 << TXINI);
-              }
-              else {
-                UENUM = EP0;
-                UECONX |= 1 << STALLRQ;
-                UEINTX &= ~(1 << RXSTPI);
-              }
-            }
-            else {
-              UECONX |= 1 << STALLRQ;
-              UEINTX &= ~(1 << RXSTPI);
-            }
-            break;
-          default:
-            UECONX |= 1 << STALLRQ;
-            UEINTX &= ~(1 << RXSTPI);
-          }
-        }
-        else {
-          usb_user_read_request(bmRequestType, bmRequest);
-        }
-        break;
-      case 0x00:
-        if (0x7F < bmRequestType && 0x82 >= bmRequestType) {
-          U8 wIndex;
-          U8 dummy;
-          dummy = UEDATX;
-          dummy = UEDATX;
-          wIndex = UEDATX;
-          switch (bmRequestType) {
-          case 0x80:
-            UEINTX &= ~(1 << RXSTPI);
-            UEDATX = (U8) device_status;
-            break;
-          case 0x81:
-            UEINTX &= ~(1 << RXSTPI);
-            UEDATX = (U8) 0x00;
-            break;
-          case 0x82:
-            UEINTX &= ~(1 << RXSTPI);
-            wIndex = wIndex & 0x7F;
-            UEDATX = (U8) endpoint_status[wIndex];
-            break;
-          default:
-            UECONX |= 1 << STALLRQ;
-            UEINTX &= ~(1 << RXSTPI);
-            goto out_get_status;
-          }
-          UEDATX = (U8) 0x00;
-          UEINTX &= ~(1 << TXINI);
-          while (!(UEINTX & 1 << RXOUTI)) ;
-          UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
-        out_get_status:;
-        }
-        else {
-          usb_user_read_request(bmRequestType, bmRequest);
-        }
-        break;
-      case 0x0A:
-        if (bmRequestType == 0x81) {
-          UEINTX &= ~(1 << RXSTPI);
-          UEINTX &= ~(1 << TXINI);
-          while (!(UEINTX & 1 << RXOUTI)) ;
-          UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
-        }
-        else {
-          usb_user_read_request(bmRequestType, bmRequest);
-        }
-        break;
-      case 0x0B:
-        if (bmRequestType == 0x01) {
-          UEINTX &= ~(1 << RXSTPI);
-          UEINTX &= ~(1 << TXINI);
-          while (!(UEINTX & 1 << TXINI)) ;
-        }
-        break;
-      case 0x07:
-      case 0x0C:
-      default:
-        if (usb_user_read_request(bmRequestType, bmRequest) == (0 == 1)) {
-          UECONX |= 1 << STALLRQ;
-          UEINTX &= ~(1 << RXSTPI);
-        }
-      }
+      @<Process SETUP request@>@;
     }
     if (usb_configuration_nb != 0 && line_status.DTR) {
       if (UCSR1A & 0x20) {
@@ -943,3 +634,316 @@ ISR(USART1_RX_vect)
     UENUM = (U8) save_ep;
   }
 }
+
+@ @<Process SETUP...@>=
+      U8 bmRequest;
+      UEINTX &= ~(1 << RXOUTI);
+      bmRequestType = UEDATX;
+      bmRequest = (UEDATX);
+      switch (bmRequest) {
+      case 0x06:
+        if (0x80 == bmRequestType) {
+          U16 wLength;
+          U8 descriptor_type;
+          U8 string_type;
+          U8 dummy;
+          U8 nb_byte;
+          zlp = 0;
+          string_type = UEDATX;
+          descriptor_type = UEDATX;
+          switch (descriptor_type) {
+          case 0x01:
+            data_to_transfer = sizeof usb_dev_desc;
+            pbuffer = &usb_dev_desc.bLength;
+            break;
+          case 0x02:
+            data_to_transfer = sizeof usb_conf_desc;
+            pbuffer = &usb_conf_desc.cfg.bLength;
+            break;
+          default:
+            UECONX |= 1 << STALLRQ;
+            UEINTX &= ~(1 << RXSTPI);
+            goto out_get_descriptor;
+          }
+          dummy = UEDATX;
+          dummy = UEDATX;
+          ((U8 *) & wLength)[0] = UEDATX;
+          ((U8 *) & wLength)[1] = UEDATX;
+          UEINTX &= ~(1 << RXSTPI);
+          if (wLength > data_to_transfer) {
+            if (data_to_transfer % 32 == 0) {
+              zlp = 1;
+            }
+            else {
+              zlp = 0;
+            }
+          }
+          else {
+            data_to_transfer = (U8) wLength;
+          }
+          UEINTX &= ~(1 << NAKOUTI);
+          while (data_to_transfer != 0 && !(UEINTX & 1 << NAKOUTI)) {
+            while (!(UEINTX & 1 << TXINI)) {
+              if (UEINTX & 1 << NAKOUTI)
+                break;
+            }
+            nb_byte = 0;
+            while (data_to_transfer != 0) {
+              if (nb_byte++ == 32) {
+                break;
+              }
+              UEDATX = (U8) pgm_read_byte_near((unsigned int) pbuffer++);
+              data_to_transfer--;
+            }
+            if (UEINTX & 1 << NAKOUTI)
+              break;
+            else
+              UEINTX &= ~(1 << TXINI);
+          }
+          if (zlp == 1 && !(UEINTX & 1 << NAKOUTI)) {
+            while (!(UEINTX & 1 << TXINI)) ;
+            UEINTX &= ~(1 << TXINI);
+          }
+          while (!(UEINTX & 1 << NAKOUTI)) ;
+          UEINTX &= ~(1 << NAKOUTI);
+          UEINTX &= ~(1 << RXOUTI);
+        out_get_descriptor:;
+        }
+        else {
+          usb_user_read_request(bmRequestType, bmRequest);
+        }
+        break;
+      case 0x08:
+        if (0x80 == bmRequestType) {
+          UEINTX &= ~(1 << RXSTPI);
+          UEDATX = (U8) usb_configuration_nb;
+          UEINTX &= ~(1 << TXINI), UEINTX &= ~(1 << FIFOCON);
+          while (!(UEINTX & 1 << RXOUTI)) ;
+          UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
+        }
+        else {
+          usb_user_read_request(bmRequestType, bmRequest);
+        }
+        break;
+      case 0x05:
+        if (0x00 == bmRequestType) {
+          U8 addr = UEDATX;
+          UDADDR = (UDADDR & 1 << ADDEN) | ((U8) addr & 0x7F);
+          UEINTX &= ~(1 << RXSTPI);
+          UEINTX &= ~(1 << TXINI);
+          while (!(UEINTX & 1 << TXINI)) ;
+          UDADDR |= 1 << ADDEN;
+        }
+        else {
+          usb_user_read_request(bmRequestType, bmRequest);
+        }
+        break;
+      case 0x09:
+        if (0x00 == bmRequestType) {
+          U8 configuration_number;
+          configuration_number = UEDATX;
+          if (configuration_number <= 1) {
+            UEINTX &= ~(1 << RXSTPI);
+            usb_configuration_nb = configuration_number;
+            UEINTX &= ~(1 << TXINI);
+
+            UENUM = EP3;
+            UECONX |= 1 << EPEN;
+            UECFG0X = 1 << EPTYPE1 | 1 << EPTYPE0 | 1 << EPDIR; /* interrupt, IN */
+            UECFG1X = 1 << EPSIZE1;     /* 32 bytes */
+            UECFG1X |= 1 << ALLOC;
+
+            UENUM = EP1;
+            UECONX |= 1 << EPEN;
+            UECFG0X = 1 << EPTYPE1 | 1 << EPDIR;        /* bulk, IN */
+            UECFG1X = 1 << EPSIZE1;     /* 32 bytes */
+            UECFG1X |= 1 << ALLOC;
+
+            UENUM = EP2;
+            UECONX |= 1 << EPEN;
+            UECFG0X = 1 << EPTYPE1;     /* bulk, OUT */
+            UECFG1X = 1 << EPSIZE1;     /* 32 bytes */
+            UECFG1X |= 1 << ALLOC;
+
+            UERST = 1 << EP3, UERST = 0;
+            UERST = 1 << EP1, UERST = 0;
+            UERST = 1 << EP2, UERST = 0;
+          }
+          else {
+            UECONX |= 1 << STALLRQ;
+            UEINTX &= ~(1 << RXSTPI);
+          }
+        }
+        else {
+          usb_user_read_request(bmRequestType, bmRequest);
+        }
+        break;
+      case 0x01:
+        if (0x02 >= bmRequestType) {
+          U8 wValue;
+          U8 wIndex;
+          U8 dummy;
+          if (bmRequestType == 0x00) {
+            wValue = (UEDATX);
+            UECONX |= 1 << STALLRQ;
+            UEINTX &= ~(1 << RXSTPI);
+          }
+          else if (bmRequestType == 0x01) {
+            UECONX |= 1 << STALLRQ;
+            UEINTX &= ~(1 << RXSTPI);
+          }
+          else if (bmRequestType == 0x02) {
+            wValue = UEDATX;
+            dummy = UEDATX;
+            if (wValue == 0x00) {
+              wIndex = UEDATX & 0x7F;
+              UENUM = (U8) wIndex;
+              if (UECONX & 1 << EPEN) {
+                if (wIndex != 0) {
+                  UECONX |= 1 << STALLRQC;
+                  UERST = 1 << (U8) wIndex, UERST = 0;
+                  UECONX |= 1 << RSTDT;
+                }
+                UENUM = EP0;
+                endpoint_status[wIndex] = 0x00;
+                UEINTX &= ~(1 << RXSTPI);
+                UEINTX &= ~(1 << TXINI);
+              }
+              else {
+                UENUM = EP0;
+                UECONX |= 1 << STALLRQ;
+                UEINTX &= ~(1 << RXSTPI);
+              }
+            }
+            else {
+              UECONX |= 1 << STALLRQ;
+              UEINTX &= ~(1 << RXSTPI);
+            }
+          }
+        }
+        else {
+          usb_user_read_request(bmRequestType, bmRequest);
+        }
+        break;
+      case 0x03:
+        if (0x02 >= bmRequestType) {
+          U8 wValue;
+          U8 wIndex;
+          U8 dummy;
+          switch (bmRequestType) {
+          case 0x00:
+            wValue = UEDATX;
+            switch (wValue) {
+            case 1:
+              UECONX |= 1 << STALLRQ;
+              UEINTX &= ~(1 << RXSTPI);
+              break;
+            default:
+              UECONX |= 1 << STALLRQ;
+              UEINTX &= ~(1 << RXSTPI);
+            }
+            break;
+          case 0x01:
+            UECONX |= 1 << STALLRQ;
+            UEINTX &= ~(1 << RXSTPI);
+            break;
+          case 0x02:
+            wValue = UEDATX;
+            dummy = UEDATX;
+            if (wValue == 0x00) {
+              wIndex = UEDATX & 0x7F;
+              if (wIndex == 0) {
+                UECONX |= 1 << STALLRQ;
+                UEINTX &= ~(1 << RXSTPI);
+              }
+              UENUM = (U8) wIndex;
+              if (UECONX & 1 << EPEN) {
+                UECONX |= 1 << STALLRQ;
+                UENUM = EP0;
+                endpoint_status[wIndex] = 0x01;
+                UEINTX &= ~(1 << RXSTPI);
+                UEINTX &= ~(1 << TXINI);
+              }
+              else {
+                UENUM = EP0;
+                UECONX |= 1 << STALLRQ;
+                UEINTX &= ~(1 << RXSTPI);
+              }
+            }
+            else {
+              UECONX |= 1 << STALLRQ;
+              UEINTX &= ~(1 << RXSTPI);
+            }
+            break;
+          default:
+            UECONX |= 1 << STALLRQ;
+            UEINTX &= ~(1 << RXSTPI);
+          }
+        }
+        else {
+          usb_user_read_request(bmRequestType, bmRequest);
+        }
+        break;
+      case 0x00:
+        if (0x7F < bmRequestType && 0x82 >= bmRequestType) {
+          U8 wIndex;
+          U8 dummy;
+          dummy = UEDATX;
+          dummy = UEDATX;
+          wIndex = UEDATX;
+          switch (bmRequestType) {
+          case 0x80:
+            UEINTX &= ~(1 << RXSTPI);
+            UEDATX = (U8) device_status;
+            break;
+          case 0x81:
+            UEINTX &= ~(1 << RXSTPI);
+            UEDATX = (U8) 0x00;
+            break;
+          case 0x82:
+            UEINTX &= ~(1 << RXSTPI);
+            wIndex = wIndex & 0x7F;
+            UEDATX = (U8) endpoint_status[wIndex];
+            break;
+          default:
+            UECONX |= 1 << STALLRQ;
+            UEINTX &= ~(1 << RXSTPI);
+            goto out_get_status;
+          }
+          UEDATX = (U8) 0x00;
+          UEINTX &= ~(1 << TXINI);
+          while (!(UEINTX & 1 << RXOUTI)) ;
+          UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
+        out_get_status:;
+        }
+        else {
+          usb_user_read_request(bmRequestType, bmRequest);
+        }
+        break;
+      case 0x0A:
+        if (bmRequestType == 0x81) {
+          UEINTX &= ~(1 << RXSTPI);
+          UEINTX &= ~(1 << TXINI);
+          while (!(UEINTX & 1 << RXOUTI)) ;
+          UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
+        }
+        else {
+          usb_user_read_request(bmRequestType, bmRequest);
+        }
+        break;
+      case 0x0B:
+        if (bmRequestType == 0x01) {
+          UEINTX &= ~(1 << RXSTPI);
+          UEINTX &= ~(1 << TXINI);
+          while (!(UEINTX & 1 << TXINI)) ;
+        }
+        break;
+      case 0x07:
+      case 0x0C:
+      default:
+        if (usb_user_read_request(bmRequestType, bmRequest) == (0 == 1)) {
+          UECONX |= 1 << STALLRQ;
+          UEINTX &= ~(1 << RXSTPI);
+        }
+      }
+
