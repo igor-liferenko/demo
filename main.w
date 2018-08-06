@@ -637,6 +637,10 @@ ISR(USART1_RX_vect)
 @ The following big switch just dispatches SETUP request.
 
 @<Process SETUP request@>=
+U8 addr;
+U8 wValue;
+U8 wIndex;
+U8 configuration_number;
 U8 bmRequest;
 UEINTX &= ~(1 << RXOUTI); /* TODO: ??? - check if it is non-zero here */
 bmRequestType = 0;
@@ -677,7 +681,7 @@ case 0x08: /* here go all cases for bmRequestType different from 0x80 */
   usb_user_read_request(bmRequestType, bmRequest);
   break;
 case 0x0500: @/
-  U8 addr = UEDATX;
+  addr = UEDATX;
   UDADDR = (UDADDR & 1 << ADDEN) | ((U8) addr & 0x7F);
   UEINTX &= ~(1 << RXSTPI);
   UEINTX &= ~(1 << TXINI);
@@ -688,7 +692,6 @@ case 0x05: /* here go all cases for bmRequestType different from 0x00 */
   usb_user_read_request(bmRequestType, bmRequest);
   break;
 case 0x0900: @/
-  U8 configuration_number;
   configuration_number = UEDATX;
   if (configuration_number <= 1) {
     UEINTX &= ~(1 << RXSTPI);
@@ -726,9 +729,6 @@ case 0x09: /* here go all cases for bmRequestType different from 0x00 */
   usb_user_read_request(bmRequestType, bmRequest);
   break;
 case 0x0102: @/
-  U8 wValue;
-  U8 wIndex;
-  U8 dummy;
   if (bmRequestType == 0x00) {
     wValue = (UEDATX);
     UECONX |= 1 << STALLRQ;
