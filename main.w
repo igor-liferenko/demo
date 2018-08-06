@@ -313,7 +313,7 @@ int main(void)
       UERST = 1 << EP0, UERST = 0;
       usb_configuration_nb = 0;
     }
-    UENUM = (U8) 0;
+    UENUM = EP0;
     if (UEINTX & 1 << RXSTPI) {
       U8 bmRequest;
       UEINTX &= ~(1 << RXOUTI);
@@ -426,19 +426,19 @@ int main(void)
             usb_configuration_nb = configuration_number;
             UEINTX &= ~(1 << TXINI);
 
-            UENUM = (U8) 0x03;
+            UENUM = EP3;
             UECONX |= 1 << EPEN;
             UECFG0X = 1 << EPTYPE1 | 1 << EPTYPE0 | 1 << EPDIR; /* interrupt, IN */
             UECFG1X = 1 << EPSIZE1;     /* 32 bytes */
             UECFG1X |= 1 << ALLOC;
 
-            UENUM = (U8) 0x01;
+            UENUM = EP1;
             UECONX |= 1 << EPEN;
             UECFG0X = 1 << EPTYPE1 | 1 << EPDIR;        /* bulk, IN */
             UECFG1X = 1 << EPSIZE1;     /* 32 bytes */
             UECFG1X |= 1 << ALLOC;
 
-            UENUM = (U8) 0x02;
+            UENUM = EP2;
             UECONX |= 1 << EPEN;
             UECFG0X = 1 << EPTYPE1;     /* bulk, OUT */
             UECFG1X = 1 << EPSIZE1;     /* 32 bytes */
