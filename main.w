@@ -729,41 +729,41 @@ case 0x09: /* here go all cases for bmRequestType different from 0x00 */
   usb_user_read_request(bmRequestType, bmRequest);
   break;
 case 0x0100: @/
-    wValue = (UEDATX);
-    UECONX |= 1 << STALLRQ;
-    UEINTX &= ~(1 << RXSTPI);
+  wValue = (UEDATX);
+  UECONX |= 1 << STALLRQ;
+  UEINTX &= ~(1 << RXSTPI);
   break;
 case 0x0101: @/
-    UECONX |= 1 << STALLRQ;
-    UEINTX &= ~(1 << RXSTPI);
+  UECONX |= 1 << STALLRQ;
+  UEINTX &= ~(1 << RXSTPI);
   break;
 case 0x0102: @/
-    wValue = UEDATX;
-    dummy = UEDATX;
-    if (wValue == 0x00) {
-      wIndex = UEDATX & 0x7F;
-      UENUM = (U8) wIndex;
-      if (UECONX & 1 << EPEN) {
-        if (wIndex != 0) {
-          UECONX |= 1 << STALLRQC;
-          UERST = 1 << (U8) wIndex, UERST = 0;
-          UECONX |= 1 << RSTDT;
-        }
-        UENUM = EP0;
-        endpoint_status[wIndex] = 0x00;
-        UEINTX &= ~(1 << RXSTPI);
-        UEINTX &= ~(1 << TXINI);
+  wValue = UEDATX;
+  dummy = UEDATX;
+  if (wValue == 0x00) {
+    wIndex = UEDATX & 0x7F;
+    UENUM = (U8) wIndex;
+    if (UECONX & 1 << EPEN) {
+      if (wIndex != 0) {
+        UECONX |= 1 << STALLRQC;
+        UERST = 1 << (U8) wIndex, UERST = 0;
+        UECONX |= 1 << RSTDT;
       }
-      else {
-        UENUM = EP0;
-        UECONX |= 1 << STALLRQ;
-        UEINTX &= ~(1 << RXSTPI);
-      }
+      UENUM = EP0;
+      endpoint_status[wIndex] = 0x00;
+      UEINTX &= ~(1 << RXSTPI);
+      UEINTX &= ~(1 << TXINI);
     }
     else {
+      UENUM = EP0;
       UECONX |= 1 << STALLRQ;
       UEINTX &= ~(1 << RXSTPI);
     }
+  }
+  else {
+    UECONX |= 1 << STALLRQ;
+    UEINTX &= ~(1 << RXSTPI);
+  }
   break;
 case 0x01: /* here go all cases for bmRequestType different from 0x00, 0x01 and 0x02 */
   usb_user_read_request(bmRequestType, bmRequest);
