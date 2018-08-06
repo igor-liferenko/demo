@@ -94,18 +94,6 @@ typedef struct {
 typedef struct {
   U8 bLength;
   U8 bDescriptorType;
-  U16 bscUSB;
-  U8 bDeviceClass;
-  U8 bDeviceSubClass;
-  U8 bDeviceProtocol;
-  U8 bMaxPacketSize0;
-  U8 bNumConfigurations;
-  U8 bReserved;
-} S_usb_device_qualifier_descriptor;
-
-typedef struct {
-  U8 bLength;
-  U8 bDescriptorType;
   U16 wlangid;
 } S_usb_language_id;
 
