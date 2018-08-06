@@ -647,24 +647,24 @@ U8 nb_byte;
 zlp = 0;
 switch (UEDATX | UEDATX << 8) {
 case 0x0680: @/
-    switch (UEDATX | UEDATX << 8) {
-    case 0x0100:
-      data_to_transfer = sizeof usb_dev_desc;
-      pbuffer = &usb_dev_desc.bLength;
-      @<Code which is executed in |0x0680| for both |0x0100| and |0x0200|@>@;
-      break;
-    case 0x0200:
-      data_to_transfer = sizeof usb_conf_desc;
-      pbuffer = &usb_conf_desc.cfg.bLength;
-      @<Code which is executed in |0x0680| for both |0x0100| and |0x0200|@>@;
-      break;
-    default:
-      UECONX |= 1 << STALLRQ;
-      UEINTX &= ~(1 << RXSTPI);
-    }
+  switch (UEDATX | UEDATX << 8) {
+  case 0x0100:
+    data_to_transfer = sizeof usb_dev_desc;
+    pbuffer = &usb_dev_desc.bLength;
+    @<Code which is executed in |0x0680| for both |0x0100| and |0x0200|@>@;
+    break;
+  case 0x0200:
+    data_to_transfer = sizeof usb_conf_desc;
+    pbuffer = &usb_conf_desc.cfg.bLength;
+    @<Code which is executed in |0x0680| for both |0x0100| and |0x0200|@>@;
+    break;
+  default:
+    UECONX |= 1 << STALLRQ;
+    UEINTX &= ~(1 << RXSTPI);
+  }
   break;
 case 0x06: /* here go all cases for bmRequestType different from 0x80 */
-    usb_user_read_request(bmRequestType, bmRequest);
+  usb_user_read_request(bmRequestType, bmRequest);
   break;
 case 0x08:
   if (0x80 == bmRequestType) {
