@@ -687,8 +687,7 @@ case 0x0500: @/
 case 0x05: /* here go all cases for bmRequestType different from 0x00 */
   usb_user_read_request(bmRequestType, bmRequest);
   break;
-case 0x09:
-  if (0x00 == bmRequestType) {
+case 0x0900: @/
     U8 configuration_number;
     configuration_number = UEDATX;
     if (configuration_number <= 1) {
@@ -722,10 +721,9 @@ case 0x09:
       UECONX |= 1 << STALLRQ;
       UEINTX &= ~(1 << RXSTPI);
     }
-  }
-  else {
+  break;
+case 0x09: /* here go all cases for bmRequestType different from 0x00 */
     usb_user_read_request(bmRequestType, bmRequest);
-  }
   break;
 case 0x01:
   if (0x02 >= bmRequestType) {
