@@ -564,8 +564,7 @@ int main(void)
         }
         break;
       case 0x00:
-        if ((0x7F < bmRequestType) & (0x82 >= bmRequestType)) { /* TODO:
-                                                                   check this via objdump again and change */
+        if (0x7F < bmRequestType && 0x82 >= bmRequestType) {
           U8 wIndex;
           U8 dummy;
           dummy = UEDATX;
