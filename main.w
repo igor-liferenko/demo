@@ -827,16 +827,14 @@ case 0x0082: @/
 case 0x00: /* here go all cases for bmRequestType different from 0x80, 0x81 and 0x82 */
   usb_user_read_request(bmRequestType, bmRequest);
   break;
-case 0x0A:
-  if (bmRequestType == 0x81) {
+case 0x0A81: @/
     UEINTX &= ~(1 << RXSTPI);
     UEINTX &= ~(1 << TXINI);
     while (!(UEINTX & 1 << RXOUTI)) ;
     UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
-  }
-  else {
+  break;
+case 0x0A: /* here go all cases for bmRequestType different from 0x81 */
     usb_user_read_request(bmRequestType, bmRequest);
-  }
   break;
 case 0x0B:
   if (bmRequestType == 0x01) {
