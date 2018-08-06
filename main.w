@@ -770,11 +770,7 @@ case 0x0102: @/
 case 0x01: /* here go all cases for bmRequestType different from 0x02 */
   usb_user_read_request(bmRequestType, bmRequest);
   break;
-case 0x03:
-  if (0x02 >= bmRequestType) {
-    U8 wValue;
-    U8 wIndex;
-    U8 dummy;
+case 0x0302: @/
     switch (bmRequestType) {
     case 0x00:
       wValue = UEDATX;
@@ -824,10 +820,9 @@ case 0x03:
       UECONX |= 1 << STALLRQ;
       UEINTX &= ~(1 << RXSTPI);
     }
-  }
-  else {
+  break;
+case 0x03: /* here go all cases for bmRequestType different from 0x02 */
     usb_user_read_request(bmRequestType, bmRequest);
-  }
   break;
 case 0x00:
   if (0x7F < bmRequestType && 0x82 >= bmRequestType) {
