@@ -181,36 +181,36 @@ PROGMEM const S_usb_user_configuration_descriptor usb_conf_desc = {
 PROGMEM const S_usb_manufacturer_string_descriptor
   usb_user_manufacturer_string_descriptor = {
   sizeof usb_user_manufacturer_string_descriptor, 0x03, {((U16) ('A')),
-                                                           ((U16) ('T')),
-                                                           ((U16) ('M')),
-                                                           ((U16) ('E')),
-                                                           ((U16) ('L'))}
+                                                         ((U16) ('T')),
+                                                         ((U16) ('M')),
+                                                         ((U16) ('E')),
+                                                         ((U16) ('L'))}
 };
 
 PROGMEM const S_usb_product_string_descriptor
   usb_user_product_string_descriptor = {
   sizeof usb_user_product_string_descriptor, 0x03, {((U16) ('A')),
-                                                      ((U16) ('V')),
-                                                      ((U16) ('R')),
-                                                      ((U16) (' ')),
-                                                      ((U16) ('U')),
-                                                      ((U16) ('S')),
-                                                      ((U16) ('B')),
-                                                      ((U16) (' ')),
-                                                      ((U16) ('C')),
-                                                      ((U16) ('D')),
-                                                      ((U16) ('C')),
-                                                      ((U16) (' ')),
-                                                      ((U16) ('D')),
-                                                      ((U16) ('E')),
-                                                      ((U16) ('M')),
-                                                      ((U16) ('O'))}
+                                                    ((U16) ('V')),
+                                                    ((U16) ('R')),
+                                                    ((U16) (' ')),
+                                                    ((U16) ('U')),
+                                                    ((U16) ('S')),
+                                                    ((U16) ('B')),
+                                                    ((U16) (' ')),
+                                                    ((U16) ('C')),
+                                                    ((U16) ('D')),
+                                                    ((U16) ('C')),
+                                                    ((U16) (' ')),
+                                                    ((U16) ('D')),
+                                                    ((U16) ('E')),
+                                                    ((U16) ('M')),
+                                                    ((U16) ('O'))}
 };
 
 PROGMEM const S_usb_serial_number usb_user_serial_number = {
   sizeof usb_user_serial_number, 0x03, {((U16) ('1')), ((U16) ('.')),
-                                          ((U16) ('0')), ((U16) ('.')),
-                                          ((U16) ('0'))}
+                                        ((U16) ('0')), ((U16) ('.')),
+                                        ((U16) ('0'))}
 };
 
 PROGMEM const S_usb_language_id usb_user_language_id = {
@@ -290,9 +290,8 @@ int main(void)
         USBCON |= 1 << FRZCLK;
 
         PLLFRQ &=
-         ~(1 << PDIV3 | 1 << PDIV2 | 1 << PDIV1 | 1 << PDIV0),
-         PLLFRQ |= 1 << PDIV2,
-         PLLCSR = 1 << PINDIV | 1 << PLLE;
+          ~(1 << PDIV3 | 1 << PDIV2 | 1 << PDIV1 | 1 << PDIV0),
+          PLLFRQ |= 1 << PDIV2, PLLCSR = 1 << PINDIV | 1 << PLLE;
         while (!(PLLCSR & 1 << PLOCK)) ;
         USBCON &= ~(1 << FRZCLK);
         UDCON &= ~(1 << DETACH);
@@ -347,8 +346,8 @@ int main(void)
           }
           dummy = UEDATX;
           dummy = UEDATX;
-          ((U8 *) &wLength)[0] = UEDATX;
-          ((U8 *) &wLength)[1] = UEDATX;
+          ((U8 *) & wLength)[0] = UEDATX;
+          ((U8 *) & wLength)[1] = UEDATX;
           UEINTX &= ~(1 << RXSTPI);
           if (wLength > data_to_transfer) {
             if (data_to_transfer % 32 == 0) {
@@ -430,19 +429,19 @@ int main(void)
             UENUM = (U8) 0x03;
             UECONX |= 1 << EPEN;
             UECFG0X = 1 << EPTYPE1 | 1 << EPTYPE0 | 1 << EPDIR; /* interrupt, IN */
-            UECFG1X = 1 << EPSIZE1; /* 32 bytes */
+            UECFG1X = 1 << EPSIZE1;     /* 32 bytes */
             UECFG1X |= 1 << ALLOC;
 
             UENUM = (U8) 0x01;
             UECONX |= 1 << EPEN;
-            UECFG0X = 1 << EPTYPE1 | 1 << EPDIR; /* bulk, IN */
-            UECFG1X = 1 << EPSIZE1; /* 32 bytes */
+            UECFG0X = 1 << EPTYPE1 | 1 << EPDIR;        /* bulk, IN */
+            UECFG1X = 1 << EPSIZE1;     /* 32 bytes */
             UECFG1X |= 1 << ALLOC;
 
             UENUM = (U8) 0x02;
             UECONX |= 1 << EPEN;
-            UECFG0X = 1 << EPTYPE1; /* bulk, OUT */
-            UECFG1X = 1 << EPSIZE1; /* 32 bytes */
+            UECFG0X = 1 << EPTYPE1;     /* bulk, OUT */
+            UECFG1X = 1 << EPSIZE1;     /* 32 bytes */
             UECFG1X |= 1 << ALLOC;
 
             UERST = 1 << EP3, UERST = 0;
@@ -566,7 +565,7 @@ int main(void)
         break;
       case 0x00:
         if ((0x7F < bmRequestType) & (0x82 >= bmRequestType)) { /* TODO:
-            check this via objdump again and change */
+                                                                   check this via objdump again and change */
           U8 wIndex;
           U8 dummy;
           dummy = UEDATX;
@@ -648,16 +647,19 @@ int main(void)
         }
       }
       if (cpt_sof >= 100) {
-        if ((0 == (flash_read_fuse(0x0003) & 1 << 6)) || PINF & 1 << PINF6 ? 0 : 1) {
+        if ((0 == (flash_read_fuse(0x0003) & 1 << 6))
+            || PINF & 1 << PINF6 ? 0 : 1) {
           printf("Select Pressed !\r\n");
         }
-        if ((0 == (flash_read_fuse(0x0003) & 1 << 6)) || PINF & 1 << PINF7 ? 0 : 1) {
+        if ((0 == (flash_read_fuse(0x0003) & 1 << 6))
+            || PINF & 1 << PINF7 ? 0 : 1) {
           printf("Right Pressed !\r\n");
           serial_state.bDCD = 1;
         }
         else
           serial_state.bDCD = 0;
-        if ((0 == (flash_read_fuse(0x0003) & 1 << 6)) || PINF & 1 << PINF4 ? 0 : 1) {
+        if ((0 == (flash_read_fuse(0x0003) & 1 << 6))
+            || PINF & 1 << PINF4 ? 0 : 1) {
           printf("Left Pressed !\r\n");
           serial_state.bDSR = 1;
         }
@@ -665,7 +667,8 @@ int main(void)
           serial_state.bDSR = 0;
         if (!(PINC & 1 << PINC6))
           printf("Down Pressed !\r\n");
-        if ((0 == (flash_read_fuse(0x0003) & 1 << 6)) || PINF & 1 << PINF5 ? 0 : 1)
+        if ((0 == (flash_read_fuse(0x0003) & 1 << 6))
+            || PINF & 1 << PINF5 ? 0 : 1)
           printf("Up Pressed !\r\n");
         if (!(PINE & 1 << PINE2))
           printf("Hello from ATmega32U4 !\r\n");
@@ -681,8 +684,8 @@ int main(void)
             UEDATX = (U8) 0x00;
             UEDATX = (U8) 0x02;
             UEDATX = (U8) 0x00;
-            UEDATX = (U8) ((U8 *) &serial_state.all)[0];
-            UEDATX = (U8) ((U8 *) &serial_state.all)[1];
+            UEDATX = (U8) ((U8 *) & serial_state.all)[0];
+            UEDATX = (U8) ((U8 *) & serial_state.all)[1];
             UEINTX &= ~(1 << TXINI), UEINTX &= ~(1 << FIFOCON);
           }
         }
@@ -713,18 +716,18 @@ Bool usb_user_read_request(U8 type, U8 request)
 {
   U16 wValue;
 
-  ((U8 *) &wValue)[0] = UEDATX;
-  ((U8 *) &wValue)[1] = UEDATX;
+  ((U8 *) & wValue)[0] = UEDATX;
+  ((U8 *) & wValue)[1] = UEDATX;
 
   if (0x21 == type) {
     switch (request) {
     case 0x20:
       UEINTX &= ~(1 << RXSTPI);
       while (!(UEINTX & 1 << RXOUTI)) ;
-      ((U8 *) &line_coding.dwDTERate)[0] = UEDATX;
-      ((U8 *) &line_coding.dwDTERate)[1] = UEDATX;
-      ((U8 *) &line_coding.dwDTERate)[2] = UEDATX;
-      ((U8 *) &line_coding.dwDTERate)[3] = UEDATX;
+      ((U8 *) & line_coding.dwDTERate)[0] = UEDATX;
+      ((U8 *) & line_coding.dwDTERate)[1] = UEDATX;
+      ((U8 *) & line_coding.dwDTERate)[2] = UEDATX;
+      ((U8 *) & line_coding.dwDTERate)[3] = UEDATX;
       line_coding.bCharFormat = UEDATX;
       line_coding.bParityType = UEDATX;
       line_coding.bDataBits = UEDATX;
@@ -732,8 +735,8 @@ Bool usb_user_read_request(U8 type, U8 request)
       UEINTX &= ~(1 << TXINI);
       while (!(UEINTX & 1 << TXINI)) ;
       UBRR1 =
-       (U16) (((U32) 16000 * 1000L) /
-              ((U32) line_coding.dwDTERate / 2 * 16) - 1);
+        (U16) (((U32) 16000 * 1000L) /
+               ((U32) line_coding.dwDTERate / 2 * 16) - 1);
       return 1;
       break;
     case 0x22:
@@ -791,7 +794,7 @@ void uart_usb_send_buffer(U8 * buffer, U8 nb_data)
   while (nb_data) {
     while (!(UEINTX & 1 << RWAL)) ;
     while (UEINTX & 1 << RWAL && nb_data) {
-      UEDATX = (U8) *buffer;
+      UEDATX = (U8) * buffer;
       buffer++;
       nb_data--;
     }
@@ -805,7 +808,7 @@ void uart_usb_send_buffer(U8 * buffer, U8 nb_data)
 
 int uart_usb_putchar(int data_to_send)
 {
-  uart_usb_send_buffer((U8 *) &data_to_send, 1);
+  uart_usb_send_buffer((U8 *) & data_to_send, 1);
   return data_to_send;
 }
 
@@ -843,8 +846,7 @@ ISR(USB_GEN_vect)
       USBCON |= 1 << FRZCLK;
 
       PLLFRQ &= ~(1 << PDIV3 | 1 << PDIV2 | 1 << PDIV1 | 1 << PDIV0),
-       PLLFRQ |= 1 << PDIV2,
-       PLLCSR = 1 << PINDIV | 1 << PLLE;
+        PLLFRQ |= 1 << PDIV2, PLLCSR = 1 << PINDIV | 1 << PLLE;
       while (!(PLLCSR & 1 << PLOCK)) ;
       USBCON &= ~(1 << FRZCLK);
       UDCON &= ~(1 << DETACH);
@@ -886,9 +888,8 @@ ISR(USB_GEN_vect)
   if (UDINT & 1 << WAKEUPI && UDIEN & 1 << WAKEUPE) {
     if (!(PLLCSR & 1 << PLOCK)) {
       PLLFRQ &=
-       ~(1 << PDIV3 | 1 << PDIV2 | 1 << PDIV1 | 1 << PDIV0),
-       PLLFRQ |= 1 << PDIV2,
-       PLLCSR = 1 << PINDIV | 1 << PLLE;
+        ~(1 << PDIV3 | 1 << PDIV2 | 1 << PDIV1 | 1 << PDIV0),
+        PLLFRQ |= 1 << PDIV2, PLLCSR = 1 << PINDIV | 1 << PLLE;
       while (!(PLLCSR & (1 << PLOCK))) ;
     }
     USBCON &= ~(1 << FRZCLK);
@@ -939,7 +940,7 @@ ISR(USART1_RX_vect)
         i++;
       }
     } while (!(UEINTX & 1 << RWAL));
-    uart_usb_send_buffer((U8 *) &rs2usb, i);
+    uart_usb_send_buffer((U8 *) & rs2usb, i);
     UENUM = (U8) save_ep;
   }
 }
