@@ -677,15 +677,15 @@ case 0x08: /* here go all cases for bmRequestType different from 0x80 */
   usb_user_read_request(bmRequestType, bmRequest);
   break;
 case 0x0500: @/
-    U8 addr = UEDATX;
-    UDADDR = (UDADDR & 1 << ADDEN) | ((U8) addr & 0x7F);
-    UEINTX &= ~(1 << RXSTPI);
-    UEINTX &= ~(1 << TXINI);
-    while (!(UEINTX & 1 << TXINI)) ;
-    UDADDR |= 1 << ADDEN;
+  U8 addr = UEDATX;
+  UDADDR = (UDADDR & 1 << ADDEN) | ((U8) addr & 0x7F);
+  UEINTX &= ~(1 << RXSTPI);
+  UEINTX &= ~(1 << TXINI);
+  while (!(UEINTX & 1 << TXINI)) ;
+  UDADDR |= 1 << ADDEN;
   break;
 case 0x05: /* here go all cases for bmRequestType different from 0x00 */
-    usb_user_read_request(bmRequestType, bmRequest);
+  usb_user_read_request(bmRequestType, bmRequest);
   break;
 case 0x09:
   if (0x00 == bmRequestType) {
