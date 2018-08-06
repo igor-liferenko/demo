@@ -843,10 +843,8 @@ case 0x0B01:
   break;
 case 0x0B: /* here go all cases for bmRequestType different from 0x01 */
   break;
-case 0x07:
-case 0x0C:
-default:
-  if (usb_user_read_request(bmRequestType, bmRequest) == (0 == 1)) {
+default: /* here go all cases for bmRequest different from above */
+  if (usb_user_read_request(bmRequestType, bmRequest) == 0) {
     UECONX |= 1 << STALLRQ;
     UEINTX &= ~(1 << RXSTPI);
   }
