@@ -667,14 +667,14 @@ case 0x06: /* here go all cases for bmRequestType different from 0x80 */
   usb_user_read_request(bmRequestType, bmRequest);
   break;
 case 0x0880: @/
-    UEINTX &= ~(1 << RXSTPI);
-    UEDATX = (U8) usb_configuration_nb;
-    UEINTX &= ~(1 << TXINI), UEINTX &= ~(1 << FIFOCON);
-    while (!(UEINTX & 1 << RXOUTI)) ;
-    UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
+  UEINTX &= ~(1 << RXSTPI);
+  UEDATX = (U8) usb_configuration_nb;
+  UEINTX &= ~(1 << TXINI), UEINTX &= ~(1 << FIFOCON);
+  while (!(UEINTX & 1 << RXOUTI)) ;
+  UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
   break;
 case 0x08: /* here go all cases for bmRequestType different from 0x80 */
-    usb_user_read_request(bmRequestType, bmRequest);
+  usb_user_read_request(bmRequestType, bmRequest);
   break;
 case 0x05:
   if (0x00 == bmRequestType) {
