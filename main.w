@@ -845,16 +845,11 @@ case 0x00:
       wIndex = wIndex & 0x7F;
       UEDATX = (U8) endpoint_status[wIndex];
       break;
-    default:
-      UECONX |= 1 << STALLRQ;
-      UEINTX &= ~(1 << RXSTPI);
-      goto out_get_status;
     }
     UEDATX = (U8) 0x00;
     UEINTX &= ~(1 << TXINI);
     while (!(UEINTX & 1 << RXOUTI)) ;
     UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
-  out_get_status:;
   }
   else {
     usb_user_read_request(bmRequestType, bmRequest);
