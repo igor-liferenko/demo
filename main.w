@@ -824,36 +824,17 @@ case 0x0302: @/
 case 0x03: /* here go all cases for bmRequestType different from 0x02 */
   usb_user_read_request(bmRequestType, bmRequest);
   break;
-case 0x00:
-  if (0x7F < bmRequestType && 0x82 >= bmRequestType) {
-    U8 wIndex;
-    U8 dummy;
-    dummy = UEDATX;
-    dummy = UEDATX;
-    wIndex = UEDATX;
-    switch (bmRequestType) {
-    case 0x80:
-      UEINTX &= ~(1 << RXSTPI);
-      UEDATX = (U8) device_status;
-      break;
-    case 0x81:
-      UEINTX &= ~(1 << RXSTPI);
-      UEDATX = (U8) 0x00;
-      break;
-    case 0x82:
-      UEINTX &= ~(1 << RXSTPI);
-      wIndex = wIndex & 0x7F;
-      UEDATX = (U8) endpoint_status[wIndex];
-      break;
-    }
-    UEDATX = (U8) 0x00;
-    UEINTX &= ~(1 << TXINI);
-    while (!(UEINTX & 1 << RXOUTI)) ;
-    UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
-  }
-  else {
+case 0x0080: @/
+  @<Code which is executed in |0x00| for |0x80|, |0x81| and |0x82|@>@;
+  break;
+case 0x0081: @/
+  @<Code which is executed in |0x00| for |0x80|, |0x81| and |0x82|@>@;
+  break;
+case 0x0082: @/
+  @<Code which is executed in |0x00| for |0x80|, |0x81| and |0x82|@>@;
+  break;
+case 0x00: /* here go all cases for bmRequestType different from 0x80, 0x81 and 0x82 */
     usb_user_read_request(bmRequestType, bmRequest);
-  }
   break;
 case 0x0A:
   if (bmRequestType == 0x81) {
@@ -925,3 +906,27 @@ default:
     while (!(UEINTX & 1 << NAKOUTI)) ;
     UEINTX &= ~(1 << NAKOUTI);
     UEINTX &= ~(1 << RXOUTI);
+
+@ @<Code which is executed in |0x00| for |0x80|, |0x81| and |0x82|@>=
+    dummy = UEDATX;
+    dummy = UEDATX;
+    wIndex = UEDATX;
+    switch (bmRequestType) {
+    case 0x80:
+      UEINTX &= ~(1 << RXSTPI);
+      UEDATX = (U8) device_status;
+      break;
+    case 0x81:
+      UEINTX &= ~(1 << RXSTPI);
+      UEDATX = (U8) 0x00;
+      break;
+    case 0x82:
+      UEINTX &= ~(1 << RXSTPI);
+      wIndex = wIndex & 0x7F;
+      UEDATX = (U8) endpoint_status[wIndex];
+      break;
+    }
+    UEDATX = (U8) 0x00;
+    UEINTX &= ~(1 << TXINI);
+    while (!(UEINTX & 1 << RXOUTI)) ;
+    UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
