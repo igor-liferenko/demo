@@ -688,42 +688,42 @@ case 0x05: /* here go all cases for bmRequestType different from 0x00 */
   usb_user_read_request(bmRequestType, bmRequest);
   break;
 case 0x0900: @/
-    U8 configuration_number;
-    configuration_number = UEDATX;
-    if (configuration_number <= 1) {
-      UEINTX &= ~(1 << RXSTPI);
-      usb_configuration_nb = configuration_number;
-      UEINTX &= ~(1 << TXINI);
+  U8 configuration_number;
+  configuration_number = UEDATX;
+  if (configuration_number <= 1) {
+    UEINTX &= ~(1 << RXSTPI);
+    usb_configuration_nb = configuration_number;
+    UEINTX &= ~(1 << TXINI);
 
-      UENUM = EP3;
-      UECONX |= 1 << EPEN;
-      UECFG0X = 1 << EPTYPE1 | 1 << EPTYPE0 | 1 << EPDIR;       /* interrupt, IN */
-      UECFG1X = 1 << EPSIZE1;   /* 32 bytes */
-      UECFG1X |= 1 << ALLOC;
+    UENUM = EP3;
+    UECONX |= 1 << EPEN;
+    UECFG0X = 1 << EPTYPE1 | 1 << EPTYPE0 | 1 << EPDIR;       /* interrupt, IN */
+    UECFG1X = 1 << EPSIZE1;   /* 32 bytes */
+    UECFG1X |= 1 << ALLOC;
 
-      UENUM = EP1;
-      UECONX |= 1 << EPEN;
-      UECFG0X = 1 << EPTYPE1 | 1 << EPDIR;      /* bulk, IN */
-      UECFG1X = 1 << EPSIZE1;   /* 32 bytes */
-      UECFG1X |= 1 << ALLOC;
+    UENUM = EP1;
+    UECONX |= 1 << EPEN;
+    UECFG0X = 1 << EPTYPE1 | 1 << EPDIR;      /* bulk, IN */
+    UECFG1X = 1 << EPSIZE1;   /* 32 bytes */
+    UECFG1X |= 1 << ALLOC;
 
-      UENUM = EP2;
-      UECONX |= 1 << EPEN;
-      UECFG0X = 1 << EPTYPE1;   /* bulk, OUT */
-      UECFG1X = 1 << EPSIZE1;   /* 32 bytes */
-      UECFG1X |= 1 << ALLOC;
+    UENUM = EP2;
+    UECONX |= 1 << EPEN;
+    UECFG0X = 1 << EPTYPE1;   /* bulk, OUT */
+    UECFG1X = 1 << EPSIZE1;   /* 32 bytes */
+    UECFG1X |= 1 << ALLOC;
 
-      UERST = 1 << EP3, UERST = 0;
-      UERST = 1 << EP1, UERST = 0;
-      UERST = 1 << EP2, UERST = 0;
-    }
-    else {
-      UECONX |= 1 << STALLRQ;
-      UEINTX &= ~(1 << RXSTPI);
-    }
+    UERST = 1 << EP3, UERST = 0;
+    UERST = 1 << EP1, UERST = 0;
+    UERST = 1 << EP2, UERST = 0;
+  }
+  else {
+    UECONX |= 1 << STALLRQ;
+    UEINTX &= ~(1 << RXSTPI);
+  }
   break;
 case 0x09: /* here go all cases for bmRequestType different from 0x00 */
-    usb_user_read_request(bmRequestType, bmRequest);
+  usb_user_read_request(bmRequestType, bmRequest);
   break;
 case 0x01:
   if (0x02 >= bmRequestType) {
