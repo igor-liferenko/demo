@@ -769,49 +769,49 @@ case 0x01: /* here go all cases for bmRequestType different from 0x00, 0x01 and 
   usb_user_read_request(bmRequestType, bmRequest);
   break;
 case 0x0300: @/
-    wValue = UEDATX;
-    switch (wValue) {
-    case 1:
-      UECONX |= 1 << STALLRQ;
-      UEINTX &= ~(1 << RXSTPI);
-      break;
-    default:
-      UECONX |= 1 << STALLRQ;
-      UEINTX &= ~(1 << RXSTPI);
-    }
-    break;
-case 0x0301: @/
+  wValue = UEDATX;
+  switch (wValue) {
+  case 1:
     UECONX |= 1 << STALLRQ;
     UEINTX &= ~(1 << RXSTPI);
     break;
+  default:
+    UECONX |= 1 << STALLRQ;
+    UEINTX &= ~(1 << RXSTPI);
+  }
+  break;
+case 0x0301: @/
+  UECONX |= 1 << STALLRQ;
+  UEINTX &= ~(1 << RXSTPI);
+  break;
 case 0x0302:
-    wValue = UEDATX;
-    dummy = UEDATX;
-    if (wValue == 0x00) {
-      wIndex = UEDATX & 0x7F;
-      if (wIndex == 0) {
-        UECONX |= 1 << STALLRQ;
-        UEINTX &= ~(1 << RXSTPI);
-      }
-      UENUM = (U8) wIndex;
-      if (UECONX & 1 << EPEN) {
-        UECONX |= 1 << STALLRQ;
-        UENUM = EP0;
-        endpoint_status[wIndex] = 0x01;
-        UEINTX &= ~(1 << RXSTPI);
-        UEINTX &= ~(1 << TXINI);
-      }
-      else {
-        UENUM = EP0;
-        UECONX |= 1 << STALLRQ;
-        UEINTX &= ~(1 << RXSTPI);
-      }
-    }
-    else {
+  wValue = UEDATX;
+  dummy = UEDATX;
+  if (wValue == 0x00) {
+    wIndex = UEDATX & 0x7F;
+    if (wIndex == 0) {
       UECONX |= 1 << STALLRQ;
       UEINTX &= ~(1 << RXSTPI);
     }
-    break;
+    UENUM = (U8) wIndex;
+    if (UECONX & 1 << EPEN) {
+      UECONX |= 1 << STALLRQ;
+      UENUM = EP0;
+      endpoint_status[wIndex] = 0x01;
+      UEINTX &= ~(1 << RXSTPI);
+      UEINTX &= ~(1 << TXINI);
+    }
+    else {
+      UENUM = EP0;
+      UECONX |= 1 << STALLRQ;
+      UEINTX &= ~(1 << RXSTPI);
+    }
+  }
+  else {
+    UECONX |= 1 << STALLRQ;
+    UEINTX &= ~(1 << RXSTPI);
+  }
+  break;
 case 0x03: /* here go all cases for bmRequestType different from 0x00, 0x01 and 0x02 */
   usb_user_read_request(bmRequestType, bmRequest);
   break;
