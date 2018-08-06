@@ -834,7 +834,7 @@ case 0x0082: @/
   @<Code which is executed in |0x00| for |0x80|, |0x81| and |0x82|@>@;
   break;
 case 0x00: /* here go all cases for bmRequestType different from 0x80, 0x81 and 0x82 */
-    usb_user_read_request(bmRequestType, bmRequest);
+  usb_user_read_request(bmRequestType, bmRequest);
   break;
 case 0x0A:
   if (bmRequestType == 0x81) {
