@@ -814,9 +814,6 @@ case 0x0302: @/
       UEINTX &= ~(1 << RXSTPI);
     }
     break;
-  default:
-    UECONX |= 1 << STALLRQ;
-    UEINTX &= ~(1 << RXSTPI);
   }
   break;
 case 0x03: /* here go all cases for bmRequestType different from 0x02 */
