@@ -43,14 +43,6 @@ typedef struct {
 } S_line_coding;
 
 typedef struct {
-  U8 bmRequestType;
-  U8 bRequest;
-  U16 wValue;
-  U16 wIndex;
-  U16 wLength;
-} S_UsbRequest;
-
-typedef struct {
   U8 bLength;
   U8 bDescriptorType;
   U16 bscUSB;
