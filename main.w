@@ -315,12 +315,7 @@ Bool usb_user_read_request(U8 type, U8 request)
 {
   U16 wValue;
 
-  ((U8 *) & wValue)[0] = UEDATX;
-  ((U8 *) & wValue)[1] = UEDATX;
-
-  if (0x21 == type) {
-    switch (request) {
-    case 0x20:
+    case 0x2021:
       UEINTX &= ~(1 << RXSTPI);
       while (!(UEINTX & 1 << RXOUTI)) ;
       ((U8 *) & line_coding.dwDTERate)[0] = UEDATX;
@@ -338,25 +333,23 @@ Bool usb_user_read_request(U8 type, U8 request)
                ((U32) line_coding.dwDTERate / 2 * 16) - 1);
       return 1;
       break;
-    case 0x22:
+    case 0x2221:
+      ((U8 *) & wValue)[0] = UEDATX;
+      ((U8 *) & wValue)[1] = UEDATX;
       UEINTX &= ~(1 << RXSTPI);
       UEINTX &= ~(1 << TXINI);
       line_status.all = wValue;
       while (!(UEINTX & 1 << TXINI)) ;
       return 1;
       break;
-    case 0x23:
+    case 0x2321:
       UEINTX &= ~(1 << RXSTPI);
       UEINTX &= ~(1 << TXINI);
       usb_request_break_generation = 1;
       while (!(UEINTX & 1 << TXINI)) ;
       return 1;
       break;
-    }
-  }
-  if (0xA1 == type) {
-    switch (request) {
-    case 0x21:
+    case 0x21A1:
       UEINTX &= ~(1 << RXSTPI);
       UEDATX = (U8) ((U8 *) & line_coding.dwDTERate)[0];
       UEDATX = (U8) ((U8 *) & line_coding.dwDTERate)[1];
@@ -373,8 +366,7 @@ Bool usb_user_read_request(U8 type, U8 request)
       UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
       return 1;
       break;
-    }
-  }
+
   return 0;
 }
 
