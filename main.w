@@ -489,7 +489,6 @@ UEINTX &= ~(1 << RXOUTI); /* TODO: ??? - check if it is non-zero here */
 bmRequestType = 0;
 bmRequest = 0;
 U16 wLength;
-U8 dummy;
 U8 nb_byte;
 zlp = 0;
 switch (UEDATX | UEDATX << 8) {
@@ -719,8 +718,8 @@ default: @/
 }
 
 @ @<Code which is executed in |0x0680| for both |0x0100| and |0x0200|@>=
-    dummy = UEDATX;
-    dummy = UEDATX;
+    (void) UEDATX;
+    (void) UEDATX;
     ((U8 *) & wLength)[0] = UEDATX;
     ((U8 *) & wLength)[1] = UEDATX;
     UEINTX &= ~(1 << RXSTPI);
@@ -763,8 +762,8 @@ default: @/
     UEINTX &= ~(1 << RXOUTI);
 
 @ @<Code which is executed in |0x00| for |0x80|, |0x81| and |0x82|@>=
-    dummy = UEDATX;
-    dummy = UEDATX;
+    (void) UEDATX;
+    (void) UEDATX;
     wIndex = UEDATX;
     switch (bmRequestType) {
     case 0x80:
