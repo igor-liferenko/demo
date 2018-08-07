@@ -764,10 +764,18 @@ default: @/
     case 0x80:
       UEINTX &= ~(1 << RXSTPI);
       UEDATX = (U8) device_status;
+      UEDATX = 0x00;
+      UEINTX &= ~(1 << TXINI);
+      while (!(UEINTX & 1 << RXOUTI)) ;
+      UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
       break;
     case 0x81:
       UEINTX &= ~(1 << RXSTPI);
       UEDATX = 0x00;
+      UEDATX = 0x00;
+      UEINTX &= ~(1 << TXINI);
+      while (!(UEINTX & 1 << RXOUTI)) ;
+      UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
       break;
     case 0x82:
       (void) UEDATX;
@@ -776,9 +784,9 @@ default: @/
       UEINTX &= ~(1 << RXSTPI);
       wIndex = wIndex & 0x7F;
       UEDATX = (U8) endpoint_status[wIndex];
+      UEDATX = 0x00;
+      UEINTX &= ~(1 << TXINI);
+      while (!(UEINTX & 1 << RXOUTI)) ;
+      UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
       break;
     }
-    UEDATX = 0x00;
-    UEINTX &= ~(1 << TXINI);
-    while (!(UEINTX & 1 << RXOUTI)) ;
-    UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
