@@ -722,8 +722,8 @@ case 0x21A1:
   UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
   break;
 default: /* here go all cases for bmRequest different from above */
-    UECONX |= 1 << STALLRQ;
-    UEINTX &= ~(1 << RXSTPI);
+  UECONX |= 1 << STALLRQ;
+  UEINTX &= ~(1 << RXSTPI);
 }
 
 @ @<Code which is executed in |0x0680| for both |0x0100| and |0x0200|@>=
