@@ -505,8 +505,6 @@ case 0x0680: @/
     UEINTX &= ~(1 << RXSTPI);
   }
   break;
-//case 0x06: /* here go all cases for bmRequestType different from 0x80 */
-//  break;
 case 0x0880: @/
   UEINTX &= ~(1 << RXSTPI);
   UEDATX = (U8) usb_configuration_nb;
@@ -514,8 +512,6 @@ case 0x0880: @/
   while (!(UEINTX & 1 << RXOUTI)) ;
   UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
   break;
-//case 0x08: /* here go all cases for bmRequestType different from 0x80 */
-//  break;
 case 0x0500: @/
   addr = UEDATX;
   UDADDR = (UDADDR & 1 << ADDEN) | ((U8) addr & 0x7F);
@@ -524,8 +520,6 @@ case 0x0500: @/
   while (!(UEINTX & 1 << TXINI)) ;
   UDADDR |= 1 << ADDEN;
   break;
-//case 0x05: /* here go all cases for bmRequestType different from 0x00 */
-//  break;
 case 0x0900: @/
   configuration_number = UEDATX;
   if (configuration_number <= 1) {
@@ -560,8 +554,6 @@ case 0x0900: @/
     UEINTX &= ~(1 << RXSTPI);
   }
   break;
-//case 0x09: /* here go all cases for bmRequestType different from 0x00 */
-//  break;
 case 0x0100: @/
   UECONX |= 1 << STALLRQ;
   UEINTX &= ~(1 << RXSTPI);
@@ -598,8 +590,6 @@ case 0x0102: @/
     UEINTX &= ~(1 << RXSTPI);
   }
   break;
-//case 0x01: /* here go all cases for bmRequestType different from 0x00, 0x01 and 0x02 */
-//  break;
 case 0x0300: @/
   UECONX |= 1 << STALLRQ;
   UEINTX &= ~(1 << RXSTPI);
@@ -636,8 +626,6 @@ case 0x0302:
     UEINTX &= ~(1 << RXSTPI);
   }
   break;
-//case 0x03: /* here go all cases for bmRequestType different from 0x00, 0x01 and 0x02 */
-//  break;
 case 0x0080: @/
   UEINTX &= ~(1 << RXSTPI);
   UEDATX = (U8) device_status;
@@ -666,23 +654,17 @@ case 0x0082: @/
   while (!(UEINTX & 1 << RXOUTI)) ;
   UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
   break;
-//case 0x00: /* here go all cases for bmRequestType different from 0x80, 0x81 and 0x82 */
-//  break;
 case 0x0A81: @/
   UEINTX &= ~(1 << RXSTPI);
   UEINTX &= ~(1 << TXINI);
   while (!(UEINTX & 1 << RXOUTI)) ;
   UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
   break;
-//case 0x0A: /* here go all cases for bmRequestType different from 0x81 */
-//  break;
 case 0x0B01:
   UEINTX &= ~(1 << RXSTPI);
   UEINTX &= ~(1 << TXINI);
   while (!(UEINTX & 1 << TXINI)) ;
   break;
-//case 0x0B: /* here go all cases for bmRequestType different from 0x01 */
-//  break;
 case 0x2021: @/
   UEINTX &= ~(1 << RXSTPI);
   while (!(UEINTX & 1 << RXOUTI)) ;
