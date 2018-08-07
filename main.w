@@ -510,9 +510,8 @@ case 0x0680: @/
     UEINTX &= ~(1 << RXSTPI);
   }
   break;
-case 0x06: /* here go all cases for bmRequestType different from 0x80 */
-  usb_user_read_request(bmRequestType, bmRequest);
-  break;
+//case 0x06: /* here go all cases for bmRequestType different from 0x80 */
+//  break;
 case 0x0880: @/
   UEINTX &= ~(1 << RXSTPI);
   UEDATX = (U8) usb_configuration_nb;
@@ -520,9 +519,8 @@ case 0x0880: @/
   while (!(UEINTX & 1 << RXOUTI)) ;
   UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
   break;
-case 0x08: /* here go all cases for bmRequestType different from 0x80 */
-  usb_user_read_request(bmRequestType, bmRequest);
-  break;
+//case 0x08: /* here go all cases for bmRequestType different from 0x80 */
+//  break;
 case 0x0500: @/
   addr = UEDATX;
   UDADDR = (UDADDR & 1 << ADDEN) | ((U8) addr & 0x7F);
@@ -531,9 +529,8 @@ case 0x0500: @/
   while (!(UEINTX & 1 << TXINI)) ;
   UDADDR |= 1 << ADDEN;
   break;
-case 0x05: /* here go all cases for bmRequestType different from 0x00 */
-  usb_user_read_request(bmRequestType, bmRequest);
-  break;
+//case 0x05: /* here go all cases for bmRequestType different from 0x00 */
+//  break;
 case 0x0900: @/
   configuration_number = UEDATX;
   if (configuration_number <= 1) {
@@ -568,9 +565,8 @@ case 0x0900: @/
     UEINTX &= ~(1 << RXSTPI);
   }
   break;
-case 0x09: /* here go all cases for bmRequestType different from 0x00 */
-  usb_user_read_request(bmRequestType, bmRequest);
-  break;
+//case 0x09: /* here go all cases for bmRequestType different from 0x00 */
+//  break;
 case 0x0100: @/
   UECONX |= 1 << STALLRQ;
   UEINTX &= ~(1 << RXSTPI);
@@ -607,9 +603,8 @@ case 0x0102: @/
     UEINTX &= ~(1 << RXSTPI);
   }
   break;
-case 0x01: /* here go all cases for bmRequestType different from 0x00, 0x01 and 0x02 */
-  usb_user_read_request(bmRequestType, bmRequest);
-  break;
+//case 0x01: /* here go all cases for bmRequestType different from 0x00, 0x01 and 0x02 */
+//  break;
 case 0x0300: @/
   UECONX |= 1 << STALLRQ;
   UEINTX &= ~(1 << RXSTPI);
@@ -646,9 +641,8 @@ case 0x0302:
     UEINTX &= ~(1 << RXSTPI);
   }
   break;
-case 0x03: /* here go all cases for bmRequestType different from 0x00, 0x01 and 0x02 */
-  usb_user_read_request(bmRequestType, bmRequest);
-  break;
+//case 0x03: /* here go all cases for bmRequestType different from 0x00, 0x01 and 0x02 */
+//  break;
 case 0x0080: @/
   @<Code which is executed in |0x00| for |0x80|, |0x81| and |0x82|@>@;
   break;
@@ -658,26 +652,24 @@ case 0x0081: @/
 case 0x0082: @/
   @<Code which is executed in |0x00| for |0x80|, |0x81| and |0x82|@>@;
   break;
-case 0x00: /* here go all cases for bmRequestType different from 0x80, 0x81 and 0x82 */
-  usb_user_read_request(bmRequestType, bmRequest);
-  break;
+//case 0x00: /* here go all cases for bmRequestType different from 0x80, 0x81 and 0x82 */
+//  break;
 case 0x0A81: @/
   UEINTX &= ~(1 << RXSTPI);
   UEINTX &= ~(1 << TXINI);
   while (!(UEINTX & 1 << RXOUTI)) ;
   UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
   break;
-case 0x0A: /* here go all cases for bmRequestType different from 0x81 */
-  usb_user_read_request(bmRequestType, bmRequest);
-  break;
+//case 0x0A: /* here go all cases for bmRequestType different from 0x81 */
+//  break;
 case 0x0B01:
   UEINTX &= ~(1 << RXSTPI);
   UEINTX &= ~(1 << TXINI);
   while (!(UEINTX & 1 << TXINI)) ;
   break;
-case 0x0B: /* here go all cases for bmRequestType different from 0x01 */
-  break;
-case 0x2021:
+//case 0x0B: /* here go all cases for bmRequestType different from 0x01 */
+//  break;
+case 0x2021: @/
   UEINTX &= ~(1 << RXSTPI);
   while (!(UEINTX & 1 << RXOUTI)) ;
   ((U8 *) &line_coding.dwDTERate)[0] = UEDATX;
@@ -693,7 +685,7 @@ case 0x2021:
   UBRR1 = (U16) (((U32) 16000 * 1000L) /
                 ((U32) line_coding.dwDTERate / 2 * 16) - 1);
   break;
-case 0x2221:
+case 0x2221: @/
   ((U8 *) & wValue)[0] = UEDATX;
   ((U8 *) & wValue)[1] = UEDATX;
   UEINTX &= ~(1 << RXSTPI);
@@ -701,18 +693,18 @@ case 0x2221:
   line_status.all = wValue;
   while (!(UEINTX & 1 << TXINI)) ;
   break;
-case 0x2321:
+case 0x2321: @/
   UEINTX &= ~(1 << RXSTPI);
   UEINTX &= ~(1 << TXINI);
   usb_request_break_generation = 1;
   while (!(UEINTX & 1 << TXINI)) ;
   break;
-case 0x21A1:
+case 0x21A1: @/
   UEINTX &= ~(1 << RXSTPI);
-  UEDATX = (U8) ((U8 *) & line_coding.dwDTERate)[0];
-  UEDATX = (U8) ((U8 *) & line_coding.dwDTERate)[1];
-  UEDATX = (U8) ((U8 *) & line_coding.dwDTERate)[2];
-  UEDATX = (U8) ((U8 *) & line_coding.dwDTERate)[3];
+  UEDATX = (U8) ((U8 *) &line_coding.dwDTERate)[0];
+  UEDATX = (U8) ((U8 *) &line_coding.dwDTERate)[1];
+  UEDATX = (U8) ((U8 *) &line_coding.dwDTERate)[2];
+  UEDATX = (U8) ((U8 *) &line_coding.dwDTERate)[3];
   UEDATX = (U8) line_coding.bCharFormat;
   UEDATX = (U8) line_coding.bParityType;
   UEDATX = (U8) line_coding.bDataBits;
@@ -721,7 +713,7 @@ case 0x21A1:
   while (!(UEINTX & 1 << RXOUTI)) ;
   UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
   break;
-default: /* here go all cases for bmRequest different from above */
+default: @/
   UECONX |= 1 << STALLRQ;
   UEINTX &= ~(1 << RXSTPI);
 }
