@@ -649,10 +649,24 @@ case 0x0080: @/
   UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
   break;
 case 0x0081: @/
-  @<Code which is executed in |0x00| for |0x80|, |0x81| and |0x82|@>@;
+  UEINTX &= ~(1 << RXSTPI);
+  UEDATX = 0x00;
+  UEDATX = 0x00;
+  UEINTX &= ~(1 << TXINI);
+  while (!(UEINTX & 1 << RXOUTI)) ;
+  UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
   break;
 case 0x0082: @/
-  @<Code which is executed in |0x00| for |0x80|, |0x81| and |0x82|@>@;
+  (void) UEDATX;
+  (void) UEDATX;
+  wIndex = UEDATX;
+  UEINTX &= ~(1 << RXSTPI);
+  wIndex = wIndex & 0x7F;
+  UEDATX = (U8) endpoint_status[wIndex];
+  UEDATX = 0x00;
+  UEINTX &= ~(1 << TXINI);
+  while (!(UEINTX & 1 << RXOUTI)) ;
+  UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
   break;
 //case 0x00: /* here go all cases for bmRequestType different from 0x80, 0x81 and 0x82 */
 //  break;
@@ -763,27 +777,3 @@ default: @/
     while (!(UEINTX & 1 << NAKOUTI)) ;
     UEINTX &= ~(1 << NAKOUTI);
     UEINTX &= ~(1 << RXOUTI);
-
-@ @<Code which is executed in |0x00| for |0x80|, |0x81| and |0x82|@>=
-    switch (bmRequestType) {
-    case 0x81:
-      UEINTX &= ~(1 << RXSTPI);
-      UEDATX = 0x00;
-      UEDATX = 0x00;
-      UEINTX &= ~(1 << TXINI);
-      while (!(UEINTX & 1 << RXOUTI)) ;
-      UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
-      break;
-    case 0x82:
-      (void) UEDATX;
-      (void) UEDATX;
-      wIndex = UEDATX;
-      UEINTX &= ~(1 << RXSTPI);
-      wIndex = wIndex & 0x7F;
-      UEDATX = (U8) endpoint_status[wIndex];
-      UEDATX = 0x00;
-      UEINTX &= ~(1 << TXINI);
-      while (!(UEINTX & 1 << RXOUTI)) ;
-      UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
-      break;
-    }
