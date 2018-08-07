@@ -760,9 +760,6 @@ default: @/
     UEINTX &= ~(1 << RXOUTI);
 
 @ @<Code which is executed in |0x00| for |0x80|, |0x81| and |0x82|@>=
-    (void) UEDATX;
-    (void) UEDATX;
-    wIndex = UEDATX;
     switch (bmRequestType) {
     case 0x80:
       UEINTX &= ~(1 << RXSTPI);
@@ -770,15 +767,18 @@ default: @/
       break;
     case 0x81:
       UEINTX &= ~(1 << RXSTPI);
-      UEDATX = (U8) 0x00;
+      UEDATX = 0x00;
       break;
     case 0x82:
+      (void) UEDATX;
+      (void) UEDATX;
+      wIndex = UEDATX;
       UEINTX &= ~(1 << RXSTPI);
       wIndex = wIndex & 0x7F;
       UEDATX = (U8) endpoint_status[wIndex];
       break;
     }
-    UEDATX = (U8) 0x00;
+    UEDATX = 0x00;
     UEINTX &= ~(1 << TXINI);
     while (!(UEINTX & 1 << RXOUTI)) ;
     UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
