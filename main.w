@@ -631,7 +631,6 @@ case 0x09: /* here go all cases for bmRequestType different from 0x00 */
   usb_user_read_request(bmRequestType, bmRequest);
   break;
 case 0x0100: @/
-  wValue = (UEDATX);
   UECONX |= 1 << STALLRQ;
   UEINTX &= ~(1 << RXSTPI);
   break;
