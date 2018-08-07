@@ -126,7 +126,6 @@ const S_usb_user_configuration_descriptor usb_conf_desc
 @t\2@> {sizeof (S_usb_endpoint_descriptor), 0x05, 0x02, 0x02, 0x20, 0x00} @/
 };
 
-U8 bmRequestType;
 U8 zlp;
 U8 endpoint_status[7];
 U8 device_status = 1;
@@ -485,7 +484,6 @@ U16 wValue;
 U8 wIndex;
 U8 configuration_number;
 UEINTX &= ~(1 << RXOUTI); /* TODO: ??? - check if it is non-zero here */
-bmRequestType = 0;
 U16 wLength;
 U8 nb_byte;
 zlp = 0;
