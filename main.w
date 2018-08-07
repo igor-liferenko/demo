@@ -311,8 +311,6 @@ char __low_level_init()
   return 1;
 }
 
-Bool usb_user_read_request(U8 type, U8 request)
-{
     case 0x2021:
       UEINTX &= ~(1 << RXSTPI);
       while (!(UEINTX & 1 << RXOUTI)) ;
@@ -329,7 +327,6 @@ Bool usb_user_read_request(U8 type, U8 request)
       UBRR1 =
         (U16) (((U32) 16000 * 1000L) /
                ((U32) line_coding.dwDTERate / 2 * 16) - 1);
-      return 1;
       break;
     case 0x2221:
       ((U8 *) & wValue)[0] = UEDATX;
@@ -338,14 +335,12 @@ Bool usb_user_read_request(U8 type, U8 request)
       UEINTX &= ~(1 << TXINI);
       line_status.all = wValue;
       while (!(UEINTX & 1 << TXINI)) ;
-      return 1;
       break;
     case 0x2321:
       UEINTX &= ~(1 << RXSTPI);
       UEINTX &= ~(1 << TXINI);
       usb_request_break_generation = 1;
       while (!(UEINTX & 1 << TXINI)) ;
-      return 1;
       break;
     case 0x21A1:
       UEINTX &= ~(1 << RXSTPI);
@@ -360,11 +355,7 @@ Bool usb_user_read_request(U8 type, U8 request)
       while (!(UEINTX & 1 << TXINI)) ;
       while (!(UEINTX & 1 << RXOUTI)) ;
       UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
-      return 1;
       break;
-
-  return 0;
-}
 
 void uart_usb_send_buffer(U8 * buffer, U8 nb_data)
 {
@@ -733,10 +724,8 @@ case 0x0B01:
 case 0x0B: /* here go all cases for bmRequestType different from 0x01 */
   break;
 default: /* here go all cases for bmRequest different from above */
-  if (usb_user_read_request(bmRequestType, bmRequest) == 0) {
     UECONX |= 1 << STALLRQ;
     UEINTX &= ~(1 << RXSTPI);
-  }
 }
 
 @ @<Code which is executed in |0x0680| for both |0x0100| and |0x0200|@>=
