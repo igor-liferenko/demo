@@ -679,16 +679,8 @@ case 0x01: /* here go all cases for bmRequestType different from 0x00, 0x01 and 
   usb_user_read_request(bmRequestType, bmRequest);
   break;
 case 0x0300: @/
-  wValue = UEDATX;
-  switch (wValue) {
-  case 1:
     UECONX |= 1 << STALLRQ;
     UEINTX &= ~(1 << RXSTPI);
-    break;
-  default:
-    UECONX |= 1 << STALLRQ;
-    UEINTX &= ~(1 << RXSTPI);
-  }
   break;
 case 0x0301: @/
   UECONX |= 1 << STALLRQ;
