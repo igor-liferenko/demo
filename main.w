@@ -313,8 +313,6 @@ char __low_level_init()
 
 Bool usb_user_read_request(U8 type, U8 request)
 {
-  U16 wValue;
-
     case 0x2021:
       UEINTX &= ~(1 << RXSTPI);
       while (!(UEINTX & 1 << RXOUTI)) ;
@@ -358,10 +356,8 @@ Bool usb_user_read_request(U8 type, U8 request)
       UEDATX = (U8) line_coding.bCharFormat;
       UEDATX = (U8) line_coding.bParityType;
       UEDATX = (U8) line_coding.bDataBits;
-
       UEINTX &= ~(1 << TXINI);
       while (!(UEINTX & 1 << TXINI)) ;
-
       while (!(UEINTX & 1 << RXOUTI)) ;
       UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
       return 1;
@@ -540,7 +536,7 @@ ISR(USART1_RX_vect)
 
 @<Process SETUP request@>=
 U8 addr;
-U8 wValue;
+U16 wValue;
 U8 wIndex;
 U8 configuration_number;
 U8 bmRequest;
@@ -640,7 +636,7 @@ case 0x0101: @/
   break;
 case 0x0102: @/
   wValue = UEDATX;
-  dummy = UEDATX;
+  (void) UEDATX;
   if (wValue == 0x00) {
     wIndex = UEDATX & 0x7F;
     UENUM = (U8) wIndex;
@@ -679,7 +675,7 @@ case 0x0301: @/
   break;
 case 0x0302:
   wValue = UEDATX;
-  dummy = UEDATX;
+  (void) UEDATX;
   if (wValue == 0x00) {
     wIndex = UEDATX & 0x7F;
     if (wIndex == 0) {
