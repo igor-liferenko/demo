@@ -572,7 +572,7 @@ case 0x0680: @/
     pbuffer = &usb_conf_desc.cfg.bLength;
     @<Code which is executed in |0x0680| for both |0x0100| and |0x0200|@>@;
     break;
-  default: @/
+  default: /* here go all cases for descriptor\_type different from 0x01 and 0x02 */
     UECONX |= 1 << STALLRQ;
     UEINTX &= ~(1 << RXSTPI);
   }
