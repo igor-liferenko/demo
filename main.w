@@ -484,10 +484,8 @@ U8 addr;
 U16 wValue;
 U8 wIndex;
 U8 configuration_number;
-U8 bmRequest;
 UEINTX &= ~(1 << RXOUTI); /* TODO: ??? - check if it is non-zero here */
 bmRequestType = 0;
-bmRequest = 0;
 U16 wLength;
 U8 nb_byte;
 zlp = 0;
