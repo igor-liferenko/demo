@@ -8,6 +8,7 @@
 #include <avr/io.h>
 #include <avr/wdt.h>
 #include <avr/power.h>
+#include <avr/boot.h> /* |boot_lock_fuse_bits_get| */
 typedef unsigned char U8;
 typedef unsigned short U16;
 typedef unsigned long U32;
@@ -106,7 +107,6 @@ typedef struct {
 void (*start_bootloader) (void) = (void (*)(void)) 0x3800;
 int uart_usb_putchar(int);
 char uart_usb_getchar(void);
-U8 flash_read_fuse(unsigned long adr);
 Bool usb_user_read_request(U8, U8);
 Bool usb_user_get_descriptor(U8, U8);
 
@@ -183,7 +183,7 @@ int main(void)
   DDRD |= 1 << PD5 | 1 << PD6 | 1 << PD7;
   DDRC &= ~(1 << PC6);
   PORTC |= 1 << PC6;
-  if (flash_read_fuse(0x0003) & 1 << 6) {
+  if (boot_lock_fuse_bits_get(GET_HIGH_FUSE_BITS) & 1 << 6) {
     DDRF &= ~(1 << PF4 | 1 << PF5 | 1 << PF6 | 1 << PF7);
     PORTF |= 1 << PF4 | 1 << PF5 | 1 << PF6 | 1 << PF7;
   }
@@ -247,18 +247,18 @@ int main(void)
         }
       }
       if (cpt_sof >= 100) {
-        if ((0 == (flash_read_fuse(0x0003) & 1 << 6))
+        if ((0 == (boot_lock_fuse_bits_get(GET_HIGH_FUSE_BITS) & 1 << 6))
             || PINF & 1 << PF6 ? 0 : 1) {
           printf("Select Pressed !\r\n");
         }
-        if ((0 == (flash_read_fuse(0x0003) & 1 << 6))
+        if ((0 == (boot_lock_fuse_bits_get(GET_HIGH_FUSE_BITS) & 1 << 6))
             || PINF & 1 << PF7 ? 0 : 1) {
           printf("Right Pressed !\r\n");
           serial_state.bDCD = 1;
         }
         else
           serial_state.bDCD = 0;
-        if ((0 == (flash_read_fuse(0x0003) & 1 << 6))
+        if ((0 == (boot_lock_fuse_bits_get(GET_HIGH_FUSE_BITS) & 1 << 6))
             || PINF & 1 << PINF4 ? 0 : 1) {
           printf("Left Pressed !\r\n");
           serial_state.bDSR = 1;
@@ -267,7 +267,7 @@ int main(void)
           serial_state.bDSR = 0;
         if (!(PINC & 1 << PC6))
           printf("Down Pressed !\r\n");
-        if ((0 == (flash_read_fuse(0x0003) & 1 << 6))
+        if ((0 == (boot_lock_fuse_bits_get(GET_HIGH_FUSE_BITS) & 1 << 6))
             || PINF & 1 << PINF5 ? 0 : 1)
           printf("Up Pressed !\r\n");
         if (!(PINE & 1 << PE2))
