@@ -14,6 +14,13 @@ typedef unsigned long U32;
 typedef unsigned char Bool;
 typedef unsigned char Uchar;
 
+#define EVT_USB_POWERED               1         // USB plugged
+#define EVT_USB_UNPOWERED             2         // USB un-plugged
+#define EVT_USB_SUSPEND               5         // USB suspend
+#define EVT_USB_WAKE_UP               6         // USB wake up
+#define EVT_USB_RESUME                7         // USB resume
+#define EVT_USB_RESET                 8         // USB reset
+
 typedef union {
   U16 all;
   struct {
@@ -215,8 +222,8 @@ int main(void)
         }
       }
     }
-    if (g_usb_event & 1 << 8) {
-      g_usb_event &= ~(1 << 8);
+    if (g_usb_event & 1 << EVT_USB_RESET) {
+      g_usb_event &= ~(1 << EVT_USB_RESET);
       UERST = 1 << EP0, UERST = 0;
       usb_configuration_nb = 0;
     }
@@ -239,7 +246,7 @@ int main(void)
           while (rx_counter) {
             while (!(UCSR1A & 1 << UDRE1)) ;
             UDR1 = uart_usb_getchar();
-            PIND |= 1 << PD6;
+            PIND |= 1 << PD6; /* toggle PD6 in PORTD */
           }
         }
       }
@@ -284,7 +291,7 @@ int main(void)
       }
       if (usb_request_break_generation == 1) {
         usb_request_break_generation = 0;
-        PIND |= 1 << PD7;
+        PIND |= 1 << PD7; /* toggle PD7 in PORTD */
 // !! this is used to reset the chip?
         boot_key = 0x55AAAA55;
         wdt_reset();
@@ -366,7 +373,7 @@ ISR(USB_GEN_vect)
     USBINT = ~(1 << VBUSTI);
     if (USBSTA & 1 << VBUS) {
       usb_connected = 1;
-      g_usb_event |= 1 << 1;
+      g_usb_event |= 1 << EVT_USB_POWERED;
       UDIEN |= 1 << EORSTE;
       USBCON |= 1 << FRZCLK;
 
@@ -393,7 +400,7 @@ ISR(USB_GEN_vect)
     else {
       usb_connected = 0;
       usb_configuration_nb = 0;
-      g_usb_event |= 1 << 2;
+      g_usb_event |= 1 << EVT_USB_UNPOWERED;
     }
   }
   if (UDINT & 1 << SOFI && UDIEN & 1 << SOFE) {
@@ -403,7 +410,7 @@ ISR(USB_GEN_vect)
   if (UDINT & 1 << SUSPI && UDIEN & 1 << SUSPE) {
     usb_suspended = 1;
     UDINT = ~(1 << WAKEUPI);
-    g_usb_event |= 1 << 5;
+    g_usb_event |= 1 << EVT_USB_SUSPEND;
     UDINT = ~(1 << SUSPI);
     UDIEN |= 1 << WAKEUPE;
     UDIEN &= ~(1 << EORSME);
@@ -424,7 +431,7 @@ ISR(USB_GEN_vect)
       UDIEN |= 1 << EORSTE;
       UDINT = ~(1 << WAKEUPI);
       UDIEN &= ~(1 << WAKEUPE);
-      g_usb_event |= 1 << 6;
+      g_usb_event |= 1 << EVT_USB_WAKE_UP;
       UDIEN |= 1 << SUSPE;
       UDIEN |= 1 << EORSME;
       UDIEN |= 1 << EORSTE;
@@ -435,7 +442,7 @@ ISR(USB_GEN_vect)
     UDIEN &= ~(1 << WAKEUPE);
     UDINT = ~(1 << EORSMI);
     UDIEN &= ~(1 << EORSME);
-    g_usb_event |= 1 << 7;
+    g_usb_event |= 1 << EVT_USB_RESUME;
   }
   if (UDINT & 1 << EORSTI && UDIEN & 1 << EORSTE) {
     usb_remote_wup_feature = 0;
@@ -447,7 +454,7 @@ ISR(USB_GEN_vect)
       UECFG1X = 1 << EPSIZE1;
       UECFG1X |= 1 << ALLOC;
     }
-    g_usb_event |= 1 << 8;
+    g_usb_event |= 1 << EVT_USB_RESET;
   }
 }
 
