@@ -866,11 +866,11 @@ TODO: detect if update was accepted by host, and resend if not
           serial_state_saved.all = serial_state.all;
           UENUM = EP3;
           if (UEINTX & 1 << RWAL) {
-            UEDATX = 0xA1; 
-            UEDATX = 0x20; 
-            UEDATX = 0x00; @+ UEDATX = 0x00;                 
-            UEDATX = 0x00; @+ UEDATX = 0x00; 
-            UEDATX = 0x02; @+ UEDATX = 0x00; 
+            UEDATX = 0xA1;
+            UEDATX = 0x20;
+            UEDATX = 0x00; @+ UEDATX = 0x00;
+            UEDATX = 0x00; @+ UEDATX = 0x00;
+            UEDATX = 0x02; @+ UEDATX = 0x00;
             UEDATX = (U8) ((U8 *) &serial_state.all)[0];
             UEDATX = (U8) ((U8 *) &serial_state.all)[1];
             UEINTX &= ~(1 << TXINI), UEINTX &= ~(1 << FIFOCON);
