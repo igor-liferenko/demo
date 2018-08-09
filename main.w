@@ -180,14 +180,14 @@ int main(void)
   UCSR1C = 1 << UCSZ11 | 1 << UCSZ10;
   UCSR1B |= 1 << RXEN1 | 1 << TXEN1;
   UCSR1B |= 1 << RXCIE1;
-  DDRD |= 1 << PIND5 | 1 << PIND6 | 1 << PIND7;
+  DDRD |= 1 << PD5 | 1 << PD6 | 1 << PD7;
   DDRC &= ~(1 << PC6);
   PORTC |= 1 << PC6;
   if (flash_read_fuse(0x0003) & 1 << 6) {
     DDRF &= ~(1 << PF4 | 1 << PF5 | 1 << PF6 | 1 << PF7);
     PORTF |= 1 << PF4 | 1 << PF5 | 1 << PF6 | 1 << PF7;
   }
-  DDRE &= ~(1 << PINE2), PORTE |= 1 << PINE2;
+  DDRE &= ~(1 << PE2), PORTE |= 1 << PE2;
   UDIEN |= 1 << SOFE;
   fdevopen((int (*)(char, FILE *)) uart_usb_putchar,
            (int (*)(FILE *)) uart_usb_getchar);
@@ -228,7 +228,7 @@ int main(void)
       @<Process SETUP request@>@;
     }
     if (usb_configuration_nb != 0 && line_status.DTR) {
-      if (UCSR1A & 0x20) {
+      if (UCSR1A & 1 << UDRE1) {
         if (!rx_counter) {
           UENUM = EP2;
           if (UEINTX & 1 << RXOUTI) {
@@ -240,19 +240,19 @@ int main(void)
         }
         if (rx_counter) {
           while (rx_counter) {
-            while (!(UCSR1A & 0x20)) ;
+            while (!(UCSR1A & 1 << UDRE1)) ;
             UDR1 = uart_usb_getchar();
-            PIND |= 1 << PIND6;
+            PIND |= 1 << PD6;
           }
         }
       }
       if (cpt_sof >= 100) {
         if ((0 == (flash_read_fuse(0x0003) & 1 << 6))
-            || PINF & 1 << PINF6 ? 0 : 1) {
+            || PINF & 1 << PF6 ? 0 : 1) {
           printf("Select Pressed !\r\n");
         }
         if ((0 == (flash_read_fuse(0x0003) & 1 << 6))
-            || PINF & 1 << PINF7 ? 0 : 1) {
+            || PINF & 1 << PF7 ? 0 : 1) {
           printf("Right Pressed !\r\n");
           serial_state.bDCD = 1;
         }
@@ -265,12 +265,12 @@ int main(void)
         }
         else
           serial_state.bDSR = 0;
-        if (!(PINC & 1 << PINC6))
+        if (!(PINC & 1 << PC6))
           printf("Down Pressed !\r\n");
         if ((0 == (flash_read_fuse(0x0003) & 1 << 6))
             || PINF & 1 << PINF5 ? 0 : 1)
           printf("Up Pressed !\r\n");
-        if (!(PINE & 1 << PINE2))
+        if (!(PINE & 1 << PE2))
           printf("Hello from ATmega32U4 !\r\n");
         if (serial_state_saved.all != serial_state.all) {
           serial_state_saved.all = serial_state.all;
@@ -284,8 +284,8 @@ int main(void)
             UEDATX = 0x00;
             UEDATX = 0x02;
             UEDATX = 0x00;
-            UEDATX = (U8) ((U8 *) & serial_state.all)[0];
-            UEDATX = (U8) ((U8 *) & serial_state.all)[1];
+            UEDATX = (U8) ((U8 *) &serial_state.all)[0];
+            UEDATX = (U8) ((U8 *) &serial_state.all)[1];
             UEINTX &= ~(1 << TXINI), UEINTX &= ~(1 << FIFOCON);
           }
         }
@@ -531,7 +531,7 @@ case 0x0300: @/
 case 0x0301: @/
   @<Handle {\caps set feature interface}@>@;
   break;
-case 0x0302:
+case 0x0302: @/
   @<Handle {\caps set feature endpoint}@>@;
   break;
 case 0x0080: @/
@@ -546,7 +546,7 @@ case 0x0082: @/
 case 0x0A81: @/
   @<Handle {\caps get interface}@>@;
   break;
-case 0x0B01:
+case 0x0B01: @/
   @<Handle {\caps set interface}@>@;
   break;
 case 0x2021: @/
