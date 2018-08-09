@@ -506,208 +506,58 @@ case 0x0680: @/
   }
   break;
 case 0x0880: @/
-  UEINTX &= ~(1 << RXSTPI);
-  UEDATX = (U8) usb_configuration_nb;
-  UEINTX &= ~(1 << TXINI), UEINTX &= ~(1 << FIFOCON);
-  while (!(UEINTX & 1 << RXOUTI)) ;
-  UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
+  @<Handle {\caps get configuration}@>@;
   break;
 case 0x0500: @/
-  addr = UEDATX;
-  UDADDR = (UDADDR & 1 << ADDEN) | ((U8) addr & 0x7F);
-  UEINTX &= ~(1 << RXSTPI);
-  UEINTX &= ~(1 << TXINI);
-  while (!(UEINTX & 1 << TXINI)) ;
-  UDADDR |= 1 << ADDEN;
+  @<Handle {\caps set address}@>@;
   break;
 case 0x0900: @/
-  configuration_number = UEDATX;
-  if (configuration_number <= 1) {
-    UEINTX &= ~(1 << RXSTPI);
-    usb_configuration_nb = configuration_number;
-    UEINTX &= ~(1 << TXINI);
-
-    UENUM = EP3;
-    UECONX |= 1 << EPEN;
-    UECFG0X = 1 << EPTYPE1 | 1 << EPTYPE0 | 1 << EPDIR;       /* interrupt, IN */
-    UECFG1X = 1 << EPSIZE1;   /* 32 bytes */
-    UECFG1X |= 1 << ALLOC;
-
-    UENUM = EP1;
-    UECONX |= 1 << EPEN;
-    UECFG0X = 1 << EPTYPE1 | 1 << EPDIR;      /* bulk, IN */
-    UECFG1X = 1 << EPSIZE1;   /* 32 bytes */
-    UECFG1X |= 1 << ALLOC;
-
-    UENUM = EP2;
-    UECONX |= 1 << EPEN;
-    UECFG0X = 1 << EPTYPE1;   /* bulk, OUT */
-    UECFG1X = 1 << EPSIZE1;   /* 32 bytes */
-    UECFG1X |= 1 << ALLOC;
-
-    UERST = 1 << EP3, UERST = 0;
-    UERST = 1 << EP1, UERST = 0;
-    UERST = 1 << EP2, UERST = 0;
-  }
-  else {
-    UECONX |= 1 << STALLRQ;
-    UEINTX &= ~(1 << RXSTPI);
-  }
+  @<Handle {\caps set configuration}@>@;
   break;
 case 0x0100: @/
-  UECONX |= 1 << STALLRQ;
-  UEINTX &= ~(1 << RXSTPI);
+  @<Handle {\caps clear feature device}@>@;
   break;
 case 0x0101: @/
-  UECONX |= 1 << STALLRQ;
-  UEINTX &= ~(1 << RXSTPI);
+  @<Handle {\caps clear feature interface}@>@;
   break;
 case 0x0102: @/
-  wValue = UEDATX;
-  (void) UEDATX;
-  if (wValue == 0x00) {
-    wIndex = UEDATX & 0x7F;
-    UENUM = (U8) wIndex;
-    if (UECONX & 1 << EPEN) {
-      if (wIndex != 0) {
-        UECONX |= 1 << STALLRQC;
-        UERST = 1 << (U8) wIndex, UERST = 0;
-        UECONX |= 1 << RSTDT;
-      }
-      UENUM = EP0;
-      endpoint_status[wIndex] = 0x00;
-      UEINTX &= ~(1 << RXSTPI);
-      UEINTX &= ~(1 << TXINI);
-    }
-    else {
-      UENUM = EP0;
-      UECONX |= 1 << STALLRQ;
-      UEINTX &= ~(1 << RXSTPI);
-    }
-  }
-  else {
-    UECONX |= 1 << STALLRQ;
-    UEINTX &= ~(1 << RXSTPI);
-  }
+  @<Handle {\caps clear feature endpoint}@>@;
   break;
 case 0x0300: @/
-  UECONX |= 1 << STALLRQ;
-  UEINTX &= ~(1 << RXSTPI);
+  @<Handle {\caps set feature device}@>@;
   break;
 case 0x0301: @/
-  UECONX |= 1 << STALLRQ;
-  UEINTX &= ~(1 << RXSTPI);
+  @<Handle {\caps set feature interface}@>@;
   break;
 case 0x0302:
-  wValue = UEDATX;
-  (void) UEDATX;
-  if (wValue == 0x00) {
-    wIndex = UEDATX & 0x7F;
-    if (wIndex == 0) {
-      UECONX |= 1 << STALLRQ;
-      UEINTX &= ~(1 << RXSTPI);
-    }
-    UENUM = (U8) wIndex;
-    if (UECONX & 1 << EPEN) {
-      UECONX |= 1 << STALLRQ;
-      UENUM = EP0;
-      endpoint_status[wIndex] = 0x01;
-      UEINTX &= ~(1 << RXSTPI);
-      UEINTX &= ~(1 << TXINI);
-    }
-    else {
-      UENUM = EP0;
-      UECONX |= 1 << STALLRQ;
-      UEINTX &= ~(1 << RXSTPI);
-    }
-  }
-  else {
-    UECONX |= 1 << STALLRQ;
-    UEINTX &= ~(1 << RXSTPI);
-  }
+  @<Handle {\caps set feature endpoint}@>@;
   break;
 case 0x0080: @/
-  UEINTX &= ~(1 << RXSTPI);
-  UEDATX = (U8) device_status;
-  UEDATX = 0x00;
-  UEINTX &= ~(1 << TXINI);
-  while (!(UEINTX & 1 << RXOUTI)) ;
-  UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
+  @<Handle {\caps get status device}@>@;
   break;
 case 0x0081: @/
-  UEINTX &= ~(1 << RXSTPI);
-  UEDATX = 0x00;
-  UEDATX = 0x00;
-  UEINTX &= ~(1 << TXINI);
-  while (!(UEINTX & 1 << RXOUTI)) ;
-  UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
+  @<Handle {\caps get status interface}@>@;
   break;
 case 0x0082: @/
-  (void) UEDATX;
-  (void) UEDATX;
-  wIndex = UEDATX;
-  UEINTX &= ~(1 << RXSTPI);
-  wIndex = wIndex & 0x7F;
-  UEDATX = (U8) endpoint_status[wIndex];
-  UEDATX = 0x00;
-  UEINTX &= ~(1 << TXINI);
-  while (!(UEINTX & 1 << RXOUTI)) ;
-  UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
+  @<Handle {\caps get status endpoint}@>@;
   break;
 case 0x0A81: @/
-  UEINTX &= ~(1 << RXSTPI);
-  UEINTX &= ~(1 << TXINI);
-  while (!(UEINTX & 1 << RXOUTI)) ;
-  UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
+  @<Handle {\caps get interface}@>@;
   break;
 case 0x0B01:
-  UEINTX &= ~(1 << RXSTPI);
-  UEINTX &= ~(1 << TXINI);
-  while (!(UEINTX & 1 << TXINI)) ;
+  @<Handle {\caps set interface}@>@;
   break;
 case 0x2021: @/
-  UEINTX &= ~(1 << RXSTPI);
-  while (!(UEINTX & 1 << RXOUTI)) ;
-  ((U8 *) &line_coding.dwDTERate)[0] = UEDATX;
-  ((U8 *) &line_coding.dwDTERate)[1] = UEDATX;
-  ((U8 *) &line_coding.dwDTERate)[2] = UEDATX;
-  ((U8 *) &line_coding.dwDTERate)[3] = UEDATX;
-  line_coding.bCharFormat = UEDATX;
-  line_coding.bParityType = UEDATX;
-  line_coding.bDataBits = UEDATX;
-  UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
-  UEINTX &= ~(1 << TXINI);
-  while (!(UEINTX & 1 << TXINI)) ;
-  UBRR1 = (U16) (((U32) 16000 * 1000L) /
-                ((U32) line_coding.dwDTERate / 2 * 16) - 1);
+  @<Handle {\caps set line coding}@>@;
   break;
 case 0x2221: @/
-  ((U8 *) & wValue)[0] = UEDATX;
-  ((U8 *) & wValue)[1] = UEDATX;
-  UEINTX &= ~(1 << RXSTPI);
-  UEINTX &= ~(1 << TXINI);
-  line_status.all = wValue;
-  while (!(UEINTX & 1 << TXINI)) ;
+  @<Handle {\caps set control line state}@>@;
   break;
 case 0x2321: @/
-  UEINTX &= ~(1 << RXSTPI);
-  UEINTX &= ~(1 << TXINI);
-  usb_request_break_generation = 1;
-  while (!(UEINTX & 1 << TXINI)) ;
+  @<Handle {\caps send break}@>@;
   break;
 case 0x21A1: @/
-  UEINTX &= ~(1 << RXSTPI);
-  UEDATX = (U8) ((U8 *) &line_coding.dwDTERate)[0];
-  UEDATX = (U8) ((U8 *) &line_coding.dwDTERate)[1];
-  UEDATX = (U8) ((U8 *) &line_coding.dwDTERate)[2];
-  UEDATX = (U8) ((U8 *) &line_coding.dwDTERate)[3];
-  UEDATX = (U8) line_coding.bCharFormat;
-  UEDATX = (U8) line_coding.bParityType;
-  UEDATX = (U8) line_coding.bDataBits;
-  UEINTX &= ~(1 << TXINI);
-  while (!(UEINTX & 1 << TXINI)) ;
-  while (!(UEINTX & 1 << RXOUTI)) ;
-  UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
+  @<Handle {\caps get line coding}@>@;
   break;
 default: @/
   UECONX |= 1 << STALLRQ;
@@ -757,3 +607,253 @@ default: @/
     while (!(UEINTX & 1 << NAKOUTI)) ;
     UEINTX &= ~(1 << NAKOUTI);
     UEINTX &= ~(1 << RXOUTI);
+
+@ @<Handle {\caps set address}@>=
+  addr = UEDATX;
+  UDADDR = (UDADDR & 1 << ADDEN) | ((U8) addr & 0x7F);
+  UEINTX &= ~(1 << RXSTPI);
+  UEINTX &= ~(1 << TXINI);
+  while (!(UEINTX & 1 << TXINI)) ;
+  UDADDR |= 1 << ADDEN;
+
+@ @<Handle {\caps set configuration}@>=
+  configuration_number = UEDATX;
+  if (configuration_number <= 1) {
+    UEINTX &= ~(1 << RXSTPI);
+    usb_configuration_nb = configuration_number;
+    UEINTX &= ~(1 << TXINI);
+
+    UENUM = EP3;
+    UECONX |= 1 << EPEN;
+    UECFG0X = 1 << EPTYPE1 | 1 << EPTYPE0 | 1 << EPDIR;       /* interrupt, IN */
+    UECFG1X = 1 << EPSIZE1;   /* 32 bytes */
+    UECFG1X |= 1 << ALLOC;
+
+    UENUM = EP1;
+    UECONX |= 1 << EPEN;
+    UECFG0X = 1 << EPTYPE1 | 1 << EPDIR;      /* bulk, IN */
+    UECFG1X = 1 << EPSIZE1;   /* 32 bytes */
+    UECFG1X |= 1 << ALLOC;
+
+    UENUM = EP2;
+    UECONX |= 1 << EPEN;
+    UECFG0X = 1 << EPTYPE1;   /* bulk, OUT */
+    UECFG1X = 1 << EPSIZE1;   /* 32 bytes */
+    UECFG1X |= 1 << ALLOC;
+
+    UERST = 1 << EP3, UERST = 0;
+    UERST = 1 << EP1, UERST = 0;
+    UERST = 1 << EP2, UERST = 0;
+  }
+  else {
+    UECONX |= 1 << STALLRQ;
+    UEINTX &= ~(1 << RXSTPI);
+  }
+
+@ This will send two bytes during the DATA stage. Only first two bits of the first byte are used.
+If first bit is set, then this indicates the device is self powered. If clear, the device
+is bus powered. If second bit is set, the device has remote wakeup enabled and can wake the
+host up during suspend. The remote wakeup bit can be by the {\caps set feature} and
+{\caps clear feature} requests with a feature selector of |0x01| (\.{DEVICE\_REMOTE\_WAKEUP}).
+
+@<Handle {\caps get status device}@>=
+  UEINTX &= ~(1 << RXSTPI);
+  UEDATX = (U8) device_status;
+  UEDATX = 0x00;
+  UEINTX &= ~(1 << TXINI);
+  while (!(UEINTX & 1 << RXOUTI)) ;
+  UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
+
+@ Sends two bytes of |0x00|, |0x00|. (Both bytes are reserved for future use.)
+
+@<Handle {\caps get status interface}@>=
+  UEINTX &= ~(1 << RXSTPI);
+  UEDATX = 0x00;
+  UEDATX = 0x00;
+  UEINTX &= ~(1 << TXINI);
+  while (!(UEINTX & 1 << RXOUTI)) ;
+  UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
+
+@ Sends two bytes indicating the status (Halted/Stalled) of an endpoint.
+Only first bit of the first byte is used.
+
+@<Handle {\caps get status endpoint}@>=
+  (void) UEDATX;
+  (void) UEDATX;
+  wIndex = UEDATX;
+  UEINTX &= ~(1 << RXSTPI);
+  wIndex = wIndex & 0x7F;
+  UEDATX = (U8) endpoint_status[wIndex];
+  UEDATX = 0x00;
+  UEINTX &= ~(1 << TXINI);
+  while (!(UEINTX & 1 << RXOUTI)) ;
+  UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
+
+@ This gets the Alternative Interface setting.
+
+@<Handle {\caps get interface}@>=
+  UEINTX &= ~(1 << RXSTPI);
+  UEINTX &= ~(1 << TXINI);
+  while (!(UEINTX & 1 << RXOUTI)) ;
+  UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
+
+@ Used to set boolean features. The only two feature selectors available are
+\.{DEVICE\_REMOTE\_WAKEUP} and \.{TEST\_MODE}.
+
+@<Handle {\caps set feature device}@>=
+  UECONX |= 1 << STALLRQ;
+  UEINTX &= ~(1 << RXSTPI);
+
+@ @<Handle {\caps clear feature device}@>=
+  UECONX |= 1 << STALLRQ;
+  UEINTX &= ~(1 << RXSTPI);
+
+@ Used to set boolean features. The current USB Specification Revision 2 specifies no
+interface features.
+
+@<Handle {\caps set feature interface}@>=
+  UECONX |= 1 << STALLRQ;
+  UEINTX &= ~(1 << RXSTPI);
+
+@ @<Handle {\caps clear feature interface}@>=
+  UECONX |= 1 << STALLRQ;
+  UEINTX &= ~(1 << RXSTPI);
+
+@ Used to set endpoint features. The standard currently defines one endpoint feature
+selector, \.{ENDPOINT\_HALT} (|0x00|) which allows the host to stall and clear an endpoint.
+Only endpoints other than the default endpoint are recommended to have this functionality.
+
+@<Handle {\caps set feature endpoint}@>=
+  wValue = UEDATX;
+  (void) UEDATX;
+  if (wValue == 0x00) {
+    wIndex = UEDATX & 0x7F;
+    if (wIndex == 0) {
+      UECONX |= 1 << STALLRQ;
+      UEINTX &= ~(1 << RXSTPI);
+    }
+    UENUM = (U8) wIndex;
+    if (UECONX & 1 << EPEN) {
+      UECONX |= 1 << STALLRQ;
+      UENUM = EP0;
+      endpoint_status[wIndex] = 0x01;
+      UEINTX &= ~(1 << RXSTPI);
+      UEINTX &= ~(1 << TXINI);
+    }
+    else {
+      UENUM = EP0;
+      UECONX |= 1 << STALLRQ;
+      UEINTX &= ~(1 << RXSTPI);
+    }
+  }
+  else {
+    UECONX |= 1 << STALLRQ;
+    UEINTX &= ~(1 << RXSTPI);
+  }
+
+@ @<Handle {\caps clear feature endpoint}@>=
+  wValue = UEDATX;
+  (void) UEDATX;
+  if (wValue == 0x00) {
+    wIndex = UEDATX & 0x7F;
+    UENUM = (U8) wIndex;
+    if (UECONX & 1 << EPEN) {
+      if (wIndex != 0) {
+        UECONX |= 1 << STALLRQC;
+        UERST = 1 << (U8) wIndex, UERST = 0;
+        UECONX |= 1 << RSTDT;
+      }
+      UENUM = EP0;
+      endpoint_status[wIndex] = 0x00;
+      UEINTX &= ~(1 << RXSTPI);
+      UEINTX &= ~(1 << TXINI);
+    }
+    else {
+      UENUM = EP0;
+      UECONX |= 1 << STALLRQ;
+      UEINTX &= ~(1 << RXSTPI);
+    }
+  }
+  else {
+    UECONX |= 1 << STALLRQ;
+    UEINTX &= ~(1 << RXSTPI);
+  }
+
+@ Used to request the current device configuration. A byte will be sent during the DATA stage
+indicating the devices status. A zero value means the device is not configured and a non-zero
+value indicates the device is configured.
+
+@<Handle {\caps get configuration}@>=
+  UEINTX &= ~(1 << RXSTPI);
+  UEDATX = (U8) usb_configuration_nb;
+  UEINTX &= ~(1 << TXINI), UEINTX &= ~(1 << FIFOCON);
+  while (!(UEINTX & 1 << RXOUTI)) ;
+  UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
+
+@ This request allows the host to find out the currently configured line coding. (\S6.2.13 in
+CDC spec.)
+
+@<Handle {\caps get line coding}@>=
+  UEINTX &= ~(1 << RXSTPI);
+  UEDATX = (U8) ((U8 *) &line_coding.dwDTERate)[0];
+  UEDATX = (U8) ((U8 *) &line_coding.dwDTERate)[1];
+  UEDATX = (U8) ((U8 *) &line_coding.dwDTERate)[2];
+  UEDATX = (U8) ((U8 *) &line_coding.dwDTERate)[3];
+  UEDATX = (U8) line_coding.bCharFormat;
+  UEDATX = (U8) line_coding.bParityType;
+  UEDATX = (U8) line_coding.bDataBits;
+  UEINTX &= ~(1 << TXINI);
+  while (!(UEINTX & 1 << TXINI)) ;
+  while (!(UEINTX & 1 << RXOUTI)) ;
+  UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
+
+@ This request sends special carrier modulation that generates an RS-232 style break.
+(\S6.2.15 in CDC spec.)
+
+@<Handle {\caps send break}@>=
+  UEINTX &= ~(1 << RXSTPI);
+  UEINTX &= ~(1 << TXINI);
+  usb_request_break_generation = 1;
+  while (!(UEINTX & 1 << TXINI)) ;
+
+@ This request generates RS-232/V.24 style control signals.
+(\S6.2.14 and in CDC spec.)
+
+Especially, first bit of first byte indicates to DCE if DTE is present or not.
+This signal corresponds to RS-232 signal DTR (0 --- Not Present, 1 --- Present).
+@^DTR@>
+
+@<Handle {\caps set control line state}@>=
+  ((U8 *) & wValue)[0] = UEDATX;
+  ((U8 *) & wValue)[1] = UEDATX;
+  UEINTX &= ~(1 << RXSTPI);
+  UEINTX &= ~(1 << TXINI);
+  line_status.all = wValue;
+  while (!(UEINTX & 1 << TXINI)) ;
+
+@ This request allows the host to specify typical asynchronous line-character formatting
+properties. (\S6.2.12 in CDC spec.)
+
+@<Handle {\caps set line coding}@>=
+  UEINTX &= ~(1 << RXSTPI);
+  while (!(UEINTX & 1 << RXOUTI)) ;
+  ((U8 *) &line_coding.dwDTERate)[0] = UEDATX;
+  ((U8 *) &line_coding.dwDTERate)[1] = UEDATX;
+  ((U8 *) &line_coding.dwDTERate)[2] = UEDATX;
+  ((U8 *) &line_coding.dwDTERate)[3] = UEDATX;
+  line_coding.bCharFormat = UEDATX;
+  line_coding.bParityType = UEDATX;
+  line_coding.bDataBits = UEDATX;
+  UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
+  UEINTX &= ~(1 << TXINI);
+  while (!(UEINTX & 1 << TXINI)) ;
+  UBRR1 = (U16) (((U32) 16000 * 1000L) /
+                ((U32) line_coding.dwDTERate / 2 * 16) - 1);
+
+@ This request allows the host to select an alternate setting for the specified interface.
+(\S9.4.10 in USB spec.)
+
+@<Handle {\caps set interface}@>=
+  UEINTX &= ~(1 << RXSTPI);
+  UEINTX &= ~(1 << TXINI);
+  while (!(UEINTX & 1 << TXINI)) ;
