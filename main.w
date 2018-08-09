@@ -324,7 +324,7 @@ void uart_usb_send_buffer(U8 * buffer, U8 nb_data)
 
 int uart_usb_putchar(int data_to_send)
 {
-  uart_usb_send_buffer((U8 *) & data_to_send, 1);
+  uart_usb_send_buffer((U8 *) &data_to_send, 1);
   return data_to_send;
 }
 
@@ -451,12 +451,12 @@ ISR(USART1_RX_vect)
     save_ep = UENUM;
     UENUM = EP1;
     do {
-      if (UCSR1A & 0x80) {
+      if (UCSR1A & 1 << RXC1) { // if there is unread data in the receive buffer
         rs2usb[i] = UDR1;
         i++;
       }
     } while (!(UEINTX & 1 << RWAL));
-    uart_usb_send_buffer((U8 *) & rs2usb, i);
+    uart_usb_send_buffer((U8 *) &rs2usb, i);
     UENUM = (U8) save_ep;
   }
 }
