@@ -191,7 +191,7 @@ int main(void)
   PORTC |= 1 << PC6;
   DDRF &= ~(1 << PF4 | 1 << PF5 | 1 << PF6 | 1 << PF7);
   PORTF |= 1 << PF4 | 1 << PF5 | 1 << PF6 | 1 << PF7;
-  DDRE &= ~(1 << PE2), PORTE |= 1 << PE2;
+  DDRE &= ~(1 << PE6), PORTE |= 1 << PE6;
   UDIEN |= 1 << SOFE;
   fdevopen((int (*)(char, FILE *)) uart_usb_putchar,
            (int (*)(FILE *)) uart_usb_getchar);
@@ -269,7 +269,7 @@ int main(void)
           printf("Down Pressed !\r\n");
         if (!(PINF & 1 << PF5))
           printf("Up Pressed !\r\n");
-        if (!(PINE & 1 << PE2))
+        if (!(PINE & 1 << PE6))
           printf("Hello from ATmega32U4 !\r\n");
         @<Update serial state@>@;
       }
