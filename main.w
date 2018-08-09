@@ -271,23 +271,7 @@ int main(void)
           printf("Up Pressed !\r\n");
         if (!(PINE & 1 << PE2))
           printf("Hello from ATmega32U4 !\r\n");
-        if (serial_state_saved.all != serial_state.all) {
-          serial_state_saved.all = serial_state.all;
-          UENUM = EP3;
-          if (UEINTX & 1 << RWAL) {
-            UEDATX = 0xA1;
-            UEDATX = 0x20;
-            UEDATX = 0x00;
-            UEDATX = 0x00;
-            UEDATX = 0x00;
-            UEDATX = 0x00;
-            UEDATX = 0x02;
-            UEDATX = 0x00;
-            UEDATX = (U8) ((U8 *) &serial_state.all)[0];
-            UEDATX = (U8) ((U8 *) &serial_state.all)[1];
-            UEINTX &= ~(1 << TXINI), UEINTX &= ~(1 << FIFOCON);
-          }
-        }
+        @<Update serial state@>@;
       }
       if (usb_request_break_generation == 1) {
         usb_request_break_generation = 0;
@@ -811,6 +795,9 @@ CDC spec.)
 @ This request sends special carrier modulation that generates an RS-232 style break.
 (\S6.2.15 in CDC spec.)
 
+TODO: manage here hardware flow control
+@^TODO@>
+
 @<Handle {\caps send break}@>=
   UEINTX &= ~(1 << RXSTPI);
   UEINTX &= ~(1 << TXINI);
@@ -823,6 +810,9 @@ CDC spec.)
 Especially, first bit of first byte indicates to DCE if DTE is present or not.
 This signal corresponds to RS-232 signal DTR (0 --- Not Present, 1 --- Present).
 @^DTR@>
+
+TODO: manage here hardware flow control
+@^TODO@>
 
 @<Handle {\caps set control line state}@>=
   ((U8 *) & wValue)[0] = UEDATX;
@@ -858,3 +848,33 @@ properties. (\S6.2.12 in CDC spec.)
   UEINTX &= ~(1 << RXSTPI);
   UEINTX &= ~(1 << TXINI);
   while (!(UEINTX & 1 << TXINI)) ;
+
+@ Check if serial state has changed and update host with that information.
+Necessary for hardware handshake support.
+(\S6.3.5 in CDC spec.)
+
+SerialState is used like a real interrupt status register. Once a notification has been sent,
+the device will reset and re-evaluate the different signals. For the consistent signals like
+carrier detect or transmission carrier, this will mean another notification will not be generated
+until there is a state change. For the irregular signals like break, the incoming ring signal,
+or the overrun error state, this will reset their values to zero and again will not send another
+notification until their state changes.
+
+TODO: detect if update was accepted by host, and resend if not
+@^TODO@>
+
+@<Update serial state@>=
+        if (serial_state_saved.all != serial_state.all) {
+          serial_state_saved.all = serial_state.all;
+          UENUM = EP3;
+          if (UEINTX & 1 << RWAL) {
+            UEDATX = 0xA1; 
+            UEDATX = 0x20; 
+            UEDATX = 0x00; @+ UEDATX = 0x00;                 
+            UEDATX = 0x00; @+ UEDATX = 0x00; 
+            UEDATX = 0x02; @+ UEDATX = 0x00; 
+            UEDATX = (U8) ((U8 *) &serial_state.all)[0];
+            UEDATX = (U8) ((U8 *) &serial_state.all)[1];
+            UEINTX &= ~(1 << TXINI), UEINTX &= ~(1 << FIFOCON);
+          }
+        }
