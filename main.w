@@ -853,7 +853,7 @@ properties. (\S6.2.12 in CDC spec.)
 Necessary for hardware handshake support.
 (\S6.3.5 in CDC spec.)
 
-SerialState is used like a real interrupt status register. Once a notification has been sent,
+|serial_state| is used like a real interrupt status register. Once a notification has been sent,
 the device will reset and re-evaluate the different signals. For the consistent signals like
 carrier detect or transmission carrier, this will mean another notification will not be generated
 until there is a state change. For the irregular signals like break, the incoming ring signal,
