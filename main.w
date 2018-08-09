@@ -16,24 +16,12 @@ typedef unsigned char Uchar;
 
 #define EVT_USB_POWERED               1         // USB plugged
 #define EVT_USB_UNPOWERED             2         // USB un-plugged
-#define EVT_USB_SUSPEND               5         // USB suspend
-#define EVT_USB_WAKE_UP               6         // USB wake up
-#define EVT_USB_RESUME                7         // USB resume
-#define EVT_USB_RESET                 8         // USB reset
+#define EVT_USB_SUSPEND               5
+#define EVT_USB_WAKE_UP               6
+#define EVT_USB_RESUME                7
+#define EVT_USB_RESET                 8
 
-typedef union {
-  U16 all;
-  struct {
-    U16 bDCD:1;
-    U16 bDSR:1;
-    U16 bBreak:1;
-    U16 bRing:1;
-    U16 bFraming:1;
-    U16 bParity:1;
-    U16 bOverRun:1;
-    U16 reserved:9;
-  };
-} S_serial_state;
+@<Type definitions@>@;
 
 typedef union {
   U8 all;
@@ -134,6 +122,7 @@ const S_usb_user_configuration_descriptor usb_conf_desc
 @t\2@> {sizeof (S_usb_endpoint_descriptor), 0x05, 0x02, 0x02, 0x20, 0x00} @/
 };
 
+@<Global variables@>@;
 U8 zlp;
 U8 endpoint_status[7];
 U8 device_status = 1;
@@ -142,8 +131,6 @@ PGM_VOID_P pbuffer;
 U8 remote_wakeup_feature = 0;
 U8 usb_configuration_nb;
 U8 usb_remote_wup_feature;
-S_serial_state serial_state;
-S_serial_state serial_state_saved;
 volatile U8 usb_request_break_generation = 0;
 volatile U8 rs2usb[10];
 volatile U8 cpt_sof;
@@ -271,7 +258,7 @@ int main(void)
           printf("Up Pressed !\r\n");
         if (!(PINE & 1 << PE6))
           printf("Hello from ATmega32U4 !\r\n");
-        @<Update serial state@>@;
+        @<Notify host about new |serial_state|@>@;
       }
       if (usb_request_break_generation == 1) {
         usb_request_break_generation = 0;
@@ -847,6 +834,27 @@ properties. (\S6.2.12 in CDC spec.)
   UEINTX &= ~(1 << TXINI);
   while (!(UEINTX & 1 << TXINI)) ;
 
+@ @s S_serial_state int
+
+@<Type definitions@>=
+typedef union {
+  U16 all;
+  struct {
+    U16 bDCD:1;
+    U16 bDSR:1;
+    U16 bBreak:1;
+    U16 bRing:1;
+    U16 bFraming:1;
+    U16 bParity:1;
+    U16 bOverRun:1;
+    U16 reserved:9;
+  };
+} S_serial_state;
+
+@ @<Global variables@>=
+S_serial_state serial_state;
+S_serial_state serial_state_saved;
+
 @ Check if serial state has changed and update host with that information.
 Necessary for hardware handshake support.
 (\S6.3.5 in CDC spec.)
@@ -861,7 +869,7 @@ notification until their state changes.
 TODO: detect if update was accepted by host, and resend if not
 @^TODO@>
 
-@<Update serial state@>=
+@<Notify host about new |serial_state|@>=
         if (serial_state_saved.all != serial_state.all) {
           serial_state_saved.all = serial_state.all;
           UENUM = EP3;
