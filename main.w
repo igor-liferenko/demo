@@ -186,7 +186,7 @@ int main(void)
   UCSR1C = 1 << UCSZ11 | 1 << UCSZ10;
   UCSR1B |= 1 << RXEN1 | 1 << TXEN1;
   UCSR1B |= 1 << RXCIE1;
-  DDRD |= 1 << PD5 | 1 << PD6 | 1 << PD7;
+  DDRD |= 1 << PD6 | 1 << PD7;
   DDRC &= ~(1 << PC6);
   PORTC |= 1 << PC6;
   DDRF &= ~(1 << PF4 | 1 << PF5 | 1 << PF6 | 1 << PF7);
