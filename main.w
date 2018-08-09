@@ -1,3 +1,5 @@
+\font\caps=cmcsc10 at 9pt
+
 @ @c
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
@@ -720,7 +722,7 @@ interface features.
   UEINTX &= ~(1 << RXSTPI);
 
 @ Used to set endpoint features. The standard currently defines one endpoint feature
-selector, \.{ENDPOINT\_HALT} (|0x00|) which allows the host to stall and clear an endpoint.
+selector |0x00|, which allows the host to stall and clear an endpoint.
 Only endpoints other than the default endpoint are recommended to have this functionality.
 
 @<Handle {\caps set feature endpoint}@>=
