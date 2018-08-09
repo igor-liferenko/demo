@@ -552,8 +552,7 @@ default: @/
 @ @<Code which is executed in |0x0680| for both |0x0100| and |0x0200|@>=
     (void) UEDATX;
     (void) UEDATX;
-    ((U8 *) & wLength)[0] = UEDATX;
-    ((U8 *) & wLength)[1] = UEDATX;
+    wLength = UEDATX | UEDATX << 8;
     UEINTX &= ~(1 << RXSTPI);
     if (wLength > data_to_transfer) {
       if (data_to_transfer % 32 == 0) {
@@ -815,8 +814,7 @@ TODO: manage here hardware flow control
 @^TODO@>
 
 @<Handle {\caps set control line state}@>=
-  ((U8 *) & wValue)[0] = UEDATX;
-  ((U8 *) & wValue)[1] = UEDATX;
+  wValue = UEDATX | UEDATX << 8;
   UEINTX &= ~(1 << RXSTPI);
   UEINTX &= ~(1 << TXINI);
   line_status.all = wValue;
