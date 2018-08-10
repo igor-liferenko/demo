@@ -221,7 +221,8 @@ int main(void)
         if (rx_counter) {
           while (rx_counter) {
             while (!(UCSR1A & 1 << UDRE1)) ;
-            UDR1 = uart_usb_getchar(); /* TODO: move it here directly */
+            UDR1 = uart_usb_getchar(); /* TODO: do it via section ``Read byte from USB to |UDR1|''
+                                          instead of function */
             PINB |= 1 << PB0; /* toggle PB0 in PORTB */
           }
         }
