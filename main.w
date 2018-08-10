@@ -243,9 +243,10 @@ is moved after or'ing */
       }
       if (usb_request_break_generation == 1) {
         usb_request_break_generation = 0;
-        PIND |= 1 << PD5; /* toggle \.{PD5} in \.{PORTD}; FIXME: is the PIN bit cleared automatically 
-after set? otherwise it is unclear if it sets other bits except PD5, because the whole register 
-is moved after or'ing */
+        PIND |= 1 << PD5; /* toggle \.{PD5} in \.{PORTD}; FIXME: is the PIN
+          bit cleared automatically after set? otherwise it is unclear if it
+          sets other bits except PD5, because the whole register 
+          is moved after or'ing */
         @<Reset MCU@>@;
       }
     }
