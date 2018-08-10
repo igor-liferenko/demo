@@ -169,11 +169,8 @@ int main(void)
   UCSR1B |= 1 << RXCIE1;
   DDRD |= 1 << PD5;
   DDRB |= 1 << PB0;
-  DDRC &= ~(1 << PC6);
-  PORTC |= 1 << PC6;
-  DDRF &= ~(1 << PF4 | 1 << PF5 | 1 << PF6 | 1 << PF7);
-  PORTF |= 1 << PF4 | 1 << PF5 | 1 << PF6 | 1 << PF7;
-  DDRE &= ~(1 << PE6), PORTE |= 1 << PE6;
+  DDRF &= ~(1 << PF4), PORTF |= 1 << PF4;
+  DDRF &= ~(1 << PF7), PORTF |= 1 << PF7;
   UDIEN |= 1 << SOFE;
   fdevopen((int (*)(char, FILE *)) uart_usb_putchar,
            (int (*)(FILE *)) uart_usb_getchar);
@@ -232,27 +229,15 @@ int main(void)
           }
         }
       }
-      if (cpt_sof >= 100) {
-        if (!(PINF & 1 << PF6))
-          printf("Select Pressed !\r\n");
-        if (!(PINF & 1 << PF7)) {
-          printf("Right Pressed !\r\n");
+      if (cpt_sof >= 100) { /* debounce */
+        if (!(PINF & 1 << PF7))
           serial_state.bDCD = 1;
-        }
         else
           serial_state.bDCD = 0;
-        if (!(PINF & 1 << PF4)) {
-          printf("Left Pressed !\r\n");
+        if (!(PINF & 1 << PF4))
           serial_state.bDSR = 1;
-        }
         else
           serial_state.bDSR = 0;
-        if (!(PINC & 1 << PC6))
-          printf("Down Pressed !\r\n");
-        if (!(PINF & 1 << PF5))
-          printf("Up Pressed !\r\n");
-        if (!(PINE & 1 << PE6))
-          printf("Hello from ATmega32U4 !\r\n");
         @<Notify host about new |serial_state|@>@;
       }
       if (usb_request_break_generation == 1) {
