@@ -4,7 +4,6 @@
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
 #include <avr/io.h>
-#include <stdio.h>
 #include <avr/io.h>
 #include <avr/wdt.h>
 #include <avr/power.h>
@@ -98,7 +97,6 @@ typedef struct {
   S_usb_endpoint_descriptor ep2;
 } S_usb_user_configuration_descriptor;
 
-int uart_usb_putchar(int);
 char uart_usb_getchar(void);
 Bool usb_user_read_request(U8, U8);
 Bool usb_user_get_descriptor(U8, U8);
@@ -172,8 +170,6 @@ int main(void)
   DDRF &= ~(1 << PF4), PORTF |= 1 << PF4;
   DDRF &= ~(1 << PF7), PORTF |= 1 << PF7;
   UDIEN |= 1 << SOFE;
-  fdevopen((int (*)(char, FILE *)) uart_usb_putchar,
-           (int (*)(FILE *)) uart_usb_getchar);
 
   while (1) {
     if (!usb_connected) {
@@ -224,7 +220,7 @@ int main(void)
         if (rx_counter) {
           while (rx_counter) {
             while (!(UCSR1A & 1 << UDRE1)) ;
-            UDR1 = uart_usb_getchar();
+            UDR1 = uart_usb_getchar(); /* TODO: move it here directly */
             PINB |= 1 << PB0; /* toggle PB0 in PORTB */
           }
         }
@@ -286,12 +282,6 @@ void uart_usb_send_buffer(U8 * buffer, U8 nb_data)
     while (!(UEINTX & 1 << RWAL)) ;
     UEINTX &= ~(1 << TXINI), UEINTX &= ~(1 << FIFOCON);
   }
-}
-
-int uart_usb_putchar(int data_to_send)
-{
-  uart_usb_send_buffer((U8 *) &data_to_send, 1);
-  return data_to_send;
 }
 
 char uart_usb_getchar(void)
