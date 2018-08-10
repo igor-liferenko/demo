@@ -20,6 +20,7 @@ typedef unsigned char Uchar;
 #define EVT_USB_RESUME                7
 #define EVT_USB_RESET                 8
 
+@<Predeclarations of procedures@>@;
 @<Type definitions@>@;
 
 typedef union {
@@ -229,7 +230,7 @@ int main(void)
         }
       }
       if (cpt_sof >= 100) { /* debounce */
-        char data;
+        unsigned char data;
         if (!(PINF & 1 << PF4)) {
           data = '*'; @+ uart_usb_send_buffer(&data, 1);
           serial_state.bDCD = 1;
@@ -268,7 +269,10 @@ char __low_level_init()
   return 1;
 }
 
-void uart_usb_send_buffer(U8 * buffer, U8 nb_data)
+@ @<Predeclarations of procedures@>=
+void uart_usb_send_buffer(U8 *buffer, U8 nb_data);
+@ @c
+void uart_usb_send_buffer(U8 *buffer, U8 nb_data)
 {
   U8 zlp;
 
