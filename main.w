@@ -459,14 +459,10 @@ switch (UEDATX | UEDATX << 8) {
 case 0x0680: @/
   switch (UEDATX | UEDATX << 8) {
   case 0x0100: @/
-    data_to_transfer = sizeof usb_dev_desc;
-    pbuffer = &usb_dev_desc.bLength;
-    @<Code which is executed in |0x0680| for both |0x0100| and |0x0200|@>@;
+    @<Handle {\caps get descriptor device}\null@>@;
     break;
   case 0x0200: @/
-    data_to_transfer = sizeof usb_conf_desc;
-    pbuffer = &usb_conf_desc.cfg.bLength;
-    @<Code which is executed in |0x0680| for both |0x0100| and |0x0200|@>@;
+    @<Handle {\caps get descriptor configuration}@>@;
     break;
   default: /* here go all cases for descriptor\_type different from 0x01 and 0x02 */
     UECONX |= 1 << STALLRQ;
@@ -531,6 +527,16 @@ default: @/
   UECONX |= 1 << STALLRQ;
   UEINTX &= ~(1 << RXSTPI);
 }
+
+@ @<Handle {\caps get descriptor device}\null@>=
+data_to_transfer = sizeof usb_dev_desc;
+pbuffer = &usb_dev_desc.bLength;
+@<Code which is executed in |0x0680| for both |0x0100| and |0x0200|@>@;
+
+@ @<Handle {\caps get descriptor configuration}@>=
+data_to_transfer = sizeof usb_conf_desc;
+pbuffer = &usb_conf_desc.cfg.bLength;
+@<Code which is executed in |0x0680| for both |0x0100| and |0x0200|@>@;
 
 @ @<Code which is executed in |0x0680| for both |0x0100| and |0x0200|@>=
     (void) UEDATX;
