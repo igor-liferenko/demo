@@ -8,12 +8,12 @@
 @* Program. This is cleaned-up Atmel's demo. All functionality of original is preserved.
 
 @c
+#include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
-#include <avr/io.h>
-#include <avr/io.h>
 #include <avr/wdt.h> /* |wdt_reset| */
-#include <avr/power.h>
+#include <avr/power.h> /* |clock_prescale_set| */
+
 typedef unsigned char U8;
 typedef unsigned short U16;
 typedef unsigned long U32;
@@ -105,10 +105,6 @@ typedef struct {
   S_usb_endpoint_descriptor ep2;
 } S_usb_user_configuration_descriptor;
 
-char uart_usb_getchar(void);
-Bool usb_user_read_request(U8, U8);
-Bool usb_user_get_descriptor(U8, U8);
-
 const S_usb_device_descriptor usb_dev_desc
 @t\hskip2.5pt@> @=PROGMEM@> = { @t\1@> @/
   sizeof usb_dev_desc, 0x01, 0x0200, 0x02, 0, 0, 32, 0x03EB, 0x2018, @/
@@ -140,7 +136,6 @@ volatile U8 usb_request_break_generation = 0;
 volatile U8 rs2usb[10];
 volatile U8 cpt_sof;
 volatile U16 g_usb_event = 0;
-U32 boot_key __attribute__ ((section(".noinit")));
 S_line_coding line_coding;
 U8 usb_suspended = 0;
 U8 usb_connected = 0;
@@ -318,6 +313,9 @@ void uart_usb_send_buffer(U8 *buffer, U8 nb_data)
   }
 }
 
+@ @<Predecl...@>=
+char uart_usb_getchar(void);
+@ @c
 char uart_usb_getchar(void)
 {
   register Uchar data_rx;
