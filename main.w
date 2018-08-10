@@ -167,8 +167,11 @@ int main(void)
   UCSR1B |= 1 << RXCIE1;
   DDRD |= 1 << PD5;
   DDRB |= 1 << PB0;
-  DDRF &= ~(1 << PF4), PORTF |= 1 << PF4;
-  DDRF &= ~(1 << PF7), PORTF |= 1 << PF7;
+  DDRF |= 1 << PF4, PORTF |= 1 << PF4; /* input */
+  DDRF |= 1 << PF5, PORTF |= 1 << PF5; /* input */
+  DDRF |= 1 << PF6, PORTF |= 1 << PF6; /* input */
+  DDRD |= 1 << PD7; /* ground */
+
   UDIEN |= 1 << SOFE;
 
   while (1) {
@@ -226,12 +229,20 @@ int main(void)
         }
       }
       if (cpt_sof >= 100) { /* debounce */
-        if (!(PINF & 1 << PF7))
+        char data;
+        if (!(PINF & 1 << PF4)) {
+          data = '*'; @+ uart_usb_send_buffer(&data, 1);
           serial_state.bDCD = 1;
+        }
         else
           serial_state.bDCD = 0;
-        if (!(PINF & 1 << PF4))
+        if (!(PINF & 1 << PF5)) {
+          data = '0'; @+ uart_usb_send_buffer(&data, 1);
+        }
+        if (!(PINF & 1 << PF6)) {
+          data = '#'; @+ uart_usb_send_buffer(&data, 1);
           serial_state.bDSR = 1;
+        }
         else
           serial_state.bDSR = 0;
         @<Notify host about new |serial_state|@>@;
