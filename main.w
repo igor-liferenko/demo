@@ -55,9 +55,9 @@ typedef struct {
   U16 idVendor;
   U16 idProduct;
   U16 bcdDevice;
-  U8 iManufacturer; /* do not set it to non-zero in this example */
-  U8 iProduct; /* do not set it to non-zero in this example */
-  U8 iSerialNumber; /* do not set it to non-zero in this example */
+  U8 iManufacturer;
+  U8 iProduct;
+  U8 iSerialNumber;
   U8 bNumConfigurations;
 } S_usb_device_descriptor;
 
@@ -106,7 +106,11 @@ typedef struct {
 const S_usb_device_descriptor usb_dev_desc
 @t\hskip2.5pt@> @=PROGMEM@> = { @t\1@> @/
   sizeof usb_dev_desc, 0x01, 0x0200, 0x02, 0, 0, 32, 0x03EB, 0x2018, @/
-@t\2@> 0x1000, 0x00, 0x00, 0x00, 1 @/
+  0x1000, @/
+0x00, /* set it to non-zero in code derived from this example */
+0x00, /* set it to non-zero in code derived from this example */
+0x00, /* set it to non-zero in code derived from this example */
+@t\2@> 1 @/
 };
 
 const S_usb_user_configuration_descriptor usb_conf_desc
