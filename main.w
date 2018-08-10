@@ -251,11 +251,7 @@ int main(void)
       if (usb_request_break_generation == 1) {
         usb_request_break_generation = 0;
         PIND |= 1 << PD5; /* toggle \.{PD5} in \.{PORTD} */
-// !! this is used to reset the chip
-        wdt_reset();
-        WDTCSR |= 1 << WDCE;
-        WDTCSR = 1 << WDE;
-        while (1) ;
+        @<Reset MCU@>@;
       }
     }
   }
@@ -268,6 +264,14 @@ char __low_level_init()
   clock_prescale_set(0);
   return 1;
 }
+
+@ see usb/WDT.README
+
+@<Reset MCU@>=
+wdt_reset();
+WDTCSR |= 1 << WDCE;
+WDTCSR = 1 << WDE;
+while (1) ;
 
 @ @<Predeclarations of procedures@>=
 void uart_usb_send_buffer(U8 *buffer, U8 nb_data);
