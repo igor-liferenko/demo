@@ -244,7 +244,7 @@ int main(void)
         }
         else
           serial_state.bDSR = 0;
-        @<Notify host about new |serial_state|@>@;
+        @<Notify host if |serial_state| changed@>@;
       }
       if (usb_request_break_generation == 1) {
         usb_request_break_generation = 0;
@@ -873,7 +873,7 @@ notification until their state changes.
 TODO: detect if update was accepted by host, and resend if not
 @^TODO@>
 
-@<Notify host about new |serial_state|@>=
+@<Notify host if |serial_state| changed@>=
         if (serial_state_saved.all != serial_state.all) {
           serial_state_saved.all = serial_state.all;
           UENUM = EP3;
