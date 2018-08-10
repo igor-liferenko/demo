@@ -828,9 +828,7 @@ properties. (\S6.2.12 in CDC spec.)
   UEINTX &= ~(1 << TXINI);
   while (!(UEINTX & 1 << TXINI)) ;
 
-@ @s S_serial_state int
-
-@<Type definitions@>=
+@ @<Type definitions@>=
 typedef union {
   U16 all;
   struct {
