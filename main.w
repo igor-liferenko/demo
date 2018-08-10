@@ -5,7 +5,7 @@
 #include <avr/pgmspace.h>
 #include <avr/io.h>
 #include <avr/io.h>
-#include <avr/wdt.h>
+#include <avr/wdt.h> /* |wdt_reset| */
 #include <avr/power.h>
 typedef unsigned char U8;
 typedef unsigned short U16;
