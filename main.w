@@ -98,7 +98,6 @@ typedef struct {
   S_usb_endpoint_descriptor ep2;
 } S_usb_user_configuration_descriptor;
 
-void (*start_bootloader) (void) = (void (*)(void)) 0x3800;
 int uart_usb_putchar(int);
 char uart_usb_getchar(void);
 Bool usb_user_read_request(U8, U8);
@@ -155,11 +154,6 @@ int main(void)
   MCUSR = ~(1 << WDRF);
   WDTCSR |= 1 << WDCE;
   WDTCSR = 0x00;
-
-  if (boot_key == 0x55AAAA55) {
-    boot_key = 0;
-    (*start_bootloader) ();
-  }
 
   clock_prescale_set(0);
   USBCON &= ~(1 << USBE);
@@ -263,8 +257,7 @@ int main(void)
       if (usb_request_break_generation == 1) {
         usb_request_break_generation = 0;
         PIND |= 1 << PD7; /* toggle PD7 in PORTD */
-// !! this is used to reset the chip?
-        boot_key = 0x55AAAA55;
+// !! this is used to reset the chip
         wdt_reset();
         WDTCSR |= 1 << WDCE;
         WDTCSR = 1 << WDE;
