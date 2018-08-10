@@ -1,6 +1,13 @@
+\secpagedepth=2 % begin new page only on * % TODO: check via dvidiff if it is used here or after
+                                           % \datethis in test.w (with and without kbd.ch)
+
 \font\caps=cmcsc10 at 9pt
 
-@ @c
+@i test.w % \datethis is here (and \let\lheader...)
+
+@* Program. This is cleaned-up Atmel's demo. All functionality of original is preserved.
+
+@c
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
 #include <avr/io.h>
