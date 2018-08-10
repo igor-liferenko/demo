@@ -122,14 +122,8 @@ const S_usb_user_configuration_descriptor usb_conf_desc
 };
 
 @<Global variables@>@;
-U8 zlp;
 U8 endpoint_status[7];
-U8 device_status = 1;
-U8 data_to_transfer;
-PGM_VOID_P pbuffer;
-U8 remote_wakeup_feature = 0;
 U8 usb_configuration_nb;
-U8 usb_remote_wup_feature;
 volatile U8 usb_request_break_generation = 0;
 volatile U8 rs2usb[10];
 volatile U8 cpt_sof;
@@ -157,7 +151,6 @@ int main(void)
   USBCON |= 1 << OTGPADE;
   USBCON |= 1 << VBUSTE;
   sei();
-  usb_remote_wup_feature = 0;
   UBRR1 = (U16) (((U32) 16000 * 1000L) / ((U32) 57600 / 2 * 16) - 1);
   UCSR1A |= 1 << U2X1;
   UCSR1C = 1 << UCSZ11 | 1 << UCSZ10;
@@ -212,7 +205,7 @@ int main(void)
         if (!rx_counter) {
           UENUM = EP2;
           if (UEINTX & 1 << RXOUTI) {
-            rx_counter = (U8) (UEBCLX);
+            rx_counter = (U8) (UEBCLX); /* TODO: remove parens + cast and chk via objdump */
             if (!rx_counter) {
               UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
             }
@@ -415,7 +408,6 @@ ISR(USB_GEN_vect)
     g_usb_event |= 1 << EVT_USB_RESUME;
   }
   if (UDINT & 1 << EORSTI && UDIEN & 1 << EORSTE) {
-    usb_remote_wup_feature = 0;
     UDINT = ~(1 << EORSTI);
     UENUM = EP0;
     if (!(UECONX & 1 << EPEN)) {
@@ -457,7 +449,7 @@ U8 configuration_number;
 UEINTX &= ~(1 << RXOUTI); /* TODO: ??? - check if it is non-zero here */
 U16 wLength;
 U8 nb_byte;
-zlp = 0;
+U8 zlp = 0;
 switch (UEDATX | UEDATX << 8) {
 case 0x0080: @/
   @<Handle {\caps get status device}@>@;
@@ -531,6 +523,10 @@ default: /* in code derived from this example remove this and all unused "Handle
   UECONX |= 1 << STALLRQ;
   UEINTX &= ~(1 << RXSTPI);
 }
+
+@ @<Global...@>=
+U8 data_to_transfer;
+PGM_VOID_P pbuffer;
 
 @ @<Handle {\caps get descriptor device}\null@>=
 data_to_transfer = sizeof usb_dev_desc;
@@ -635,7 +631,7 @@ host up during suspend. The remote wakeup bit can be by the {\caps set feature} 
 
 @<Handle {\caps get status device}@>=
   UEINTX &= ~(1 << RXSTPI);
-  UEDATX = (U8) device_status;
+  UEDATX = 0x01;
   UEDATX = 0x00;
   UEINTX &= ~(1 << TXINI);
   while (!(UEINTX & 1 << RXOUTI)) ;
