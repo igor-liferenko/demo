@@ -168,9 +168,9 @@ int main(void)
   UCSR1B |= 1 << RXCIE1;
   DDRD |= 1 << PD5;
   DDRB |= 1 << PB0;
-  DDRF |= 1 << PF4, PORTF |= 1 << PF4; /* input */
-  DDRF |= 1 << PF5, PORTF |= 1 << PF5; /* input */
-  DDRF |= 1 << PF6, PORTF |= 1 << PF6; /* input */
+  DDRF &= ~(1 << PF4), PORTF |= 1 << PF4; /* input */
+  DDRF &= ~(1 << PF5), PORTF |= 1 << PF5; /* input */
+  DDRF &= ~(1 << PF6), PORTF |= 1 << PF6; /* input */
   DDRD |= 1 << PD7; /* ground */
 
   UDIEN |= 1 << SOFE;
