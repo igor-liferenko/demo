@@ -497,7 +497,8 @@ case 0x0680: @/
   case 0x0200: @/
     @<Handle {\caps get descriptor configuration}@>@;
     break;
-  default: /* here go all cases for descriptor\_type different from 0x01 and 0x02 */
+  default: /* in code derived from this example change this to ``Handle
+              {\caps get descriptor device qualifier}'' */
     UECONX |= 1 << STALLRQ;
     UEINTX &= ~(1 << RXSTPI);
   }
@@ -526,7 +527,7 @@ case 0x2221: @/
 case 0x2321: @/
   @<Handle {\caps send break}@>@;
   break;
-default: @/
+default: /* in code derived from this example remove this and all unused "Handle" sections */
   UECONX |= 1 << STALLRQ;
   UEINTX &= ~(1 << RXSTPI);
 }
