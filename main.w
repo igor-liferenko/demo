@@ -227,9 +227,7 @@ int main(void)
         }
       }
       if (cpt_sof >= 100) { /* debounce */
-        unsigned char data; /* TODO: find out why here malformed packet is in wireshark,
-                               whereas to/from UART all is perfect */
-@^TODO@>
+        unsigned char data;
         if (!(PINF & 1 << PF4)) {
           data = '*'; @+ uart_usb_send_buffer(&data, 1);
           serial_state.bDCD = 1;
