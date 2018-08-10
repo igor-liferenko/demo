@@ -3,7 +3,7 @@
 
 \font\caps=cmcsc10 at 9pt
 
-@i test.w % \datethis is here (and \let\lheader...)
+@i ../usb/test.w % \datethis is here (and \let\lheader...)
 
 @* Program. This is cleaned-up Atmel's demo. All functionality of original is preserved.
 
