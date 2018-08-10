@@ -1,9 +1,7 @@
-\secpagedepth=2 % begin new page only on * % TODO: check via dvidiff if it is used here or after
-                                           % \datethis in test.w (with and without kbd.ch)
-
+\let\lheader\rheader
+%\datethis
+\secpagedepth=2 % begin new page only on *
 \font\caps=cmcsc10 at 9pt
-
-@i ../usb/test.w % \datethis is here (and \let\lheader...)
 
 @* Program. This is cleaned-up Atmel's demo. All functionality of original is preserved.
 
