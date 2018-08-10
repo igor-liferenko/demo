@@ -456,30 +456,14 @@ U16 wLength;
 U8 nb_byte;
 zlp = 0;
 switch (UEDATX | UEDATX << 8) {
-case 0x0680: @/
-  switch (UEDATX | UEDATX << 8) {
-  case 0x0100: @/
-    @<Handle {\caps get descriptor device}\null@>@;
-    break;
-  case 0x0200: @/
-    @<Handle {\caps get descriptor configuration}@>@;
-    break;
-  case 0x0600: @/
-    @<Handle {\caps get descriptor device qualifier}@>@;
-    break;
-  default: /* here go all cases for descriptor\_type different from 0x01 and 0x02 */
-    UECONX |= 1 << STALLRQ;
-    UEINTX &= ~(1 << RXSTPI);
-  }
+case 0x0080: @/
+  @<Handle {\caps get status device}@>@;
   break;
-case 0x0880: @/
-  @<Handle {\caps get configuration}@>@;
+case 0x0081: @/
+  @<Handle {\caps get status interface}@>@;
   break;
-case 0x0500: @/
-  @<Handle {\caps set address}@>@;
-  break;
-case 0x0900: @/
-  @<Handle {\caps set configuration}@>@;
+case 0x0082: @/
+  @<Handle {\caps get status endpoint}@>@;
   break;
 case 0x0100: @/
   @<Handle {\caps clear feature device}@>@;
@@ -499,14 +483,30 @@ case 0x0301: @/
 case 0x0302: @/
   @<Handle {\caps set feature endpoint}@>@;
   break;
-case 0x0080: @/
-  @<Handle {\caps get status device}@>@;
+case 0x0500: @/
+  @<Handle {\caps set address}@>@;
   break;
-case 0x0081: @/
-  @<Handle {\caps get status interface}@>@;
+case 0x0680: @/
+  switch (UEDATX | UEDATX << 8) {
+  case 0x0100: @/
+    @<Handle {\caps get descriptor device}\null@>@;
+    break;
+  case 0x0200: @/
+    @<Handle {\caps get descriptor configuration}@>@;
+    break;
+  case 0x0600: @/
+    @<Handle {\caps get descriptor device qualifier}@>@;
+    break;
+  default: /* here go all cases for descriptor\_type different from 0x01 and 0x02 */
+    UECONX |= 1 << STALLRQ;
+    UEINTX &= ~(1 << RXSTPI);
+  }
   break;
-case 0x0082: @/
-  @<Handle {\caps get status endpoint}@>@;
+case 0x0880: @/
+  @<Handle {\caps get configuration}@>@;
+  break;
+case 0x0900: @/
+  @<Handle {\caps set configuration}@>@;
   break;
 case 0x0A81: @/
   @<Handle {\caps get interface}@>@;
@@ -517,14 +517,14 @@ case 0x0B01: @/
 case 0x2021: @/
   @<Handle {\caps set line coding}@>@;
   break;
+case 0x21A1: @/
+  @<Handle {\caps get line coding}@>@;
+  break;
 case 0x2221: @/
   @<Handle {\caps set control line state}@>@;
   break;
 case 0x2321: @/
   @<Handle {\caps send break}@>@;
-  break;
-case 0x21A1: @/
-  @<Handle {\caps get line coding}@>@;
   break;
 default: @/
   UECONX |= 1 << STALLRQ;
