@@ -464,6 +464,9 @@ case 0x0680: @/
   case 0x0200: @/
     @<Handle {\caps get descriptor configuration}@>@;
     break;
+  case 0x0600: @/
+    @<Handle {\caps get descriptor device qualifier}@>@;
+    break;
   default: /* here go all cases for descriptor\_type different from 0x01 and 0x02 */
     UECONX |= 1 << STALLRQ;
     UEINTX &= ~(1 << RXSTPI);
@@ -580,6 +583,21 @@ pbuffer = &usb_conf_desc.cfg.bLength;
     while (!(UEINTX & 1 << NAKOUTI)) ;
     UEINTX &= ~(1 << NAKOUTI);
     UEINTX &= ~(1 << RXOUTI);
+
+@ A high-speed capable device that has different device information for full-speed and high-speed
+must have a Device Qualifier Descriptor. For example, if the device is currently operating at
+full-speed, the Device Qualifier returns information about how it would operate at high-speed and
+vice-versa.
+
+If a full-speed only device receives a Get Descriptor request for a device qualifier, it must
+respond with a request error. Then, the host must not make a request device information for
+high-speed.
+
+See test in \S\stallrq\ to understand why we set |STALLRQ| before clearing |RXSTPI|.
+
+@<Handle {\caps get descriptor device qualifier}@>=
+UECONX |= 1 << STALLRQ;
+UEINTX &= ~(1 << RXSTPI);
 
 @ @<Handle {\caps set address}@>=
   addr = UEDATX;
