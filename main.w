@@ -149,10 +149,7 @@ int main(void)
 {
   UHWCON |= 1 << UVREGE;
 
-  wdt_reset();
-  MCUSR = ~(1 << WDRF);
-  WDTCSR |= 1 << WDCE;
-  WDTCSR = 0x00;
+  @<Clear |WDRF|@>@;
 
   clock_prescale_set(0);
   USBCON &= ~(1 << USBE);
@@ -272,6 +269,16 @@ wdt_reset();
 WDTCSR |= 1 << WDCE;
 WDTCSR = 1 << WDE;
 while (1) ;
+
+@ After reset |WDRF| flag in |MCUSR| is set. It is necessary to clear it
+to stop MCU from eternal resetting: on MCU start we always clear |WDRF|
+(nothing will change if it is not set).
+
+@<Clear |WDRF|@>=
+wdt_reset();
+MCUSR = ~(1 << WDRF);
+WDTCSR |= 1 << WDCE;
+WDTCSR = 0x00;
 
 @ @<Predeclarations of procedures@>=
 void uart_usb_send_buffer(U8 *buffer, U8 nb_data);
