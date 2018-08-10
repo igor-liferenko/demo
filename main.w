@@ -261,7 +261,8 @@ char __low_level_init()
 }
 
 @ @<Reset MCU@>=
-wdt_reset();
+wdt_reset(); /* see Note to ``function for changing the time-out
+                value of the Watchdog Timer'' in datasheet */
 WDTCSR |= 1 << WDCE;
 WDTCSR = 1 << WDE;
 while (1) ;
