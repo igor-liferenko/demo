@@ -55,9 +55,9 @@ typedef struct {
   U16 idVendor;
   U16 idProduct;
   U16 bcdDevice;
-  U8 iManufacturer;
-  U8 iProduct;
-  U8 iSerialNumber;
+  U8 iManufacturer; /* do not set it to non-zero in this example */
+  U8 iProduct; /* do not set it to non-zero in this example */
+  U8 iSerialNumber; /* do not set it to non-zero in this example */
   U8 bNumConfigurations;
 } S_usb_device_descriptor;
 
