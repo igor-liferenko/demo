@@ -167,7 +167,8 @@ int main(void)
   UCSR1C = 1 << UCSZ11 | 1 << UCSZ10;
   UCSR1B |= 1 << RXEN1 | 1 << TXEN1;
   UCSR1B |= 1 << RXCIE1;
-  DDRD |= 1 << PD5 | 1 << PD6;
+  DDRD |= 1 << PD5;
+  DDRB |= 1 << PB0;
   DDRC &= ~(1 << PC6);
   PORTC |= 1 << PC6;
   DDRF &= ~(1 << PF4 | 1 << PF5 | 1 << PF6 | 1 << PF7);
@@ -227,7 +228,7 @@ int main(void)
           while (rx_counter) {
             while (!(UCSR1A & 1 << UDRE1)) ;
             UDR1 = uart_usb_getchar();
-            PIND |= 1 << PD6; /* toggle PD6 in PORTD */
+            PINB |= 1 << PB0; /* toggle PB0 in PORTB */
           }
         }
       }
