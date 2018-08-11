@@ -43,91 +43,206 @@ typedef struct {
   U8 bDataBits;
 } S_line_coding;
 
-typedef struct {
-  U8 bLength;
-  U8 bDescriptorType;
-  U16 bscUSB;
-  U8 bDeviceClass;
-  U8 bDeviceSubClass;
-  U8 bDeviceProtocol;
-  U8 bMaxPacketSize0;
-  U16 idVendor;
-  U16 idProduct;
-  U16 bcdDevice;
-  U8 iManufacturer;
-  U8 iProduct;
-  U8 iSerialNumber;
-  U8 bNumConfigurations;
-} S_usb_device_descriptor;
+@* USB stack.
 
-typedef struct {
-  U8 bLength;
-  U8 bDescriptorType;
-  U16 wTotalLength;
-  U8 bNumInterfaces;
-  U8 bConfigurationValue;
-  U8 iConfiguration;
-  U8 bmAttibutes;
-  U8 MaxPower;
-} S_usb_configuration_descriptor;
+The order of descriptors here is the same as the order in which they are transmitted.
 
-typedef struct {
-  U8 bLength;
-  U8 bDescriptorType;
-  U8 bInterfaceNumber;
-  U8 bAlternateSetting;
-  U8 bNumEndpoints;
-  U8 bInterfaceClass;
-  U8 bInterfaceSubClass;
-  U8 bInterfaceProtocol;
-  U8 iInterface;
-} S_usb_interface_descriptor;
+@*1 Device descriptor.
 
-typedef struct {
-  U8 bLength;
-  U8 bDescriptorType;
-  U8 bEndpointAddress;
-  U8 bmAttributes;
-  U16 wMaxPacketSize;
-  U8 bInterval;
-} S_usb_endpoint_descriptor;
+TODO: find what prefixes mean in names of variables (i.e., `b', `bcd', ...)
 
+@<Type \null definitions@>=
 typedef struct {
-  S_usb_configuration_descriptor cfg;
-  S_usb_interface_descriptor ifc0;
-  U8 CS_INTERFACE[19];
-  S_usb_endpoint_descriptor ep3;
-  S_usb_interface_descriptor ifc1;
-  S_usb_endpoint_descriptor ep1;
-  S_usb_endpoint_descriptor ep2;
-} S_usb_user_configuration_descriptor;
+  uint8_t      bLength;
+  uint8_t      bDescriptorType;
+  uint16_t     bcdUSB; /* version */
+  uint8_t      bDeviceClass; /* class code assigned by the USB */
+  uint8_t      bDeviceSubClass; /* sub-class code assigned by the USB */
+  uint8_t      bDeviceProtocol; /* protocol code assigned by the USB */
+  uint8_t      bMaxPacketSize0; /* max packet size for EP0 */
+  uint16_t     idVendor;
+  uint16_t     idProduct;
+  uint16_t     bcdDevice; /* device release number */
+  uint8_t      iManufacturer; /* index of manu. string descriptor */
+  uint8_t      iProduct; /* index of prod. string descriptor */
+  uint8_t      iSerialNumber; /* index of S.N. string descriptor */
+  uint8_t      bNumConfigurations;
+} S_device_descriptor;
 
-const S_usb_device_descriptor usb_dev_desc
+@ @<Global \null variables@>=
+const S_device_descriptor dev_desc
 @t\hskip2.5pt@> @=PROGMEM@> = { @t\1@> @/
-  sizeof usb_dev_desc, 0x01, 0x0200, 0x02, 0, 0, 32, 0x03EB, 0x2018, @/
-  0x1000, @/
-0x00, /* set it to non-zero in code derived from this example */
-0x00, /* set it to non-zero in code derived from this example */
-0x00, /* set it to non-zero in code derived from this example */
-@t\2@> 1 @/
+  sizeof (S_device_descriptor), @/
+  0x01, /* device */
+  0x0200, /* USB 2.0 */
+  0x02, /* CDC class */
+  0, /* no subclass */
+  0, @/
+  EP0_SIZE, @/
+  0x03EB, /* VID (ATMEL) */
+  0x2018, /* PID */
+  0x1000, /* device revision */
+  0x00, /* set it to non-zero in code derived from this example */
+  0x00, /* set it to non-zero in code derived from this example */
+  0x00, /* set it to non-zero in code derived from this example */
+@t\2@> 1 /* one configuration for this device */
 };
 
-@ $$\hbox to7.5cm{\vbox to7.88cm{\vfil\special{psfile=cdc-structure.eps
+@*1 User configuration descriptor.
+
+$$\hbox to7.5cm{\vbox to7.88cm{\vfil\special{psfile=cdc-structure.eps
   clip llx=0 lly=0 urx=274 ury=288 rwi=2125}}\hfil}$$
 
-@c
-const S_usb_user_configuration_descriptor usb_conf_desc
-@t\hskip2.5pt@> @=PROGMEM@> = { @t\1@> @/
-  {sizeof (S_usb_configuration_descriptor), 0x02, 0x0043, 2, 1, 0, (0x80 | 0x00), 50}, @/
-  {sizeof (S_usb_interface_descriptor), 0x04, 0, 0, 1, 0x02, 0x02, 0x01, 0}, @/
+@<Type \null definitions@>=
+@<Type definitions used in user configuration descriptor@>@;
+typedef struct {
+  S_configuration_descriptor conf_desc;
+  S_interface_descriptor ifc0;
+  U8 CS_INTERFACE[19];
+  S_endpoint_descriptor ep3;
+  S_interface_descriptor ifc1;
+  S_endpoint_descriptor ep1;
+  S_endpoint_descriptor ep2;
+} S_user_configuration_descriptor;
+
+-----
   {0x05, 0x24, 0x00, 0x10, 0x01, 0x05, 0x24, 0x01, 0x03, 0x01, 0x04, 0x24, @/
    0x02, 0x06, 0x05, 0x24, 0x06, 0x00, 0x01}, @/
-  {sizeof (S_usb_endpoint_descriptor), 0x05, 0x80 | 0x03, 0x03, 0x20, 0xFF}, @/
-  {sizeof (S_usb_interface_descriptor), 0x04, 1, 0, 2, 0x0A, 0x00, 0x00, 0}, @/
-  {sizeof (S_usb_endpoint_descriptor), 0x05, 0x80 | 0x01, 0x02, 0x20, 0x00}, @/
-@t\2@> {sizeof (S_usb_endpoint_descriptor), 0x05, 0x02, 0x02, 0x20, 0x00} @/
+----
+
+@ @<Global \null variables@>=
+@<Global variables used in user configuration descriptor@>@;
+const S_user_configuration_descriptor user_conf_desc
+@t\hskip2.5pt@> @=PROGMEM@> = { @t\1@> @/
+  @<Initialize element 1...@>, @/
+  @<Initialize element 2...@>, @/
+  @<Initialize element 3...@>, @/
+  @<Initialize element 4...@>, @/
+  @<Initialize element 5...@>, @/
+  @<Initialize element 6...@>, @/
+@t\2@> @<Initialize element 7...@> @/
 };
 
+@*2 Configuration descriptor.
+
+@s S_configuration_descriptor int
+
+@<Type definitions ...@>=
+typedef struct {
+   uint8_t      bLength;
+   uint8_t      bDescriptorType;
+   uint16_t     wTotalLength;
+   uint8_t      bNumInterfaces;
+   uint8_t      bConfigurationValue; /* number between 1 and |bNumConfigurations|, for
+     each configuration\footnote\dag{For some reason
+     configurations start numbering with `1', and interfaces and altsettings with `0'.} */
+   uint8_t      iConfiguration; /* index of string descriptor */
+   uint8_t      bmAttibutes;
+   uint8_t      MaxPower;
+} S_configuration_descriptor;
+
+@ @<Initialize element 1 in user configuration descriptor@>= { @t\1@> @/
+  sizeof (S_configuration_descriptor), @/
+  0x02, /* configuration descriptor */
+  sizeof (S_user_configuration_descriptor), @/
+  2, /* two interfaces in this configuration */
+  1, /* this corresponds to `1' in `cfg1' on picture */
+  0, /* no string descriptor */
+  0x80, /* device is powered from bus */
+@t\2@> 0x32 /* device uses 100mA */
+}
+
+@*2 Interface descriptor.
+
+@s S_interface_descriptor int
+
+@<Type definitions ...@>=
+typedef struct {
+   uint8_t      bLength;
+   uint8_t      bDescriptorType;
+   uint8_t      bInterfaceNumber; /* number between 0 and |bNumInterfaces-1|, for
+                                     each interface */
+   uint8_t      bAlternativeSetting; /* number starting from 0, for each interface */
+   uint8_t      bNumEndpoints; /* number of EP except EP 0 */
+   uint8_t      bInterfaceClass; /* class code assigned by the USB */
+   uint8_t      bInterfaceSubClass; /* sub-class code assigned by the USB */
+   uint8_t      bInterfaceProtocol; /* protocol code assigned by the USB */
+   uint8_t      iInterface; /* index of string descriptor */
+}  S_interface_descriptor;
+
+@ @<Initialize element 2 in user configuration descriptor@>= { @t\1@> @/
+  sizeof (S_interface_descriptor), @/
+  0x04, /* interface descriptor */
+  0, /* this corresponds to `0' in `if0' on picture */
+  0, /* this corresponds to `0' in `alt0' on picture */
+  1, /* one endpoint is used */
+  0x02, /* ??? */
+  0x02, /* ??? */
+  0x01, /* ??? */
+@t\2@> 0 /* no string descriptor */
+}
+
+@ @<Initialize element 5 in user configuration descriptor@>= { @t\1@> @/
+  sizeof (S_interface_descriptor), @/
+  0x04, /* interface descriptor */
+  1, /* this corresponds to `1' in `if1' on picture */
+  0, /* this corresponds to `0' in `alt0' on picture */
+  2, /* two endpoints are used */
+  0x0A, /* ??? */
+  0x00, /* ??? */
+  0x00, /* ??? */
+@t\2@> 0 /* no string descriptor */
+}
+
+@*2 Endpoint descriptor.
+
+@s S_endpoint_descriptor int
+
+@<Type definitions ...@>=
+typedef struct {
+  uint8_t bLength;
+  uint8_t bDescriptorType;
+  uint8_t bEndpointAddress;
+  uint8_t bmAttributes;
+  uint16_t wMaxPacketSize;
+  uint8_t bInterval; /* interval for polling EP by host to determine if data is available (ms-1) */
+} S_endpoint_descriptor;
+
+@ @d IN (1 << 7)
+
+@<Initialize element 4 in user configuration descriptor@>= { @t\1@> @/
+  sizeof (S_endpoint_descriptor), @/
+  0x05, /* endpoint */
+  IN | 3, /* this corresponds to `3' in `ep3' on picture */
+  0x03, /* transfers via interrupts\footnote\dag{Must correspond to
+    |UECFG0X| of |EP3|.} */
+  0x0020, /* 32 bytes */
+@t\2@> 0xFF /* 256 */
+}
+
+@ @<Initialize element 6 in user configuration descriptor@>= { @t\1@> @/
+  sizeof (S_endpoint_descriptor), @/
+  0x05, /* endpoint */
+  IN | 1, /* this corresponds to `1' in `ep1' on picture */
+  0x02, /* bulk transfers\footnote\dag{Must correspond to
+    |UECFG0X| of |EP1|.} */
+  0x0020, /* 32 bytes */
+@t\2@> 0x00 /* not applicable */
+}
+
+@ @d OUT (0 << 7)
+
+@<Initialize element 7 in user configuration descriptor@>= { @t\1@> @/
+  sizeof (S_endpoint_descriptor), @/
+  0x05, /* endpoint */
+  OUT | 2, /* this corresponds to `2' in `ep2' on picture */
+  0x02, /* bulk transfers\footnote\dag{Must correspond to
+    |UECFG0X| of |EP2|.} */
+  0x0020, /* 32 bytes */
+@t\2@> 0x00 /* not applicable */
+}
+
+@ @c
 @<Global variables@>@;
 U8 endpoint_status[7];
 U8 usb_configuration_nb;
@@ -146,6 +261,9 @@ S_line_status line_status;
 #define EP2 2
 #define EP3 3
 
+@ @d EP0_SIZE 32 /* 32 bytes\footnote\dag{Must correspond to |UECFG1X| of |EP0|.} */
+
+@c
 int main(void)
 {
   @<Disable WDT@>@;
@@ -545,8 +663,8 @@ pbuffer = &usb_dev_desc.bLength;
 @<Code which is executed in |0x0680| for both |0x0100| and |0x0200|@>@;
 
 @ @<Handle {\caps get descriptor configuration}@>=
-data_to_transfer = sizeof usb_conf_desc;
-pbuffer = &usb_conf_desc.cfg.bLength;
+data_to_transfer = sizeof user_conf_desc;
+pbuffer = &user_conf_desc.cfg.bLength;
 @<Code which is executed in |0x0680| for both |0x0100| and |0x0200|@>@;
 
 @ @<Code which is executed in |0x0680| for both |0x0100| and |0x0200|@>=
