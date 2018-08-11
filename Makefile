@@ -12,3 +12,9 @@ objdump: all
 
 clean:
 	@git clean -X -d -f
+
+.PHONY: $(wildcard *.eps)
+
+cdc-structure.eps: cdc-structure.png
+	@convert $< $@
+	@imgsize $@ 7.5 -
