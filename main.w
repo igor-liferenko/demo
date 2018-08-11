@@ -223,9 +223,7 @@ int main(void)
             while (!(UCSR1A & 1 << UDRE1)) ;
             UDR1 = uart_usb_getchar(); /* TODO: do it via section ``Read byte from USB to |UDR1|''
                                           instead of function */
-            PINB |= 1 << PB0; /* toggle PB0 in PORTB; FIXME: is the PIN bit cleared automatically
-after set? otherwise it is unclear if it sets other bits except PB0, because the whole register
-is moved after or'ing */
+            PORTB ^= 1 << PB0;
           }
         }
       }
@@ -250,10 +248,7 @@ is moved after or'ing */
       }
       if (usb_request_break_generation == 1) {
         usb_request_break_generation = 0;
-        PIND |= 1 << PD5; /* toggle \.{PD5} in \.{PORTD}; FIXME: is the PIN
-          bit cleared automatically after set? otherwise it is unclear if it
-          sets other bits except PD5, because the whole register 
-          is moved after or'ing */
+        PORTD ^= 1 << PD5;
         @<Reset MCU@>@;
       }
     }
