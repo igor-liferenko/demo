@@ -268,7 +268,7 @@ char __low_level_init()
   return 1;
 }
 
-@ Used in \.{USB_RESET} interrupt handler.
+@ Used in \.{USB\_RESET} interrupt handler.
 
 @<Reset MCU@>=
 WDTCSR |= 1 << WDCE | 1 << WDE; /* allow to enable WDT */
