@@ -225,7 +225,7 @@ is moved after or'ing */
           }
         }
       }
-      if (cpt_sof >= 100) { /* debounce */
+      if (cpt_sof >= 100) { /* debounce (FIXME: how is this even supposed to work?) */
         unsigned char data;
         if (!(PINF & 1 << PF4)) {
           data = '*'; @+ uart_usb_send_buffer(&data, 1);
