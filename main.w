@@ -9,7 +9,6 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
-#include <avr/wdt.h> /* |wdt_reset| */
 #include <avr/power.h> /* |clock_prescale_set| */
 
 typedef unsigned char U8;
@@ -145,10 +144,9 @@ S_line_status line_status;
 
 int main(void)
 {
+  @<Disable WDT@>@;
+
   UHWCON |= 1 << UVREGE;
-
-  @<Clear |WDRF|@>@;
-
   clock_prescale_set(0);
   USBCON &= ~(1 << USBE);
   USBCON |= 1 << USBE;
@@ -278,11 +276,10 @@ on MCU start we always clear |WDRF| and WDE
 To avoid unintentional changes of WDE, a special write procedure must be followed
 to change the WDE bit. To clear WDE, WDRF must be cleared first.
 
-Done according to ``The sequence for clearing WDE'' in datasheet \S8.2.
+This should be done right after MCU start, in order to be in time before WDT is triggered.
 
-@<Clear |WDRF|@>=
-wdt_reset();
-MCUSR = 0x00;
+@<Disable WDT@>=
+MCUSR = 0x00; /* clear WDRF */
 WDTCSR |= 1 << WDCE | 1 << WDE; /* allow to disable WDT */
 WDTCSR = 0x00; /* disable WDT */
 
