@@ -202,7 +202,8 @@ int main(void)
     if (UEINTX & 1 << RXSTPI) {
       @<Process SETUP request@>@;
     }
-    if (usb_configuration_nb != 0 && line_status.DTR) {
+    if (usb_configuration_nb != 0 && line_status.DTR) { /* do not allow to send data before
+                                                 end of enumeration AND open port detection */
       if (UCSR1A & 1 << UDRE1) {
         if (!rx_counter) {
           UENUM = EP2;
