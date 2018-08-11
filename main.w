@@ -112,6 +112,10 @@ const S_usb_device_descriptor usb_dev_desc
 @t\2@> 1 @/
 };
 
+@ $$\hbox to7.5cm{\vbox to7.88cm{\vfil\special{psfile=cdc-structure.eps
+  clip llx=0 lly=0 urx=274 ury=288 rwi=2125}}\hfil}$$
+
+@c
 const S_usb_user_configuration_descriptor usb_conf_desc
 @t\hskip2.5pt@> @=PROGMEM@> = { @t\1@> @/
   {sizeof (S_usb_configuration_descriptor), 0x02, 0x0043, 2, 1, 0, (0x80 | 0x00), 50}, @/
