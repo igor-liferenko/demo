@@ -759,7 +759,7 @@ default: /* in code derived from this example remove this and all unused "Handle
 
 @ @<Global variables@>=
 U8 data_to_transfer;
-PGM_VOID_P pbuffer;
+const void *pbuffer;
 
 @ @<Handle {\caps get descriptor device}\null@>=
 data_to_transfer = sizeof dev_desc;
