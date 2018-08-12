@@ -25,7 +25,7 @@ typedef unsigned char Uchar;
 #define EVT_USB_RESET                 8
 
 @<Predeclarations of procedures@>@;
-@<Type definitions@>@;
+@<Type \null definitions@>@;
 
 typedef union {
   U8 all;
@@ -69,7 +69,7 @@ typedef struct {
   uint8_t      bNumConfigurations;
 } S_device_descriptor;
 
-@ @<Global \null variables@>=
+@ @<Global variables@>=
 const S_device_descriptor dev_desc
 @t\hskip2.5pt@> @=PROGMEM@> = { @t\1@> @/
   sizeof (S_device_descriptor), @/
@@ -79,8 +79,8 @@ const S_device_descriptor dev_desc
   0, /* no subclass */
   0, @/
   EP0_SIZE, @/
-  0x03EB, /* VID (ATMEL) */
-  0x2018, /* PID */
+  0x03EB, /* VID (Atmel) */
+  0x2018, /* PID (CDC ACM) */
   0x1000, /* device revision */
   0x00, /* set it to non-zero in code derived from this example */
   0x00, /* set it to non-zero in code derived from this example */
@@ -90,37 +90,48 @@ const S_device_descriptor dev_desc
 
 @*1 User configuration descriptor.
 
+Abstract Control Model consists of two interfaces: Data Class interface
+and Communication Class interface.
+
+Two endpoints for Communication Class interface: one to implement a
+notification element, and the other to implement
+POTS line control commands. To economize on endpoints, the latter is
+done via control endpoint.
+
+Two endpoints to implement channels over which to carry unspecified
+data, over a Data Class interface.
+
 $$\hbox to7.5cm{\vbox to7.88cm{\vfil\special{psfile=cdc-structure.eps
   clip llx=0 lly=0 urx=274 ury=288 rwi=2125}}\hfil}$$
 
 @<Type \null definitions@>=
 @<Type definitions used in user configuration descriptor@>@;
 typedef struct {
-  S_configuration_descriptor conf_desc;
-  S_interface_descriptor ifc0;
-  U8 CS_INTERFACE[19];
-  S_endpoint_descriptor ep3;
-  S_interface_descriptor ifc1;
-  S_endpoint_descriptor ep1;
-  S_endpoint_descriptor ep2;
+  S_configuration_descriptor el1;
+  S_interface_descriptor el2;
+  S_header_descriptor el3;
+  S_call_management_descriptor el4;
+  S_acm_descriptor el5;
+  S_union_descriptor el6;
+  S_endpoint_descriptor el7;
+  S_interface_descriptor el8;
+  S_endpoint_descriptor el9;
+  S_endpoint_descriptor el10;
 } S_user_configuration_descriptor;
 
------
-  {0x05, 0x24, 0x00, 0x10, 0x01, 0x05, 0x24, 0x01, 0x03, 0x01, 0x04, 0x24, @/
-   0x02, 0x06, 0x05, 0x24, 0x06, 0x00, 0x01}, @/
-----
-
-@ @<Global \null variables@>=
-@<Global variables used in user configuration descriptor@>@;
+@ @<Global variables@>=
 const S_user_configuration_descriptor user_conf_desc
 @t\hskip2.5pt@> @=PROGMEM@> = { @t\1@> @/
-  @<Initialize element 1...@>, @/
-  @<Initialize element 2...@>, @/
-  @<Initialize element 3...@>, @/
-  @<Initialize element 4...@>, @/
-  @<Initialize element 5...@>, @/
-  @<Initialize element 6...@>, @/
-@t\2@> @<Initialize element 7...@> @/
+  @<Initialize element 1 ...@>, @/
+  @<Initialize element 2 ...@>, @/
+  @<Initialize element 3 ...@>, @/
+  @<Initialize element 4 ...@>, @/
+  @<Initialize element 5 ...@>, @/
+  @<Initialize element 6 ...@>, @/
+  @<Initialize element 7 ...@>, @/
+  @<Initialize element 8 ...@>, @/
+  @<Initialize element 9 ...@>, @/
+@t\2@> @<Initialize element 10 ...@> @/
 };
 
 @*2 Configuration descriptor.
@@ -176,22 +187,22 @@ typedef struct {
   0, /* this corresponds to `0' in `if0' on picture */
   0, /* this corresponds to `0' in `alt0' on picture */
   1, /* one endpoint is used */
-  0x02, /* ??? */
-  0x02, /* ??? */
-  0x01, /* ??? */
-@t\2@> 0 /* no string descriptor */
+  0x02, /* CDC */
+  0x02, /* ACM */
+  0x01, /* AT command */
+@t\2@> 0 /* not used */
 }
 
-@ @<Initialize element 5 in user configuration descriptor@>= { @t\1@> @/
+@ @<Initialize element 8 in user configuration descriptor@>= { @t\1@> @/
   sizeof (S_interface_descriptor), @/
   0x04, /* interface descriptor */
   1, /* this corresponds to `1' in `if1' on picture */
   0, /* this corresponds to `0' in `alt0' on picture */
   2, /* two endpoints are used */
-  0x0A, /* ??? */
-  0x00, /* ??? */
-  0x00, /* ??? */
-@t\2@> 0 /* no string descriptor */
+  0x0A, /* CDC data */
+  0x00, /* not applicable */
+  0x00, /* not applicable */
+@t\2@> 0 /* not used */
 }
 
 @*2 Endpoint descriptor.
@@ -210,7 +221,7 @@ typedef struct {
 
 @ @d IN (1 << 7)
 
-@<Initialize element 4 in user configuration descriptor@>= { @t\1@> @/
+@<Initialize element 10 in user configuration descriptor@>= { @t\1@> @/
   sizeof (S_endpoint_descriptor), @/
   0x05, /* endpoint */
   IN | 3, /* this corresponds to `3' in `ep3' on picture */
@@ -220,7 +231,7 @@ typedef struct {
 @t\2@> 0xFF /* 256 */
 }
 
-@ @<Initialize element 6 in user configuration descriptor@>= { @t\1@> @/
+@ @<Initialize element 9 in user configuration descriptor@>= { @t\1@> @/
   sizeof (S_endpoint_descriptor), @/
   0x05, /* endpoint */
   IN | 1, /* this corresponds to `1' in `ep1' on picture */
@@ -240,6 +251,92 @@ typedef struct {
     |UECFG0X| of |EP2|.} */
   0x0020, /* 32 bytes */
 @t\2@> 0x00 /* not applicable */
+}
+
+@*2 CDC command descriptors.
+
+@*3 Header descriptor.
+
+@s S_header_descriptor int
+
+@<Type definitions ...@>=
+typedef struct {
+  uint8_t bFunctionLength;
+  uint8_t bDescriptorType;
+  uint8_t bDescriptorSubtype;
+  uint16_t bcdCDC;
+} S_header_descriptor;
+
+@ @<Initialize element 3 in user configuration descriptor@>= { @t\1@> @/
+  sizeof (S_header_descriptor), @/
+  0x24, @/
+  0x00, @/
+@t\2@> 0x0110, /* CDC 1.1 */
+}
+
+@*3 Call management descriptor.
+
+@s S_call_management_descriptor int
+
+@<Type definitions ...@>=
+typedef struct {
+  uint8_t bFunctionLength;
+  uint8_t bDescriptorType;
+  uint8_t bDescriptorSubtype;
+  uint8_t bmCapabilities;
+  uint8_t bDataInterface;
+} S_call_management_descriptor;
+
+@ @<Initialize element 4 in user configuration descriptor@>= { @t\1@> @/
+  sizeof (S_call_management_descriptor), @/
+  0x24, @/
+  0x01, @/
+  0x03, @/
+@t\2@> 1, /* number of CDC data interface */
+}
+
+@*3 Abstract control management descriptor.
+
+\S5.2.3.3 in CDC spec.
+
+@s S_acm_descriptor int
+
+@<Type definitions ...@>=
+typedef struct {
+  uint8_t bFunctionLength;
+  uint8_t bDescriptorType;
+  uint8_t bDescriptorSubtype;
+  uint8_t bmCapabilities;
+} S_acm_descriptor;
+
+@ @<Initialize element 5 in user configuration descriptor@>= { @t\1@> @/
+  sizeof (S_acm_descriptor), @/
+  0x24, @/
+  0x02, @/
+@t\2@> 0x06, @/
+}
+
+@*3 Union descriptor.
+
+\S5.2.3.8 in CDC spec.
+
+@s S_union_descriptor int
+
+@<Type definitions ...@>=
+typedef struct {
+  uint8_t bFunctionLength;
+  uint8_t bDescriptorType;
+  uint8_t bDescriptorSubtype;
+  uint8_t bMasterInterface;
+  uint8_t bSlaveInterface0;
+} S_union_descriptor;
+
+@ @<Initialize element 6 in user configuration descriptor@>= { @t\1@> @/
+  sizeof (S_union_descriptor), @/
+  0x24, @/
+  0x06, @/
+  0, /* number of CDC control interface */
+@t\2@> 1 /* number of CDC data interface */
 }
 
 @ @c
@@ -653,18 +750,18 @@ default: /* in code derived from this example remove this and all unused "Handle
   UEINTX &= ~(1 << RXSTPI);
 }
 
-@ @<Global...@>=
+@ @<Global variables@>=
 U8 data_to_transfer;
 PGM_VOID_P pbuffer;
 
 @ @<Handle {\caps get descriptor device}\null@>=
-data_to_transfer = sizeof usb_dev_desc;
-pbuffer = &usb_dev_desc.bLength;
+data_to_transfer = sizeof dev_desc;
+pbuffer = &dev_desc;
 @<Code which is executed in |0x0680| for both |0x0100| and |0x0200|@>@;
 
 @ @<Handle {\caps get descriptor configuration}@>=
 data_to_transfer = sizeof user_conf_desc;
-pbuffer = &user_conf_desc.cfg.bLength;
+pbuffer = &user_conf_desc;
 @<Code which is executed in |0x0680| for both |0x0100| and |0x0200|@>@;
 
 @ @<Code which is executed in |0x0680| for both |0x0100| and |0x0200|@>=
@@ -965,7 +1062,7 @@ properties. (\S6.2.12 in CDC spec.)
   UEINTX &= ~(1 << TXINI);
   while (!(UEINTX & 1 << TXINI)) ;
 
-@ @<Type definitions@>=
+@ @<Type \null definitions@>=
 typedef union {
   U16 all;
   struct {
