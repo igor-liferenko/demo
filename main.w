@@ -1062,9 +1062,9 @@ properties. (\S6.2.12 in CDC spec.)
   line_coding.bDataBits = UEDATX;
   UEINTX &= ~(1 << RXOUTI);
   UEINTX &= ~(1 << TXINI); /* STATUS stage */
-  while (!(UEINTX & 1 << TXINI)) ; /* FIXME: is it necessary? */
-  UBRR1 = (U16) (((U32) 16000 * 1000L) /
-                ((U32) line_coding.dwDTERate / 2 * 16) - 1);
+  /*|while (!(UEINTX & 1 << TXINI)) ;|*/ /* FIXME: is it necessary? */
+/*  |UBRR1 = (U16) (((U32) 16000 * 1000L) /
+                ((U32) line_coding.dwDTERate / 2 * 16) - 1);|*/
 
 @ This request allows the host to select an alternate setting for the specified interface.
 (\S9.4.10 in USB spec.)
