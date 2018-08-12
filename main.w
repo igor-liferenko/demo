@@ -868,7 +868,7 @@ host up during suspend. The remote wakeup bit can be by the {\caps set feature} 
   UEDATX = 0x00;
   UEINTX &= ~(1 << TXINI);
   while (!(UEINTX & 1 << RXOUTI)) ;
-  UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
+  UEINTX &= ~(1 << RXOUTI);
 
 @ Sends two bytes of |0x00|, |0x00|. (Both bytes are reserved for future use.)
 
@@ -878,7 +878,7 @@ host up during suspend. The remote wakeup bit can be by the {\caps set feature} 
   UEDATX = 0x00;
   UEINTX &= ~(1 << TXINI);
   while (!(UEINTX & 1 << RXOUTI)) ;
-  UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
+  UEINTX &= ~(1 << RXOUTI);
 
 @ Sends two bytes indicating the status (Halted/Stalled) of an endpoint.
 Only first bit of the first byte is used.
@@ -893,7 +893,7 @@ Only first bit of the first byte is used.
   UEDATX = 0x00;
   UEINTX &= ~(1 << TXINI);
   while (!(UEINTX & 1 << RXOUTI)) ;
-  UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
+  UEINTX &= ~(1 << RXOUTI);
 
 @ This gets the Alternative Interface setting.
 
@@ -901,7 +901,7 @@ Only first bit of the first byte is used.
   UEINTX &= ~(1 << RXSTPI);
   UEINTX &= ~(1 << TXINI);
   while (!(UEINTX & 1 << RXOUTI)) ;
-  UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
+  UEINTX &= ~(1 << RXOUTI);
 
 @ Used to set boolean features. The only two feature selectors available are
 \.{DEVICE\_REMOTE\_WAKEUP} and \.{TEST\_MODE}.
@@ -992,9 +992,9 @@ value indicates the device is configured.
 @<Handle {\caps get configuration}@>=
   UEINTX &= ~(1 << RXSTPI);
   UEDATX = (U8) usb_configuration_nb;
-  UEINTX &= ~(1 << TXINI), UEINTX &= ~(1 << FIFOCON);
+  UEINTX &= ~(1 << TXINI);
   while (!(UEINTX & 1 << RXOUTI)) ;
-  UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
+  UEINTX &= ~(1 << RXOUTI);
 
 @ This request allows the host to find out the currently configured line coding. (\S6.2.13 in
 CDC spec.)
@@ -1011,7 +1011,7 @@ CDC spec.)
   UEINTX &= ~(1 << TXINI);
   while (!(UEINTX & 1 << TXINI)) ;
   while (!(UEINTX & 1 << RXOUTI)) ;
-  UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
+  UEINTX &= ~(1 << RXOUTI);
 
 @ This request sends special carrier modulation that generates an RS-232 style break.
 (\S6.2.15 in CDC spec.)
@@ -1055,7 +1055,7 @@ properties. (\S6.2.12 in CDC spec.)
   line_coding.bCharFormat = UEDATX;
   line_coding.bParityType = UEDATX;
   line_coding.bDataBits = UEDATX;
-  UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
+  UEINTX &= ~(1 << RXOUTI);
   UEINTX &= ~(1 << TXINI);
   while (!(UEINTX & 1 << TXINI)) ;
   UBRR1 = (U16) (((U32) 16000 * 1000L) /
