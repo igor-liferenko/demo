@@ -443,8 +443,11 @@ int main(void)
         if (rx_counter) {
           while (rx_counter) {
             while (!(UCSR1A & 1 << UDRE1)) ;
-            UDR1 = uart_usb_getchar(); /* TODO: do it via section ``Read byte from USB to |UDR1|''
-                                          instead of function */
+            UENUM = EP2; // FIXME: this seems not to be necessary
+            UDR1 = UEDATX;
+            rx_counter--;
+            if (!rx_counter)
+              UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
             PORTB ^= 1 << PB0;
           }
         }
@@ -535,21 +538,6 @@ void uart_usb_send_buffer(U8 *buffer, U8 nb_data)
     while (!(UEINTX & 1 << RWAL)) ;
     UEINTX &= ~(1 << TXINI), UEINTX &= ~(1 << FIFOCON);
   }
-}
-
-@ @<Predecl...@>=
-char uart_usb_getchar(void);
-@ @c
-char uart_usb_getchar(void)
-{
-  register Uchar data_rx;
-
-  UENUM = EP2;
-  data_rx = UEDATX;
-  rx_counter--;
-  if (!rx_counter)
-    UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
-  return data_rx;
 }
 
 ISR(USB_GEN_vect)
