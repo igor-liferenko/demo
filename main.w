@@ -107,7 +107,7 @@ $$\hbox to7.5cm{\vbox to7.88cm{\vfil\special{psfile=cdc-structure.eps
 typedef struct {
   S_configuration_descriptor el1;
   S_interface_descriptor el2;
-  S_header_descriptor el3;
+  S_cdc_descriptor el3;
   S_call_management_descriptor el4;
   S_acm_descriptor el5;
   S_union_descriptor el6;
@@ -251,7 +251,7 @@ typedef struct {
 @t\2@> 0x00 /* not applicable */
 }
 
-@*2 CDC Communication Class descriptors.
+@*2 CDC descriptors.
 
 @*3 Header descriptor.
 
@@ -262,7 +262,7 @@ interface and its descriptors comply.
 
 \S5.2.3.1 in CDC spec.
 
-@s S_header_descriptor int
+@s S_cdc_descriptor int
 
 @<Type definitions ...@>=
 typedef struct {
@@ -270,10 +270,10 @@ typedef struct {
   uint8_t bDescriptorType;
   uint8_t bDescriptorSubtype;
   uint16_t bcdCDC;
-} S_header_descriptor;
+} S_cdc_descriptor;
 
 @ @<Initialize element 3 in USB configuration descriptor@>= { @t\1@> @/
-  sizeof (S_header_descriptor), @/
+  sizeof (S_cdc_descriptor), @/
   0x24, /* interface */
   0x00, /* header */
 @t\2@> 0x0110, /* CDC 1.1 */
@@ -331,7 +331,7 @@ typedef struct {
 @t\2@> 0x06, @/
 }
 
-@*2 Union descriptor.
+@*3 Union descriptor.
 
 The Union functional descriptor describes the relationship between
 a group of interfaces that can be considered to form
