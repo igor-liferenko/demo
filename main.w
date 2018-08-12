@@ -1110,7 +1110,7 @@ TODO: detect if update was accepted by host, and resend if not
         if (serial_state_saved.all != serial_state.all) {
           serial_state_saved.all = serial_state.all;
           UENUM = EP3;
-          if (UEINTX & 1 << RWAL) {
+          if (UEINTX & 1 << RWAL) { /* if the bank is not yet full */
             UEDATX = 0xA1;
             UEDATX = 0x20;
             UEDATX = 0x00; @+ UEDATX = 0x00;
