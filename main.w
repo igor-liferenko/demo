@@ -1104,25 +1104,23 @@ until there is a state change. For the irregular signals like break, the incomin
 or the overrun error state, this will reset their values to zero and again will not send another
 notification until their state changes.
 
-TODO: detect if update was accepted by host, and resend if not
-@^TODO@>
-
-Here we have to wait (before or after, but
-after is not efficient - see comment at the beginning of kbd-dbg.ch), because
-it is not a control endpoint, where if SETUP packet arrives, TXINI is necessarily
-already 1.
+Here we have to wait (before or after sending notification, but
+`after' is not efficient --- see comment at the beginning of
+kbd-dbg.ch) if we want to make sure that notification was delivered
+to host , because it is not control endpoint, where if SETUP packet
+arrives, TXINI is necessarily already `1'.
 
 @<Notify host if |serial_state| changed@>=
-        if (serial_state_saved.all != serial_state.all) {
-          serial_state_saved.all = serial_state.all;
-          UENUM = EP3;
-          while (!(UEINTX & 1 << TXINI)) ; /* wait until previous packet was sent */
-            UEDATX = 0xA1;
-            UEDATX = 0x20;
-            UEDATX = 0x00; @+ UEDATX = 0x00;
-            UEDATX = 0x00; @+ UEDATX = 0x00;
-            UEDATX = 0x02; @+ UEDATX = 0x00;
-            UEDATX = (U8) ((U8 *) &serial_state.all)[0];
-            UEDATX = (U8) ((U8 *) &serial_state.all)[1];
-            UEINTX &= ~(1 << TXINI), UEINTX &= ~(1 << FIFOCON);
-        }
+if (serial_state_saved.all != serial_state.all) {
+  serial_state_saved.all = serial_state.all;
+  UENUM = EP3;
+  while (!(UEINTX & 1 << TXINI)) ; /* wait until previous packet was sent */
+  UEDATX = 0xA1;
+  UEDATX = 0x20;
+  UEDATX = 0x00; @+ UEDATX = 0x00;
+  UEDATX = 0x00; @+ UEDATX = 0x00;
+  UEDATX = 0x02; @+ UEDATX = 0x00;
+  UEDATX = (U8) ((U8 *) &serial_state.all)[0];
+  UEDATX = (U8) ((U8 *) &serial_state.all)[1];
+  UEINTX &= ~(1 << TXINI), UEINTX &= ~(1 << FIFOCON);
+}
