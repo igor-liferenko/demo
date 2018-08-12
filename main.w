@@ -1115,8 +1115,9 @@ to wait right after clearing |FIFOCON|.
 We may do other things --- meanwhile the data will be transmitted.
 It is only necessary to wait right before sending next data.})
 if we want to make sure that notification was delivered
-to host , because it is not control endpoint, where if SETUP packet
-arrives, TXINI is necessarily already `1'.
+to host. Incidentally, on control endpoint it is never necessary
+to wait TXINI to become `1', because on control endpoint if RXSTPI is `1',
+TXINI is guaranteed to be `1'.
 
 @<Notify host if |serial_state| changed@>=
 if (serial_state_saved.all != serial_state.all) {
