@@ -221,7 +221,7 @@ typedef struct {
 
 @ @d IN (1 << 7)
 
-@<Initialize element 10 in USB configuration descriptor@>= { @t\1@> @/
+@<Initialize element 7 in USB configuration descriptor@>= { @t\1@> @/
   sizeof (S_endpoint_descriptor), @/
   0x05, /* endpoint */
   IN | 3, /* this corresponds to `3' in `ep3' on picture */
@@ -243,7 +243,7 @@ typedef struct {
 
 @ @d OUT (0 << 7)
 
-@<Initialize element 7 in USB configuration descriptor@>= { @t\1@> @/
+@<Initialize element 10 in USB configuration descriptor@>= { @t\1@> @/
   sizeof (S_endpoint_descriptor), @/
   0x05, /* endpoint */
   OUT | 2, /* this corresponds to `2' in `ep2' on picture */
