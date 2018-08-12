@@ -504,6 +504,21 @@ To avoid unintentional changes of WDE, a special write procedure must be followe
 to change the WDE bit. To clear WDE, WDRF must be cleared first.
 
 This should be done right after MCU start, in order to be in time before WDT is triggered.
+Beware, that \.{avr-gcc} adds initialization code.
+On atmega32u4 before |main| is started, the following is executed:
+
+$$\vbox{\halign{\tt#\cr
+  eor r1, r1 \cr
+  out 0x3f, r1 \cr
+  ldi r28, 0xFF	\cr
+  ldi r29, 0x0A	\cr
+  out 0x3e, r29	\cr
+  out 0x3d, r28	\cr
+  call 0xc4 \cr
+}}$$
+
+At 16MHz each cycle is 62.5 nanoseconds, so it is |7*62.5| = 437.5ns.
+Watchdog runs each 16ms. So, it is enough time.
 
 @<Disable WDT@>=
 MCUSR = 0x00; /* clear WDRF */
