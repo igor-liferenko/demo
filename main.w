@@ -1065,6 +1065,7 @@ properties. (\S6.2.12 in CDC spec.)
   /*|while (!(UEINTX & 1 << TXINI)) ;|*/ /* FIXME: is it necessary? */
 /*  |UBRR1 = (U16) (((U32) 16000 * 1000L) /
                 ((U32) line_coding.dwDTERate / 2 * 16) - 1);|*/
+/*see commit 1325440b633fd639ec158b17b5afaf76b3aa998e in usb/ */
 
 @ This request allows the host to select an alternate setting for the specified interface.
 (\S9.4.10 in USB spec.)
