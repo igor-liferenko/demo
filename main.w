@@ -545,17 +545,6 @@ char uart_usb_getchar(void)
   register Uchar data_rx;
 
   UENUM = EP2;
-  if (!rx_counter) {
-    do {
-      UENUM = EP2;
-      if (UEINTX & 1 << RXOUTI) {
-        rx_counter = (U8) UEBCLX;
-        if (!rx_counter) {
-          UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
-        }
-      }
-    } while (!rx_counter);
-  }
   data_rx = UEDATX;
   rx_counter--;
   if (!rx_counter)
