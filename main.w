@@ -253,7 +253,7 @@ typedef struct {
 
 @*2 CDC descriptors.
 
-@*3 Header descriptor.
+@*3 CDC descriptor.
 
 The class-specific descriptor shall start with a header.
 It identifies the release of the USB Class Definitions for
@@ -280,6 +280,9 @@ typedef struct {
 }
 
 @*3 Call management descriptor.
+
+FIXME: remove it?
+@^FIXME@>
 
 The Call Management functional descriptor describes
 the processing of calls for the Communication Class interface.
