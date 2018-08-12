@@ -819,7 +819,7 @@ pbuffer = &usb_conf_desc;
   UDADDR = (UDADDR & 1 << ADDEN) | ((U8) addr & 0x7F);
   UEINTX &= ~(1 << RXSTPI);
   UEINTX &= ~(1 << TXINI);
-  while (!(UEINTX & 1 << TXINI)) ;
+  while (!(UEINTX & 1 << TXINI)) ; /* TODO: put here explanation like in kbd.w */
   UDADDR |= 1 << ADDEN;
 
 @ @<Handle {\caps set configuration}@>=
@@ -827,7 +827,7 @@ pbuffer = &usb_conf_desc;
   if (configuration_number <= 1) {
     UEINTX &= ~(1 << RXSTPI);
     usb_configuration_nb = configuration_number;
-    UEINTX &= ~(1 << TXINI);
+    UEINTX &= ~(1 << TXINI); /* STATUS stage */
 
     UENUM = EP3;
     UECONX |= 1 << EPEN;
@@ -944,7 +944,7 @@ Only endpoints other than the default endpoint are recommended to have this func
       UENUM = EP0;
       endpoint_status[wIndex] = 0x01;
       UEINTX &= ~(1 << RXSTPI);
-      UEINTX &= ~(1 << TXINI);
+      UEINTX &= ~(1 << TXINI); /* STATUS stage */
     }
     else {
       UENUM = EP0;
@@ -972,7 +972,7 @@ Only endpoints other than the default endpoint are recommended to have this func
       UENUM = EP0;
       endpoint_status[wIndex] = 0x00;
       UEINTX &= ~(1 << RXSTPI);
-      UEINTX &= ~(1 << TXINI);
+      UEINTX &= ~(1 << TXINI); /* STATUS stage */
     }
     else {
       UENUM = EP0;
@@ -992,8 +992,8 @@ value indicates the device is configured.
 @<Handle {\caps get configuration}@>=
   UEINTX &= ~(1 << RXSTPI);
   UEDATX = (U8) usb_configuration_nb;
-  UEINTX &= ~(1 << TXINI);
-  while (!(UEINTX & 1 << RXOUTI)) ;
+  UEINTX &= ~(1 << TXINI); /* DATA stage */
+  while (!(UEINTX & 1 << RXOUTI)) ; /* wait for STATUS stage */
   UEINTX &= ~(1 << RXOUTI);
 
 @ This request allows the host to find out the currently configured line coding. (\S6.2.13 in
@@ -1008,9 +1008,8 @@ CDC spec.)
   UEDATX = (U8) line_coding.bCharFormat;
   UEDATX = (U8) line_coding.bParityType;
   UEDATX = (U8) line_coding.bDataBits;
-  UEINTX &= ~(1 << TXINI);
-  while (!(UEINTX & 1 << TXINI)) ;
-  while (!(UEINTX & 1 << RXOUTI)) ;
+  UEINTX &= ~(1 << TXINI); /* DATA stage */
+  while (!(UEINTX & 1 << RXOUTI)) ; /* wait for STATUS stage */
   UEINTX &= ~(1 << RXOUTI);
 
 @ This request sends special carrier modulation that generates an RS-232 style break.
@@ -1023,7 +1022,6 @@ TODO: manage here hardware flow control
   UEINTX &= ~(1 << RXSTPI);
   UEINTX &= ~(1 << TXINI);
   usb_request_break_generation = 1;
-  while (!(UEINTX & 1 << TXINI)) ;
 
 @ This request generates RS-232/V.24 style control signals.
 (\S6.2.14 and in CDC spec.)
@@ -1036,18 +1034,16 @@ TODO: manage here hardware flow control
 @^TODO@>
 
 @<Handle {\caps set control line state}@>=
-  wValue = UEDATX | UEDATX << 8;
+  line_status.all = UEDATX | UEDATX << 8;
   UEINTX &= ~(1 << RXSTPI);
-  UEINTX &= ~(1 << TXINI);
-  line_status.all = wValue;
-  while (!(UEINTX & 1 << TXINI)) ;
+  UEINTX &= ~(1 << TXINI); /* STATUS stage */
 
 @ This request allows the host to specify typical asynchronous line-character formatting
 properties. (\S6.2.12 in CDC spec.)
 
 @<Handle {\caps set line coding}@>=
   UEINTX &= ~(1 << RXSTPI);
-  while (!(UEINTX & 1 << RXOUTI)) ;
+  while (!(UEINTX & 1 << RXOUTI)) ; /* wait for DATA stage */
   ((U8 *) &line_coding.dwDTERate)[0] = UEDATX;
   ((U8 *) &line_coding.dwDTERate)[1] = UEDATX;
   ((U8 *) &line_coding.dwDTERate)[2] = UEDATX;
@@ -1056,8 +1052,8 @@ properties. (\S6.2.12 in CDC spec.)
   line_coding.bParityType = UEDATX;
   line_coding.bDataBits = UEDATX;
   UEINTX &= ~(1 << RXOUTI);
-  UEINTX &= ~(1 << TXINI);
-  while (!(UEINTX & 1 << TXINI)) ;
+  UEINTX &= ~(1 << TXINI); /* STATUS stage */
+  while (!(UEINTX & 1 << TXINI)) ; /* FIXME: is it necessary? */
   UBRR1 = (U16) (((U32) 16000 * 1000L) /
                 ((U32) line_coding.dwDTERate / 2 * 16) - 1);
 
@@ -1066,8 +1062,7 @@ properties. (\S6.2.12 in CDC spec.)
 
 @<Handle {\caps set interface}@>=
   UEINTX &= ~(1 << RXSTPI);
-  UEINTX &= ~(1 << TXINI);
-  while (!(UEINTX & 1 << TXINI)) ;
+  UEINTX &= ~(1 << TXINI); /* STATUS stage */
 
 @ @<Type \null definitions@>=
 typedef union {
