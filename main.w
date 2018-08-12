@@ -253,7 +253,7 @@ typedef struct {
 @t\2@> 0x00 /* not applicable */
 }
 
-@*2 CDC command descriptors.
+@*2 CDC Communication Class descriptors.
 
 @*3 Header descriptor.
 
@@ -320,12 +320,12 @@ typedef struct {
 
 The Union functional descriptor describes the relationship between
 a group of interfaces that can be considered to form
-a functional unit. It can only occur within the class-specific portion
-of an Interface descriptor. One of the interfaces in
-the group is designated as a master or controlling interface for the group, and certain class-specific messages can be
-sent to this interface to act upon the group as a whole. Similarly, notifications for the entire group can be sent from this
-interface but apply to the entire group of interfaces. Interfaces in this group can include Communication, Data, or any
-other valid USB interface class (including, but not limited to, Audio, HID, and Monitor).
+a functional unit. One of the interfaces in
+the group is designated as a master or controlling interface for
+the group, and certain class-specific messages can be
+sent to this interface to act upon the group as a whole. Similarly,
+notifications for the entire group can be sent from this
+interface but apply to the entire group of interfaces.
 
 \S5.2.3.8 in CDC spec.
 
