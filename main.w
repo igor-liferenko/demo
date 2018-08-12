@@ -255,6 +255,10 @@ typedef struct {
 
 @*3 Header descriptor.
 
+The class-specific descriptor shall start with a header.
+
+\S5.2.3.1 in CDC spec.
+
 @s S_header_descriptor int
 
 @<Type definitions ...@>=
@@ -267,12 +271,17 @@ typedef struct {
 
 @ @<Initialize element 3 in USB configuration descriptor@>= { @t\1@> @/
   sizeof (S_header_descriptor), @/
-  0x24, @/
-  0x00, @/
+  0x24, /* interface */
+  0x00, /* header */
 @t\2@> 0x0110, /* CDC 1.1 */
 }
 
 @*3 Call management descriptor.
+
+The Call Management functional descriptor describes
+the processing of calls for the Communication Class interface.
+
+\S5.2.3.2 in CDC spec.
 
 @s S_call_management_descriptor int
 
@@ -287,13 +296,18 @@ typedef struct {
 
 @ @<Initialize element 4 in USB configuration descriptor@>= { @t\1@> @/
   sizeof (S_call_management_descriptor), @/
-  0x24, @/
-  0x01, @/
+  0x24, /* interface */
+  0x01, /* call management */
   0x03, @/
 @t\2@> 1, /* number of CDC data interface */
 }
 
 @*3 Abstract control management descriptor.
+
+The Abstract Control Management functional descriptor
+describes the commands supported by the Communication
+Class interface, as defined in \S3.6.2 in CDC spec, with the
+SubClass code of Abstract Control Model.
 
 \S5.2.3.3 in CDC spec.
 
@@ -309,8 +323,8 @@ typedef struct {
 
 @ @<Initialize element 5 in USB configuration descriptor@>= { @t\1@> @/
   sizeof (S_acm_descriptor), @/
-  0x24, @/
-  0x02, @/
+  0x24, /* interface */
+  0x02, /* ACM */
 @t\2@> 0x06, @/
 }
 
@@ -340,8 +354,8 @@ typedef struct {
 
 @ @<Initialize element 6 in USB configuration descriptor@>= { @t\1@> @/
   sizeof (S_union_descriptor), @/
-  0x24, @/
-  0x06, @/
+  0x24, /* interface */
+  0x06, /* union */
   0, /* number of CDC control interface */
 @t\2@> 1 /* number of CDC data interface */
 }
