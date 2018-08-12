@@ -1107,11 +1107,16 @@ notification until their state changes.
 TODO: detect if update was accepted by host, and resend if not
 @^TODO@>
 
+Here we have to wait (before or after, but
+after is not efficient - see comment at the beginning of kbd-dbg.ch), because
+it is not a control endpoint, where if SETUP packet arrives, TXINI is necessarily
+already 1.
+
 @<Notify host if |serial_state| changed@>=
         if (serial_state_saved.all != serial_state.all) {
           serial_state_saved.all = serial_state.all;
           UENUM = EP3;
-          if (UEINTX & 1 << TXINI) { /* if new packet may be sent */
+          while (!(UEINTX & 1 << TXINI)) ; /* wait until previous packet was sent */
             UEDATX = 0xA1;
             UEDATX = 0x20;
             UEDATX = 0x00; @+ UEDATX = 0x00;
@@ -1120,5 +1125,4 @@ TODO: detect if update was accepted by host, and resend if not
             UEDATX = (U8) ((U8 *) &serial_state.all)[0];
             UEDATX = (U8) ((U8 *) &serial_state.all)[1];
             UEINTX &= ~(1 << TXINI), UEINTX &= ~(1 << FIFOCON);
-          }
         }
