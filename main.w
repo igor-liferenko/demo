@@ -1105,8 +1105,11 @@ or the overrun error state, this will reset their values to zero and again will 
 notification until their state changes.
 
 Here we have to wait (before or after sending notification, but
-`after' is not efficient --- see comment at the beginning of
-kbd-dbg.ch) if we want to make sure that notification was delivered
+`after' is not efficient\footnote*{It is not efficient
+to wait right after clearing |FIFOCON|.
+We may do other things --- meanwhile the data will be transmitted.
+It is only necessary to wait right before sending next data.})
+if we want to make sure that notification was delivered
 to host , because it is not control endpoint, where if SETUP packet
 arrives, TXINI is necessarily already `1'.
 
