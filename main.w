@@ -75,7 +75,7 @@ const S_device_descriptor dev_desc
   sizeof (S_device_descriptor), @/
   0x01, /* device */
   0x0200, /* USB 2.0 */
-  0x02, /* CDC class */
+  0x02, /* CDC (\S4.1 in CDC spec) */
   0, /* no subclass */
   0, @/
   EP0_SIZE, @/
@@ -93,13 +93,13 @@ const S_device_descriptor dev_desc
 Abstract Control Model consists of two interfaces: Data Class interface
 and Communication Class interface.
 
-Two endpoints for Communication Class interface: one to implement a
-notification element, and the other to implement
-POTS line control commands. To economize on endpoints, the latter is
-done via control endpoint.
+The Communication Class interface uses two endpoints, one to implement
+a notification element and theh other to implement
+a management element. The management element uses the default endpoint
+for all standard and Communication Class-specific requests.
 
-Two endpoints to implement channels over which to carry unspecified
-data, over a Data Class interface.
+Theh Data Class interface consists of two endpoints to implement
+channels over which to carry data.
 
 $$\hbox to7.5cm{\vbox to7.88cm{\vfil\special{psfile=cdc-structure.eps
   clip llx=0 lly=0 urx=274 ury=288 rwi=2125}}\hfil}$$
@@ -187,9 +187,9 @@ typedef struct {
   0, /* this corresponds to `0' in `if0' on picture */
   0, /* this corresponds to `0' in `alt0' on picture */
   1, /* one endpoint is used */
-  0x02, /* CDC */
-  0x02, /* ACM */
-  0x01, /* AT command */
+  0x02, /* CDC (\S4.2 in CDC spec) */
+  0x02, /* ACM (\S4.3 in CDC spec) */
+  0x01, /* AT command (\S4.4 in CDC spec) */
 @t\2@> 0 /* not used */
 }
 
@@ -199,9 +199,9 @@ typedef struct {
   1, /* this corresponds to `1' in `if1' on picture */
   0, /* this corresponds to `0' in `alt0' on picture */
   2, /* two endpoints are used */
-  0x0A, /* CDC data */
-  0x00, /* not applicable */
-  0x00, /* not applicable */
+  0x0A, /* CDC data (\S4.5 in CDC spec) */
+  0x00, /* unused */
+  0x00, /* no protocol */
 @t\2@> 0 /* not used */
 }
 
@@ -317,6 +317,15 @@ typedef struct {
 }
 
 @*3 Union descriptor.
+
+The Union functional descriptor describes the relationship between
+a group of interfaces that can be considered to form
+a functional unit. It can only occur within the class-specific portion
+of an Interface descriptor. One of the interfaces in
+the group is designated as a master or controlling interface for the group, and certain class-specific messages can be
+sent to this interface to act upon the group as a whole. Similarly, notifications for the entire group can be sent from this
+interface but apply to the entire group of interfaces. Interfaces in this group can include Communication, Data, or any
+other valid USB interface class (including, but not limited to, Audio, HID, and Monitor).
 
 \S5.2.3.8 in CDC spec.
 
