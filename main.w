@@ -316,7 +316,7 @@ typedef struct {
 @t\2@> 0x06, @/
 }
 
-@*3 Union descriptor.
+@*2 Union descriptor.
 
 The Union functional descriptor describes the relationship between
 a group of interfaces that can be considered to form
