@@ -256,6 +256,9 @@ typedef struct {
 @*3 Header descriptor.
 
 The class-specific descriptor shall start with a header.
+It identifies the release of the USB Class Definitions for
+Communication Devices Specification with which this
+interface and its descriptors comply.
 
 \S5.2.3.1 in CDC spec.
 
