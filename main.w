@@ -430,13 +430,6 @@ int main(void)
         UDIEN |= 1 << SUSPE;
         UDIEN |= 1 << EORSTE;
         sei();
-        UENUM = EP0;
-        if (!(UECONX & 1 << EPEN)) {
-          UENUM = EP0;
-          UECONX |= 1 << EPEN;
-          UECFG1X = 1 << EPSIZE1;
-          UECFG1X |= 1 << ALLOC;
-        }
       }
     }
     if (g_usb_event & 1 << EVT_USB_RESET) {
@@ -598,13 +591,6 @@ ISR(USB_GEN_vect)
       UDIEN |= 1 << SUSPE;
       UDIEN |= 1 << EORSTE;
       sei();
-      UENUM = EP0;
-      if (!(UECONX & 1 << EPEN)) {
-        UENUM = EP0;
-        UECONX |= 1 << EPEN;
-        UECFG1X = 1 << EPSIZE1;
-        UECFG1X |= 1 << ALLOC;
-      }
       UDCON &= ~(1 << DETACH);
     }
     else {
