@@ -96,6 +96,8 @@ for all standard and Communication Class-specific requests.
 Theh Data Class interface consists of two endpoints to implement
 channels over which to carry data.
 
+\S3.4 in CDC spec.
+
 $$\hbox to7.5cm{\vbox to7.88cm{\vfil\special{psfile=cdc-structure.eps
   clip llx=0 lly=0 urx=274 ury=288 rwi=2125}}\hfil}$$
 
