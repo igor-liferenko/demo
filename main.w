@@ -515,7 +515,7 @@ to change the WDE bit. To clear WDE, WDRF must be cleared first.
 
 This should be done right at the beginning of |main|, in order to be in
 time before WDT is triggered.
-No need to call \\{wdt\_reset} because initialization code,
+We don't call \\{wdt\_reset} because initialization code,
 that \.{avr-gcc} adds, has enough time to execute before watchdog
 timer (16ms in this program) expires:
 
