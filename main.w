@@ -276,7 +276,7 @@ typedef struct {
   sizeof (S_cdc_descriptor), @/
   0x24, /* interface */
   0x00, /* header */
-@t\2@> 0x0110, /* CDC 1.1 */
+@t\2@> 0x0110 /* CDC 1.1 */
 }
 
 @*3 Call management descriptor.
@@ -305,7 +305,7 @@ typedef struct {
   0x24, /* interface */
   0x01, /* call management */
   0x03, @/
-@t\2@> 1, /* number of CDC data interface */
+@t\2@> 1 /* number of CDC data interface */
 }
 
 @*3 Abstract control management descriptor.
@@ -331,7 +331,7 @@ typedef struct {
   sizeof (S_acm_descriptor), @/
   0x24, /* interface */
   0x02, /* ACM */
-@t\2@> 0x06, @/
+@t\2@> 0x06 @/
 }
 
 @*3 Union descriptor.
