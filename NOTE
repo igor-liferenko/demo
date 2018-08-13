@@ -1,4 +1,3 @@
-if wireshark is opened after device is connected, it does not recognize set control line
-state and set line coding requests and does not write malformed packet, and if it is
-opened before device is connected, it recognizes the requests but shows malformed packets.
-why?
+In wireshark start sniffing before device is connected, otherwise wireshark
+will not recognize set control line state and set line coding requests.
+
