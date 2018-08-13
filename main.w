@@ -765,12 +765,20 @@ default: /* in code derived from this example remove this and all unused "Handle
 U8 data_to_transfer;
 const void *pbuffer;
 
-@ @<Handle {\caps get descriptor device}\null@>=
+@ When host is booting, BIOS asks 8 bytes in first request of device descriptor (8 bytes is
+sufficient for first request of device descriptor). OS asks
+64 bytes in first request of device descriptor.
+It is OK if we transfer less than the requested amount. But if we try to
+transfer more, host does not send OUT packet to initiate STATUS stage.
+
+@<Handle {\caps get descriptor device}\null@>=
 data_to_transfer = sizeof dev_desc;
 pbuffer = &dev_desc;
 @<Code which is executed in |0x0680| for both |0x0100| and |0x0200|@>@;
 
-@ @<Handle {\caps get descriptor configuration}@>=
+@ First request is 9 bytes, second is according to length given in response to first request.
+
+@<Handle {\caps get descriptor configuration}@>=
 data_to_transfer = sizeof usb_conf_desc;
 pbuffer = &usb_conf_desc;
 @<Code which is executed in |0x0680| for both |0x0100| and |0x0200|@>@;
@@ -780,16 +788,11 @@ pbuffer = &usb_conf_desc;
     (void) UEDATX;
     wLength = UEDATX | UEDATX << 8;
     UEINTX &= ~(1 << RXSTPI);
-    if (wLength > data_to_transfer) {
-      if (data_to_transfer % 32 == 0) {
-        zlp = 1;
-      }
-      else {
-        zlp = 0;
-      }
-    }
-    else {
-      data_to_transfer = (U8) wLength;
+    if (data_to_transfer > wLength)
+      data_to_transfer = (U8) wLength; /* never send more than requested */
+    else if (data_to_transfer != wLength) {
+      if (data_to_transfer % EP0_SIZE == 0) @+ zlp = 1;
+      else @+ zlp = 0;
     }
     UEINTX &= ~(1 << NAKOUTI);
     while (data_to_transfer != 0 && !(UEINTX & 1 << NAKOUTI)) {
