@@ -46,8 +46,8 @@ typedef struct {
 
 TODO: find what prefixes mean in names of variables (i.e., `b', `bcd', ...)
 
-@<Type \null definitions@>=
-typedef struct {
+@<Global variables@>=
+const struct {
   uint8_t      bLength;
   uint8_t      bDescriptorType;
   uint16_t     bcdUSB; /* version */
@@ -62,12 +62,9 @@ typedef struct {
   uint8_t      iProduct; /* index of prod. string descriptor */
   uint8_t      iSerialNumber; /* index of S.N. string descriptor */
   uint8_t      bNumConfigurations;
-} S_device_descriptor;
-
-@ @<Global variables@>=
-const S_device_descriptor dev_desc
+} dev_desc
 @t\hskip2.5pt@> @=PROGMEM@> = { @t\1@> @/
-  sizeof (S_device_descriptor), @/
+  18, /* size of this structure */
   0x01, /* device */
   0x0200, /* USB 2.0 */
   0x02, /* CDC (\S4.1 in CDC spec) */
