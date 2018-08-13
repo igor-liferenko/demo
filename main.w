@@ -101,12 +101,12 @@ $$\hbox to7.5cm{\vbox to7.88cm{\vfil\special{psfile=cdc-structure.eps
 @<Type \null definitions@>=
 @<Type definitions used in configuration descriptor@>@;
 typedef struct {
-  @<Configuration header descriptor@>@;
+  @<Configuration header descriptor@> @,@,@! el1;
   S_interface_descriptor el2;
-  @<Class-specific interface descriptor 1@>@;
-  @<Class-specific interface descriptor 2@>@;
-  @<Class-specific interface descriptor 3@>@;
-  @<Class-specific interface descriptor 4@>@;
+  @<Class-specific interface descriptor 1@> @,@,@! el3;
+  @<Class-specific interface descriptor 2@> @,@,@! el4;
+  @<Class-specific interface descriptor 3@> @,@,@! el5;
+  @<Class-specific interface descriptor 4@> @,@,@! el6;
   S_endpoint_descriptor el7;
   S_interface_descriptor el8;
   S_endpoint_descriptor el9;
@@ -142,7 +142,7 @@ struct {
    uint8_t      iConfiguration; /* index of string descriptor */
    uint8_t      bmAttibutes;
    uint8_t      MaxPower;
-} el1;
+}
 
 @ @<Initialize element 1 in configuration descriptor@>= { @t\1@> @/
   9, /* size of this structure */
@@ -271,7 +271,7 @@ struct {
   uint8_t bDescriptorType;
   uint8_t bDescriptorSubtype;
   uint16_t bcdCDC;
-} el3;
+}
 
 @ @<Initialize element 3 in configuration descriptor@>= { @t\1@> @/
   5, /* size of this structure */
@@ -297,7 +297,7 @@ struct {
   uint8_t bDescriptorSubtype;
   uint8_t bmCapabilities;
   uint8_t bDataInterface;
-} el4;
+}
 
 @ @<Initialize element 4 in configuration descriptor@>= { @t\1@> @/
   5, /* size of this structure */
@@ -322,7 +322,7 @@ struct {
   uint8_t bDescriptorType;
   uint8_t bDescriptorSubtype;
   uint8_t bmCapabilities;
-} el5;
+}
 
 @ @<Initialize element 5 in configuration descriptor@>= { @t\1@> @/
   4, /* size of this structure */
@@ -351,7 +351,7 @@ struct {
   uint8_t bDescriptorSubtype;
   uint8_t bMasterInterface;
   uint8_t bSlaveInterface0;
-} el6;
+}
 
 @ @<Initialize element 6 in configuration descriptor@>= { @t\1@> @/
   5, /* size of this structure */
