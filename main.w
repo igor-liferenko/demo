@@ -774,16 +774,16 @@ transfer more, host does not send OUT packet to initiate STATUS stage.
 @<Handle {\caps get descriptor device}\null@>=
 data_to_transfer = sizeof dev_desc;
 pbuffer = &dev_desc;
-@<Code which is executed in |0x0680| for both |0x0100| and |0x0200|@>@;
+@<Send descriptor@>@;
 
 @ First request is 9 bytes, second is according to length given in response to first request.
 
 @<Handle {\caps get descriptor configuration}@>=
 data_to_transfer = sizeof usb_conf_desc;
 pbuffer = &usb_conf_desc;
-@<Code which is executed in |0x0680| for both |0x0100| and |0x0200|@>@;
+@<Send descriptor@>@;
 
-@ @<Code which is executed in |0x0680| for both |0x0100| and |0x0200|@>=
+@ @<Send descriptor@>=
     (void) UEDATX;
     (void) UEDATX;
     wLength = UEDATX | UEDATX << 8;
