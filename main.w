@@ -686,7 +686,6 @@ U8 configuration_number;
 UEINTX &= ~(1 << RXOUTI); /* TODO: ??? - check if it is non-zero here */
 U16 wLength;
 U8 nb_byte;
-U8 zlp = 0;
 switch (UEDATX | UEDATX << 8) {
 case 0x0080: @/
   @<Handle {\caps get status device}@>@;
@@ -788,11 +787,11 @@ pbuffer = &usb_conf_desc;
     (void) UEDATX;
     wLength = UEDATX | UEDATX << 8;
     UEINTX &= ~(1 << RXSTPI);
+    uint8_t empty_packet = 0;
     if (data_to_transfer > wLength)
       data_to_transfer = (U8) wLength; /* never send more than requested */
     else if (data_to_transfer != wLength) {
-      if (data_to_transfer % EP0_SIZE == 0) @+ zlp = 1;
-      else @+ zlp = 0;
+      if (data_to_transfer % EP0_SIZE == 0) @+ empty_packet = 1;
     }
     UEINTX &= ~(1 << NAKOUTI);
     while (data_to_transfer != 0 && !(UEINTX & 1 << NAKOUTI)) {
@@ -813,7 +812,7 @@ pbuffer = &usb_conf_desc;
       else
         UEINTX &= ~(1 << TXINI);
     }
-    if (zlp == 1 && !(UEINTX & 1 << NAKOUTI)) {
+    if (empty_packet && !(UEINTX & 1 << NAKOUTI)) {
       while (!(UEINTX & 1 << TXINI)) ;
       UEINTX &= ~(1 << TXINI);
     }
