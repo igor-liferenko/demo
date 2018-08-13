@@ -80,7 +80,7 @@ struct {
 @t\2@> 1 /* one configuration for this device */
 };
 
-@*1 USB configuration descriptor.
+@*1 Configuration descriptor.
 
 Abstract Control Model consists of two interfaces: Data Class interface
 and Communication Class interface.
@@ -99,9 +99,9 @@ $$\hbox to7.5cm{\vbox to7.88cm{\vfil\special{psfile=cdc-structure.eps
   clip llx=0 lly=0 urx=274 ury=288 rwi=2125}}\hfil}$$
 
 @<Type \null definitions@>=
-@<Type definitions used in USB configuration descriptor@>@;
+@<Type definitions used in configuration descriptor@>@;
 typedef struct {
-  @<Configuration descriptor@>@;
+  @<Configuration header descriptor@>@;
   S_interface_descriptor el2;
   @<Class-specific interface descriptor 1@>@;
   @<Class-specific interface descriptor 2@>@;
@@ -111,10 +111,10 @@ typedef struct {
   S_interface_descriptor el8;
   S_endpoint_descriptor el9;
   S_endpoint_descriptor el10;
-} S_usb_configuration_descriptor;
+} S_configuration_descriptor;
 
 @ @<Global variables@>=
-const S_usb_configuration_descriptor usb_conf_desc
+const S_configuration_descriptor conf_desc
 @t\hskip2.5pt@> @=PROGMEM@> = { @t\1@> @/
   @<Initialize element 1 ...@>, @/
   @<Initialize element 2 ...@>, @/
@@ -128,9 +128,9 @@ const S_usb_configuration_descriptor usb_conf_desc
 @t\2@> @<Initialize element \9{a}{}10 ...@> @/
 };
 
-@*2 Configuration descriptor.
+@*2 Configuration header descriptor.
 
-@ @<Configuration descriptor@>=
+@ @<Configuration header descriptor@>=
 struct {
    uint8_t      bLength;
    uint8_t      bDescriptorType;
@@ -144,10 +144,10 @@ struct {
    uint8_t      MaxPower;
 } el1;
 
-@ @<Initialize element 1 in USB configuration descriptor@>= { @t\1@> @/
+@ @<Initialize element 1 in configuration descriptor@>= { @t\1@> @/
   9, /* size of this structure */
   0x02, /* configuration descriptor */
-  sizeof (S_usb_configuration_descriptor), @/
+  sizeof (S_configuration_descriptor), @/
   2, /* two interfaces in this configuration */
   1, /* this corresponds to `1' in `cfg1' on picture */
   0, /* no string descriptor */
@@ -173,7 +173,7 @@ typedef struct {
    uint8_t      iInterface; /* index of string descriptor */
 }  S_interface_descriptor;
 
-@ @<Initialize element 2 in USB configuration descriptor@>= { @t\1@> @/
+@ @<Initialize element 2 in configuration descriptor@>= { @t\1@> @/
   sizeof (S_interface_descriptor), @/
   0x04, /* interface descriptor */
   0, /* this corresponds to `0' in `if0' on picture */
@@ -185,7 +185,7 @@ typedef struct {
 @t\2@> 0 /* not used */
 }
 
-@ @<Initialize element 8 in USB configuration descriptor@>= { @t\1@> @/
+@ @<Initialize element 8 in configuration descriptor@>= { @t\1@> @/
   sizeof (S_interface_descriptor), @/
   0x04, /* interface descriptor */
   1, /* this corresponds to `1' in `if1' on picture */
@@ -213,7 +213,7 @@ typedef struct {
 
 @ @d IN (1 << 7)
 
-@<Initialize element 7 in USB configuration descriptor@>= { @t\1@> @/
+@<Initialize element 7 in configuration descriptor@>= { @t\1@> @/
   sizeof (S_endpoint_descriptor), @/
   0x05, /* endpoint */
   IN | 3, /* this corresponds to `3' in `ep3' on picture */
@@ -223,7 +223,7 @@ typedef struct {
 @t\2@> 0xFF /* 256 */
 }
 
-@ @<Initialize element 9 in USB configuration descriptor@>= { @t\1@> @/
+@ @<Initialize element 9 in configuration descriptor@>= { @t\1@> @/
   sizeof (S_endpoint_descriptor), @/
   0x05, /* endpoint */
   IN | 1, /* this corresponds to `1' in `ep1' on picture */
@@ -235,7 +235,7 @@ typedef struct {
 
 @ @d OUT (0 << 7)
 
-@<Initialize element \9{a}{}10 in USB configuration descriptor@>= { @t\1@> @/
+@<Initialize element \9{a}{}10 in configuration descriptor@>= { @t\1@> @/
   sizeof (S_endpoint_descriptor), @/
   0x05, /* endpoint */
   OUT | 2, /* this corresponds to `2' in `ep2' on picture */
@@ -273,7 +273,7 @@ struct {
   uint16_t bcdCDC;
 } el3;
 
-@ @<Initialize element 3 in USB configuration descriptor@>= { @t\1@> @/
+@ @<Initialize element 3 in configuration descriptor@>= { @t\1@> @/
   5, /* size of this structure */
   0x24, /* interface */
   0x00, /* header */
@@ -299,7 +299,7 @@ struct {
   uint8_t bDataInterface;
 } el4;
 
-@ @<Initialize element 4 in USB configuration descriptor@>= { @t\1@> @/
+@ @<Initialize element 4 in configuration descriptor@>= { @t\1@> @/
   5, /* size of this structure */
   0x24, /* interface */
   0x01, /* call management */
@@ -324,7 +324,7 @@ struct {
   uint8_t bmCapabilities;
 } el5;
 
-@ @<Initialize element 5 in USB configuration descriptor@>= { @t\1@> @/
+@ @<Initialize element 5 in configuration descriptor@>= { @t\1@> @/
   4, /* size of this structure */
   0x24, /* interface */
   0x02, /* ACM */
@@ -353,7 +353,7 @@ struct {
   uint8_t bSlaveInterface0;
 } el6;
 
-@ @<Initialize element 6 in USB configuration descriptor@>= { @t\1@> @/
+@ @<Initialize element 6 in configuration descriptor@>= { @t\1@> @/
   5, /* size of this structure */
   0x24, /* interface */
   0x06, /* union */
@@ -777,8 +777,8 @@ pbuffer = &dev_desc;
 @ First request is 9 bytes, second is according to length given in response to first request.
 
 @<Handle {\caps get descriptor configuration}@>=
-data_to_transfer = sizeof usb_conf_desc;
-pbuffer = &usb_conf_desc;
+data_to_transfer = sizeof conf_desc;
+pbuffer = &conf_desc;
 @<Send descriptor@>@;
 
 @ @<Send descriptor@>=
