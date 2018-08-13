@@ -823,7 +823,15 @@ pbuffer = &usb_conf_desc;
   UDADDR = (UDADDR & 1 << ADDEN) | ((U8) addr & 0x7F);
   UEINTX &= ~(1 << RXSTPI);
   UEINTX &= ~(1 << TXINI);
-  while (!(UEINTX & 1 << TXINI)) ; /* TODO: put here explanation like in kbd.w */
+  while (!(UEINTX & 1 << TXINI)) ; /* wait until ZLP, prepared by previous command, is
+            sent to host\footnote{$\sharp$}{According to \S22.7 of the datasheet,
+            firmware must send ZLP in the STATUS stage before enabling the new address.
+            The reason is that the request started by using zero address, and all the stages of the
+            request must use the same address.
+            Otherwise STATUS stage will not complete, and thus set address request will not
+            succeed. We can determine when ZLP is sent by receiving the ACK, which sets TXINI to 1.
+            See ``Control write (by host)'' in table of contents for the picture (note that DATA
+            stage is absent).} */
   UDADDR |= 1 << ADDEN;
 
 @ @<Handle {\caps set configuration}@>=
