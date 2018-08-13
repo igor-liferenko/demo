@@ -799,7 +799,7 @@ pbuffer = &conf_desc;
       }
       nb_byte = 0;
       while (data_to_transfer != 0) {
-        if (nb_byte++ == 32) {
+        if (nb_byte++ == EP0_SIZE) {
           break;
         }
         UEDATX = (U8) pgm_read_byte_near((unsigned int) pbuffer++);
