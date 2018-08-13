@@ -104,7 +104,7 @@ $$\hbox to7.5cm{\vbox to7.88cm{\vfil\special{psfile=cdc-structure.eps
 @<Type \null definitions@>=
 @<Type definitions used in USB configuration descriptor@>@;
 typedef struct {
-  S_configuration_descriptor el1;
+  @<Configuration descriptor@>@;
   S_interface_descriptor el2;
   S_cdc_descriptor el3;
   S_call_management_descriptor el4;
@@ -133,10 +133,8 @@ const S_usb_configuration_descriptor usb_conf_desc
 
 @*2 Configuration descriptor.
 
-@s S_configuration_descriptor int
-
-@<Type definitions ...@>=
-typedef struct {
+@ @<Configuration descriptor@>=
+struct {
    uint8_t      bLength;
    uint8_t      bDescriptorType;
    uint16_t     wTotalLength;
@@ -147,10 +145,10 @@ typedef struct {
    uint8_t      iConfiguration; /* index of string descriptor */
    uint8_t      bmAttibutes;
    uint8_t      MaxPower;
-} S_configuration_descriptor;
+} el1;
 
 @ @<Initialize element 1 in USB configuration descriptor@>= { @t\1@> @/
-  sizeof (S_configuration_descriptor), @/
+  9, /* size of this structure */
   0x02, /* configuration descriptor */
   sizeof (S_usb_configuration_descriptor), @/
   2, /* two interfaces in this configuration */
