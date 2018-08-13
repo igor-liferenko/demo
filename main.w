@@ -653,6 +653,13 @@ ISR(USB_GEN_vect)
   }
 }
 
+@ TODO: to be able to use rx and tx in parallel, just put byte to buffer
+here and in main loop alternate between rx and tx byte by byte;
+for now, make via a simple buffer and use a led to indicate if it is full,
+and later do via ring buffer
+@^TODO@>
+
+@c
 ISR(USART1_RX_vect)
 {
   U8 i = 0;
