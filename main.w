@@ -103,10 +103,10 @@ $$\hbox to7.5cm{\vbox to7.88cm{\vfil\special{psfile=cdc-structure.eps
 typedef struct {
   @<Configuration descriptor@>@;
   S_interface_descriptor el2;
-  S_cdc_descriptor el3;
-  S_call_management_descriptor el4;
-  S_acm_descriptor el5;
-  S_union_descriptor el6;
+  @<Class-specific interface descriptor 1@>@;
+  @<Class-specific interface descriptor 2@>@;
+  @<Class-specific interface descriptor 3@>@;
+  @<Class-specific interface descriptor 4@>@;
   S_endpoint_descriptor el7;
   S_interface_descriptor el8;
   S_endpoint_descriptor el9;
@@ -245,7 +245,14 @@ typedef struct {
 @t\2@> 0x00 /* not applicable */
 }
 
-@*2 CDC descriptors.
+@*2 Class-specific interface descriptors.
+
+These descriptors describe the content of the class-specific information
+within an Interface descriptor. They all start with a common header
+descriptor, which allows host software to easily parse the contents of
+class-specific descriptors. Although the
+Communication Class currently defines class specific interface descriptor
+information, the Data Class does not.
 
 @*3 CDC descriptor.
 
@@ -256,18 +263,16 @@ interface and its descriptors comply.
 
 \S5.2.3.1 in CDC spec.
 
-@s S_cdc_descriptor int
-
-@<Type definitions ...@>=
-typedef struct {
+@<Class-specific interface descriptor 1@>=
+struct {
   uint8_t bFunctionLength;
   uint8_t bDescriptorType;
   uint8_t bDescriptorSubtype;
   uint16_t bcdCDC;
-} S_cdc_descriptor;
+} el3;
 
 @ @<Initialize element 3 in USB configuration descriptor@>= { @t\1@> @/
-  sizeof (S_cdc_descriptor), @/
+  5, /* size of this structure */
   0x24, /* interface */
   0x00, /* header */
 @t\2@> 0x0110 /* CDC 1.1 */
@@ -283,19 +288,17 @@ the processing of calls for the Communication Class interface.
 
 \S5.2.3.2 in CDC spec.
 
-@s S_call_management_descriptor int
-
-@<Type definitions ...@>=
-typedef struct {
+@<Class-specific interface descriptor 2@>=
+struct {
   uint8_t bFunctionLength;
   uint8_t bDescriptorType;
   uint8_t bDescriptorSubtype;
   uint8_t bmCapabilities;
   uint8_t bDataInterface;
-} S_call_management_descriptor;
+} el4;
 
 @ @<Initialize element 4 in USB configuration descriptor@>= { @t\1@> @/
-  sizeof (S_call_management_descriptor), @/
+  5, /* size of this structure */
   0x24, /* interface */
   0x01, /* call management */
   0x03, @/
@@ -311,18 +314,16 @@ SubClass code of Abstract Control Model.
 
 \S5.2.3.3 in CDC spec.
 
-@s S_acm_descriptor int
-
-@<Type definitions ...@>=
-typedef struct {
+@<Class-specific interface descriptor 3@>=
+struct {
   uint8_t bFunctionLength;
   uint8_t bDescriptorType;
   uint8_t bDescriptorSubtype;
   uint8_t bmCapabilities;
-} S_acm_descriptor;
+} el5;
 
 @ @<Initialize element 5 in USB configuration descriptor@>= { @t\1@> @/
-  sizeof (S_acm_descriptor), @/
+  4, /* size of this structure */
   0x24, /* interface */
   0x02, /* ACM */
 @t\2@> 0x06 @/
@@ -341,19 +342,17 @@ interface but apply to the entire group of interfaces.
 
 \S5.2.3.8 in CDC spec.
 
-@s S_union_descriptor int
-
-@<Type definitions ...@>=
-typedef struct {
+@<Class-specific interface descriptor 4@>=
+struct {
   uint8_t bFunctionLength;
   uint8_t bDescriptorType;
   uint8_t bDescriptorSubtype;
   uint8_t bMasterInterface;
   uint8_t bSlaveInterface0;
-} S_union_descriptor;
+} el6;
 
 @ @<Initialize element 6 in USB configuration descriptor@>= { @t\1@> @/
-  sizeof (S_union_descriptor), @/
+  5, /* size of this structure */
   0x24, /* interface */
   0x06, /* union */
   0, /* number of CDC control interface */
