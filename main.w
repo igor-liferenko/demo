@@ -6,10 +6,7 @@
 @* Program. This is cleaned-up Atmel's demo. All functionality of original is preserved.
 
 @c
-#include <avr/io.h>
-#include <avr/interrupt.h>
-#include <avr/pgmspace.h>
-#include <avr/power.h> /* |clock_prescale_set| */
+@<Header files@>@;
 
 typedef unsigned char U8;
 typedef unsigned short U16;
@@ -1126,3 +1123,14 @@ if (serial_state_saved.all != serial_state.all) {
   UEDATX = (U8) ((U8 *) &serial_state.all)[1];
   UEINTX &= ~(1 << TXINI), UEINTX &= ~(1 << FIFOCON);
 }
+
+@* Headers.
+\secpagedepth=1 % index on current page
+
+@<Header files@>=
+#include <avr/io.h>
+#include <avr/interrupt.h>
+#include <avr/pgmspace.h>
+#include <avr/power.h> /* |clock_prescale_set| */
+
+@* Index.
