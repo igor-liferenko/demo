@@ -350,15 +350,19 @@ struct {
   uint8_t bDescriptorType;
   uint8_t bDescriptorSubtype;
   uint8_t bMasterInterface;
-  uint8_t bSlaveInterface0;
+  uint8_t bSlaveInterface[SLAVE_INTERFACE_NUM];
 }
 
-@ @<Initialize element 6 in configuration descriptor@>= { @t\1@> @/
-  5, /* size of this structure */
+@ @d SLAVE_INTERFACE_NUM 1
+
+@<Initialize element 6 in configuration descriptor@>= { @t\1@> @/
+  4 + SLAVE_INTERFACE_NUM, /* size of this structure */
   0x24, /* interface */
   0x06, /* union */
   0, /* number of CDC control interface */
+  { @t\1@> @/
 @t\2@> 1 /* number of CDC data interface */
+@t\2@> } @/
 }
 
 @ @c
