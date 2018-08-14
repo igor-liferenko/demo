@@ -441,7 +441,7 @@ int main(void)
         if (!rx_counter) {
           UENUM = EP2;
           if (UEINTX & 1 << RXOUTI) {
-            rx_counter = (U8) (UEBCLX); /* TODO: remove parens + cast and chk via objdump */
+            rx_counter = UEBCLX;
             if (!rx_counter) {
               UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
             }
