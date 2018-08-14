@@ -125,7 +125,7 @@ const S_configuration_descriptor conf_desc
   @<Initialize element 7 ...@>, @/
   @<Initialize element 8 ...@>, @/
   @<Initialize element 9 ...@>, @/
-@t\2@> @<Initialize element \9{a}{}10 ...@> @/
+@t\2@> @<Initialize element \null 10 ...@> @/
 };
 
 @*2 Configuration header descriptor.
@@ -235,7 +235,7 @@ typedef struct {
 
 @ @d OUT (0 << 7)
 
-@<Initialize element \9{a}{}10 in configuration descriptor@>= { @t\1@> @/
+@<Initialize element \null 10 in configuration descriptor@>= { @t\1@> @/
   sizeof (S_endpoint_descriptor), @/
   0x05, /* endpoint */
   OUT | 2, /* this corresponds to `2' in `ep2' on picture */
