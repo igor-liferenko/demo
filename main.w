@@ -794,7 +794,8 @@ pbuffer = &conf_desc;
     if (data_to_transfer > wLength)
       data_to_transfer = (U8) wLength; /* never send more than requested */
     if (data_to_transfer < wLength && data_to_transfer % EP0_SIZE == 0)
-      empty_packet = 1; /* indicate to the host that no more data will follow */
+      empty_packet = 1; /* indicate to the host that no more data will
+                           follow (\S5.5.3 in USB spec) */
     UEINTX &= ~(1 << NAKOUTI);
     while (data_to_transfer != 0 && !(UEINTX & 1 << NAKOUTI)) {
       while (!(UEINTX & 1 << TXINI)) {
