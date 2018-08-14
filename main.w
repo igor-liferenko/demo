@@ -1073,7 +1073,8 @@ properties. (\S6.2.12 in CDC spec.)
   line_coding.bDataBits = UEDATX;
   UEINTX &= ~(1 << RXOUTI);
   UEINTX &= ~(1 << TXINI); /* STATUS stage */
-  /*|while (!(UEINTX & 1 << TXINI)) ;|*/ /* FIXME: is it necessary? */
+  /*|while (!(UEINTX & 1 << TXINI)) ;|*/ /* it is not necessary because DTR set request
+    will come after this request and it can only come if previous request completes */
 /*  |UBRR1 = (U16) (((U32) 16000 * 1000L) /
                 ((U32) line_coding.dwDTERate / 2 * 16) - 1);|*/
 /*see commit 1325440b633fd639ec158b17b5afaf76b3aa998e in usb/ */
