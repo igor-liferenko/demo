@@ -438,24 +438,21 @@ int main(void)
     if (usb_configuration_nb != 0 && line_status.DTR) { /* do not allow to send data before
                                                  end of enumeration AND open port detection */
       if (UCSR1A & 1 << UDRE1) {
-        if (!rx_counter) {
-          UENUM = EP2;
-          if (UEINTX & 1 << RXOUTI) {
-            rx_counter = UEBCLX;
-            if (!rx_counter) {
-              UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
-            }
+        UENUM = EP2;
+        if (UEINTX & 1 << RXOUTI) {
+          rx_counter = UEBCLX;
+          if (rx_counter == 0) { /* empty packet received */
+            PORTB |= 1 << PB0; /* check if this ever happens */
+            UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
           }
         }
-        if (rx_counter) {
+        if (rx_counter != 0) {
           while (rx_counter) {
             while (!(UCSR1A & 1 << UDRE1)) ;
-            UENUM = EP2; // FIXME: this seems not to be necessary
             UDR1 = UEDATX;
             rx_counter--;
-            if (!rx_counter)
+            if (rx_counter == 0)
               UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
-            PORTB ^= 1 << PB0;
           }
         }
       }
