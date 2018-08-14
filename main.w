@@ -398,7 +398,10 @@ int main(void)
   USBCON |= 1 << OTGPADE;
   USBCON |= 1 << VBUSTE;
   sei();
-  UBRR1 = (U16) (((U32) 16000 * 1000L) / ((U32) 57600 / 2 * 16) - 1);
+  UBRR1 = (U16) (((U32) 16000 * 1000L) / ((U32) 57600 / 2 * 16) - 1); /* FIXME: no sense to
+    make it here, because it is done in |@<Handle {\caps set line coding}@>| and DTR
+    on host is set only after that (even if we do not set baud directly in application) */
+@^FIXME@>
   UCSR1A |= 1 << U2X1;
   UCSR1C = 1 << UCSZ11 | 1 << UCSZ10;
   UCSR1B |= 1 << RXEN1 | 1 << TXEN1;
