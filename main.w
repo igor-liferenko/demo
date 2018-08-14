@@ -174,7 +174,7 @@ typedef struct {
 }  S_interface_descriptor;
 
 @ @<Initialize element 2 in configuration descriptor@>= { @t\1@> @/
-  sizeof (S_interface_descriptor), @/
+  9, /* size of this structure */
   0x04, /* interface descriptor */
   0, /* this corresponds to `0' in `if0' on picture */
   0, /* this corresponds to `0' in `alt0' on picture */
@@ -186,7 +186,7 @@ typedef struct {
 }
 
 @ @<Initialize element 8 in configuration descriptor@>= { @t\1@> @/
-  sizeof (S_interface_descriptor), @/
+  9, /* size of this structure */
   0x04, /* interface descriptor */
   1, /* this corresponds to `1' in `if1' on picture */
   0, /* this corresponds to `0' in `alt0' on picture */
@@ -214,7 +214,7 @@ typedef struct {
 @ @d IN (1 << 7)
 
 @<Initialize element 7 in configuration descriptor@>= { @t\1@> @/
-  sizeof (S_endpoint_descriptor), @/
+  7, /* size of this structure */
   0x05, /* endpoint */
   IN | 3, /* this corresponds to `3' in `ep3' on picture */
   0x03, /* transfers via interrupts\footnote\dag{Must correspond to
@@ -224,7 +224,7 @@ typedef struct {
 }
 
 @ @<Initialize element 9 in configuration descriptor@>= { @t\1@> @/
-  sizeof (S_endpoint_descriptor), @/
+  7, /* size of this structure */
   0x05, /* endpoint */
   IN | 1, /* this corresponds to `1' in `ep1' on picture */
   0x02, /* bulk transfers\footnote\dag{Must correspond to
@@ -236,7 +236,7 @@ typedef struct {
 @ @d OUT (0 << 7)
 
 @<Initialize element \null 10 in configuration descriptor@>= { @t\1@> @/
-  sizeof (S_endpoint_descriptor), @/
+  7, /* size of this structure */
   0x05, /* endpoint */
   OUT | 2, /* this corresponds to `2' in `ep2' on picture */
   0x02, /* bulk transfers\footnote\dag{Must correspond to
