@@ -1067,12 +1067,16 @@ properties. (\S6.2.12 in CDC spec.)
   UEINTX &= ~(1 << TXINI); /* STATUS stage */
 #if 0
   UBRR1 = (U16) (((U32) 16000 * 1000L) / ((U32) line_coding.dwDTERate / 2 * 16) - 1); /* TODO:
-    do it properly - see commit 1325440b633fd639ec158b17b5afaf76b3aa998e in usb/ */
+    do it properly - see commit 1325440b633fd639ec158b17b5afaf76b3aa998e in usb/;
+    until then - do not set baud in application and use default 9600 here */
 @^TODO@>
   UCSR1A |= 1 << U2X1;
   UCSR1C = 1 << UCSZ11 | 1 << UCSZ10;
   UCSR1B |= 1 << RXEN1 | 1 << TXEN1;
   UCSR1B |= 1 << RXCIE1;
+#else
+  UBRR1 = 103;
+  UCSR1B |= 1 << RXEN1 | 1 << TXEN1 | 1 << RXCIE1;
 #endif
 
 @ This request allows the host to select an alternate setting for the specified interface.
