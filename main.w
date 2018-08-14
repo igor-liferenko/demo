@@ -299,7 +299,11 @@ struct {
   uint8_t bDataInterface;
 }
 
-@ @<Initialize element 4 in configuration descriptor@>= { @t\1@> @/
+@ |bmCapabilities| is: device handles call management itself;
+device can send/receive call
+management information over a Data Class interface.
+
+@<Initialize element 4 in configuration descriptor@>= { @t\1@> @/
   5, /* size of this structure */
   0x24, /* interface */
   0x01, /* call management */
@@ -324,7 +328,12 @@ struct {
   uint8_t bmCapabilities;
 }
 
-@ @<Initialize element 5 in configuration descriptor@>= { @t\1@> @/
+@ |bmCapabilities| is: device supports the request
+combination of Set\_Line\_Coding, Set\_Control\_Line\_State,
+Get\_Line\_Coding, and the notification Serial\_State;
+device supports the request Send\_Break.
+
+@<Initialize element 5 in configuration descriptor@>= { @t\1@> @/
   4, /* size of this structure */
   0x24, /* interface */
   0x02, /* ACM */
