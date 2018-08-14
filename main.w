@@ -398,14 +398,6 @@ int main(void)
   USBCON |= 1 << OTGPADE;
   USBCON |= 1 << VBUSTE;
   sei();
-  UBRR1 = (U16) (((U32) 16000 * 1000L) / ((U32) 57600 / 2 * 16) - 1); /* FIXME: no sense to
-    make it here, because it is done in |@<Handle {\caps set line coding}@>| and DTR
-    on host is set only after that (even if we do not set baud directly in application) */
-@^FIXME@>
-  UCSR1A |= 1 << U2X1;
-  UCSR1C = 1 << UCSZ11 | 1 << UCSZ10;
-  UCSR1B |= 1 << RXEN1 | 1 << TXEN1;
-  UCSR1B |= 1 << RXCIE1;
   DDRD |= 1 << PD5;
   DDRB |= 1 << PB0;
   DDRF &= ~(1 << PF4), PORTF |= 1 << PF4; /* input */
@@ -1073,11 +1065,15 @@ properties. (\S6.2.12 in CDC spec.)
   line_coding.bDataBits = UEDATX;
   UEINTX &= ~(1 << RXOUTI);
   UEINTX &= ~(1 << TXINI); /* STATUS stage */
-  /*|while (!(UEINTX & 1 << TXINI)) ;|*/ /* it is not necessary because DTR set request
-    will come after this request and it can only come if previous request completes */
-/*  |UBRR1 = (U16) (((U32) 16000 * 1000L) /
-                ((U32) line_coding.dwDTERate / 2 * 16) - 1);|*/
-/*see commit 1325440b633fd639ec158b17b5afaf76b3aa998e in usb/ */
+#if 0
+  UBRR1 = (U16) (((U32) 16000 * 1000L) / ((U32) line_coding.dwDTERate / 2 * 16) - 1); /* TODO:
+    do it properly - see commit 1325440b633fd639ec158b17b5afaf76b3aa998e in usb/ */
+@^TODO@>
+  UCSR1A |= 1 << U2X1;
+  UCSR1C = 1 << UCSZ11 | 1 << UCSZ10;
+  UCSR1B |= 1 << RXEN1 | 1 << TXEN1;
+  UCSR1B |= 1 << RXCIE1;
+#endif
 
 @ This request allows the host to select an alternate setting for the specified interface.
 (\S9.4.10 in USB spec.)
