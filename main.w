@@ -245,7 +245,7 @@ typedef struct {
 @t\2@> 0x00 /* not applicable */
 }
 
-@*2 Functional Descriptors.
+@*2 Functional descriptors.
 
 These descriptors describe the content of the class-specific information
 within an Interface descriptor. They all start with a common header
@@ -256,7 +256,7 @@ information, the Data Class does not.
 
 \S5.2.3 in CDC spec.
 
-@*3 Header Functional Descriptor.
+@*3 Header functional descriptor.
 
 The class-specific descriptor shall start with a header.
 It identifies the release of the USB Class Definitions for
@@ -280,7 +280,7 @@ struct {
 @t\2@> 0x0110 /* CDC 1.1 */
 }
 
-@*3 Call Management Functional Descriptor.
+@*3 Call management functional descriptor.
 
 FIXME: remove it?
 @^FIXME@>
@@ -307,7 +307,7 @@ struct {
 @t\2@> 1 /* number of CDC data interface */
 }
 
-@*3 Abstract Control Management Functional Descriptor.
+@*3 Abstract control management functional descriptor.
 
 The Abstract Control Management functional descriptor
 describes the commands supported by the Communication
@@ -331,7 +331,7 @@ struct {
 @t\2@> 0x06 @/
 }
 
-@*3 Union Functional Descriptor.
+@*3 Union functional descriptor.
 
 The Union functional descriptor describes the relationship between
 a group of interfaces that can be considered to form
