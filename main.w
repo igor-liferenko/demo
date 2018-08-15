@@ -24,15 +24,6 @@ typedef unsigned char Uchar;
 @<Predeclarations of procedures@>@;
 @<Type \null definitions@>@;
 
-typedef union {
-  U8 all;
-  struct {
-    U8 DTR:1;
-    U8 RTS:1;
-    U8 unused:6;
-  };
-} S_line_status;
-
 typedef struct {
   U32 dwDTERate;
   U8 bCharFormat;
@@ -404,7 +395,6 @@ S_line_coding line_coding;
 U8 usb_suspended = 0;
 U8 usb_connected = 0;
 Uchar rx_counter;
-S_line_status line_status;
 
 #define EP0 0
 #define EP1 1
@@ -1064,6 +1054,21 @@ TODO: manage here hardware flow control
   UEINTX &= ~(1 << TXINI);
   usb_request_break_generation = 1;
 
+@ This union occupies one byte. This is enough because only LSB is needed.
+
+@<Type \null definitions@>=
+typedef union {
+  U8 all;
+  struct {
+    U8 DTR:1;
+    U8 RTS:1;
+    U8 unused:6;
+  };
+} S_line_status;
+
+@ @<Global variables@>=
+S_line_status line_status;
+
 @ This request generates RS-232/V.24 style control signals.
 
 Especially, first bit of first byte indicates to DCE if DTE is present or not.
@@ -1076,12 +1081,16 @@ TODO: manage here hardware flow control
 @^TODO@>
 
 @<Handle {\caps set control line state}@>=
-  line_status.all = UEDATX | UEDATX << 8;
+  line_status.all = UEDATX; /* LSB */
   UEINTX &= ~(1 << RXSTPI);
   UEINTX &= ~(1 << TXINI); /* STATUS stage */
 
 @ This request allows the host to specify typical asynchronous line-character formatting
-properties. (\S6.2.12 in CDC spec.)
+properties.
+
+\S6.2.12 in CDC spec.
+
+Note, that 32bit is (LSW,MSW) or (LSB0,LSB1,LSB2,LSB3) or (MSB3,MSB2,MSB1,MSB0).
 
 @<Handle {\caps set line coding}@>=
   UEINTX &= ~(1 << RXSTPI);
