@@ -1095,19 +1095,7 @@ properties. (\S6.2.12 in CDC spec.)
   line_coding.bDataBits = UEDATX;
   UEINTX &= ~(1 << RXOUTI);
   UEINTX &= ~(1 << TXINI); /* STATUS stage */
-#if 0
-  UBRR1 = (U16) (((U32) 16000 * 1000L) / ((U32) line_coding.dwDTERate / 2 * 16) - 1); /* TODO:
-    do it properly - see commit 1325440b633fd639ec158b17b5afaf76b3aa998e in usb/;
-    until then - do not set baud in application and use default 9600 here */
-@^TODO@>
-  UCSR1A |= 1 << U2X1;
-  UCSR1C = 1 << UCSZ11 | 1 << UCSZ10;
-  UCSR1B |= 1 << RXEN1 | 1 << TXEN1;
-  UCSR1B |= 1 << RXCIE1;
-#else
-  UBRR1 = 103;
-  UCSR1B |= 1 << RXEN1 | 1 << TXEN1 | 1 << RXCIE1;
-#endif
+  @<Configure UART@>@;
 
 @ This request allows the host to select an alternate setting for the specified interface.
 (\S9.4.10 in USB spec.)
@@ -1174,6 +1162,31 @@ if (serial_state_saved.all != serial_state.all) {
   UEDATX = (U8) ((U8 *) &serial_state.all)[0];
   UEDATX = (U8) ((U8 *) &serial_state.all)[1];
   UEINTX &= ~(1 << TXINI), UEINTX &= ~(1 << FIFOCON);
+}
+
+@ In application we set baud only once, before setting |DTR|;
+if you change baud in middle of application, think if something
+should be considered here.
+
+Note, that 115200 baud is not supported (due to 16MHz).
+
+@<Configure UART@>=
+UCSR1B &= ~(1 << RXCIE1); /* disable interrupt first */
+UCSR1B &= ~(1 << RXEN1); /* disable receiver to flush receive buffer */
+
+switch (line_coding.dwDTERate) {
+case 9600: @/
+  UBRR1 = 103;
+  UCSR1A &= ~(1 << U2X1);
+  UCSR1B |= 1 << RXEN1 | 1 << TXEN1 | 1 << RXCIE1;
+  break;
+case 57600: @/
+  UBRR1 = 34;
+  UCSR1A |= 1 << U2X1;
+  UCSR1B |= 1 << RXEN1 | 1 << TXEN1 | 1 << RXCIE1;
+  break;
+default:
+  UCSR1B &= ~(1 << TXEN1);
 }
 
 @* Headers.
