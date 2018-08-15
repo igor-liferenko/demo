@@ -299,15 +299,21 @@ struct {
   uint8_t bDataInterface;
 }
 
-@ |bmCapabilities| is: device handles call management itself;
-device can send/receive call
-management information over a Data Class interface.
+@ |bmCapabilities|:
+Only first two bits are used.
+If first bit is set, then this indicates the device handles call
+management itself. If clear, the device
+does not handle call management itself. If second bit is set,
+the device can send/receive call management information over a
+Data Class interface. If clear, the device sends/receives call
+management information only over the Communication Class
+interface.
 
 @<Initialize element 4 in configuration descriptor@>= { @t\1@> @/
   5, /* size of this structure */
   0x24, /* interface */
   0x01, /* call management */
-  0x03, @/
+  1 << 1 | 1 << 0, @/
 @t\2@> 1 /* number of CDC data interface */
 }
 
@@ -328,16 +334,22 @@ struct {
   uint8_t bmCapabilities;
 }
 
-@ |bmCapabilities| is: device supports the request
-combination of Set\_Line\_Coding, Set\_Control\_Line\_State,
-Get\_Line\_Coding, and the notification Serial\_State;
-device supports the request Send\_Break.
+@ |bmCapabilities|: Only first four bits are used.
+If first bit is set, then this indicates the device
+supports the request combination of \.{Set\_Comm\_Feature},
+\.{Clear\_Comm\_Feature}, and \.{Get\_Comm\_Feature}.
+If second bit is set, then the device supports the request
+combination of \.{Set\_Line\_Coding}, \.{Set\_Control\_Line\_State},
+\.{Get\_Line\_Coding}, and the notification \.{Serial\_State}.
+If the third bit is set, then the device supports the request
+\.{Send\_Break}. If fourth bit is set, then the device
+supports the notification \.{Network\_Connection}.
 
 @<Initialize element 5 in configuration descriptor@>= { @t\1@> @/
   4, /* size of this structure */
   0x24, /* interface */
   0x02, /* ACM */
-@t\2@> 0x06 @/
+@t\2@> 0 << 3 | 1 << 2 | 1 << 1 | 0 << 0 @/
 }
 
 @*3 Union functional descriptor.
