@@ -85,7 +85,9 @@ struct {
 Abstract Control Model consists of two interfaces: Data Class interface
 and Communication Class interface.
 
-The Communication Class interface uses two endpoints, one to implement
+The Communication Class interface uses two endpoints\footnote*{Although
+CDC spec says that notification endpoint is optional, but in Linux host
+driver refuses to work without it.}, one to implement
 a notification element and theh other to implement
 a management element. The management element uses the default endpoint
 for all standard and Communication Class-specific requests.
@@ -307,13 +309,16 @@ does not handle call management itself. If second bit is set,
 the device can send/receive call management information over a
 Data Class interface. If clear, the device sends/receives call
 management information only over the Communication Class
-interface.
+interface. The previous bits, in combination, identify
+which call management scenario is used. If first bit
+is reset to 0, then the value of second bit is
+ignored. In this case, second bit is reset to zero.
 
 @<Initialize element 4 in configuration descriptor@>= { @t\1@> @/
   5, /* size of this structure */
   0x24, /* interface */
   0x01, /* call management */
-  1 << 1 | 1 << 0, @/
+  1 << 1 | 1, @/
 @t\2@> 1 /* number of CDC data interface */
 }
 
@@ -344,12 +349,13 @@ combination of \.{Set\_Line\_Coding}, \.{Set\_Control\_Line\_State},
 If the third bit is set, then the device supports the request
 \.{Send\_Break}. If fourth bit is set, then the device
 supports the notification \.{Network\_Connection}.
+A bit value of zero means that the request is not supported.
 
 @<Initialize element 5 in configuration descriptor@>= { @t\1@> @/
   4, /* size of this structure */
   0x24, /* interface */
   0x02, /* ACM */
-@t\2@> 0 << 3 | 1 << 2 | 1 << 1 | 0 << 0 @/
+@t\2@> 1 << 2 | 1 << 1 @/
 }
 
 @*3 Union functional descriptor.
@@ -670,6 +676,10 @@ here and in main loop alternate between rx and tx byte by byte;
 for now, make via a simple buffer and use a led to indicate if it is full,
 and later do via ring buffer
 @^TODO@>
+
+TODO: send bank if timer expired and restart timer (check timer in the same
+loop where you alternate between rx and tx as said in above TODO)
+see avr/C.c how to use timer
 
 @c
 ISR(USART1_RX_vect)
@@ -1049,16 +1059,18 @@ TODO: manage here hardware flow control
 @^TODO@>
 
 @<Handle {\caps send break}@>=
+  /* NOTE: {\it wValue} contains break length */
   UEINTX &= ~(1 << RXSTPI);
   UEINTX &= ~(1 << TXINI);
   usb_request_break_generation = 1;
 
 @ This request generates RS-232/V.24 style control signals.
-(\S6.2.14 and in CDC spec.)
 
 Especially, first bit of first byte indicates to DCE if DTE is present or not.
 This signal corresponds to RS-232 signal DTR (0 --- Not Present, 1 --- Present).
 @^DTR@>
+
+\S6.2.14 in CDC spec. 
 
 TODO: manage here hardware flow control
 @^TODO@>
@@ -1119,9 +1131,12 @@ typedef union {
   };
 } S_serial_state;
 
-@ @<Global variables@>=
-S_serial_state serial_state;
-S_serial_state serial_state_saved;
+@ We buffer the old state in ordrer to send this interrupt message only if
+|serial_state| has changed.
+
+@<Global variables@>=
+S_serial_state serial_state; // actual state
+S_serial_state serial_state_saved; // buffered previously sent state
 
 @ Check if serial state has changed and update host with that information.
 Necessary for hardware handshake support.
@@ -1144,11 +1159,13 @@ to host. Incidentally, on control endpoint it is never necessary
 to wait |TXINI| to become `1', because on control endpoint if |RXSTPI| is `1',
 |TXINI| is guaranteed to be `1'.
 
+\S6.3 in CDC spec (see also \S3.6.2.1).
+
 @<Notify host if |serial_state| changed@>=
 if (serial_state_saved.all != serial_state.all) {
   serial_state_saved.all = serial_state.all;
   UENUM = EP3;
-  while (!(UEINTX & 1 << TXINI)) ; /* wait until previous packet was sent */
+  while (!(UEINTX & 1 << TXINI)) ; /* wait until previous packet is sent */
   UEDATX = 0xA1;
   UEDATX = 0x20;
   UEDATX = 0x00; @+ UEDATX = 0x00;
