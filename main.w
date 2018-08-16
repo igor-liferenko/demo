@@ -566,7 +566,7 @@ void uart_usb_send_buffer(U8 *buffer, U8 nb_data)
   while (nb_data) {
     while (!(UEINTX & 1 << RWAL)) ;
     while (UEINTX & 1 << RWAL && nb_data) {
-      UEDATX = (U8) * buffer;
+      UEDATX = (U8) *buffer;
       buffer++;
       nb_data--;
     }
@@ -1032,13 +1032,13 @@ value indicates the device is configured.
 
 @<Handle {\caps get line coding}@>=
   UEINTX &= ~(1 << RXSTPI);
-  UEDATX = (U8) ((U8 *) &line_coding.dwDTERate)[0];
-  UEDATX = (U8) ((U8 *) &line_coding.dwDTERate)[1];
-  UEDATX = (U8) ((U8 *) &line_coding.dwDTERate)[2];
-  UEDATX = (U8) ((U8 *) &line_coding.dwDTERate)[3];
-  UEDATX = (U8) line_coding.bCharFormat;
-  UEDATX = (U8) line_coding.bParityType;
-  UEDATX = (U8) line_coding.bDataBits;
+  UEDATX = ((U8 *) &line_coding.dwDTERate)[0];
+  UEDATX = ((U8 *) &line_coding.dwDTERate)[1];
+  UEDATX = ((U8 *) &line_coding.dwDTERate)[2];
+  UEDATX = ((U8 *) &line_coding.dwDTERate)[3];
+  UEDATX = line_coding.bCharFormat;
+  UEDATX = line_coding.bParityType;
+  UEDATX = line_coding.bDataBits;
   UEINTX &= ~(1 << TXINI); /* DATA stage */
   while (!(UEINTX & 1 << RXOUTI)) ; /* wait for STATUS stage */
   UEINTX &= ~(1 << RXOUTI);
@@ -1174,8 +1174,8 @@ if (serial_state_saved.all != serial_state.all) {
   UEDATX = 0x00; @+ UEDATX = 0x00;
   UEDATX = 0x00; @+ UEDATX = 0x00;
   UEDATX = 0x02; @+ UEDATX = 0x00;
-  UEDATX = (U8) ((U8 *) &serial_state.all)[0];
-  UEDATX = (U8) ((U8 *) &serial_state.all)[1];
+  UEDATX = ((U8 *) &serial_state.all)[0];
+  UEDATX = ((U8 *) &serial_state.all)[1];
   UEINTX &= ~(1 << TXINI), UEINTX &= ~(1 << FIFOCON);
 }
 
