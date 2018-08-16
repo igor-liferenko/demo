@@ -450,12 +450,7 @@ int main(void)
         UENUM = EP2;
         if (UEINTX & 1 << RXOUTI) {
           rx_counter = UEBCLX;
-          if (rx_counter == 0) { /* empty packet received */
-            PORTD |= 1 << PD5; /* check if this ever happens */
-            UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
-          }
-        }
-        if (rx_counter != 0) {
+          if (rx_counter == 0) PORTD |= 1 << PD5; /* this cannot happen */
           while (rx_counter) {
             while (!(UCSR1A & 1 << UDRE1)) ;
             UDR1 = UEDATX;
