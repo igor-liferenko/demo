@@ -1085,9 +1085,9 @@ TODO: manage here hardware flow control
 @^TODO@>
 
 @<Handle {\caps set control line state}@>=
-  line_status.all = UEDATX | UEDATX << 8;
-  UEINTX &= ~(1 << RXSTPI);
-  UEINTX &= ~(1 << TXINI); /* STATUS stage */
+line_status.all = UEDATX | UEDATX << 8;
+UEINTX &= ~(1 << RXSTPI);
+UEINTX &= ~(1 << TXINI); /* STATUS stage */
 
 @ This request allows the host to specify typical asynchronous line-character formatting
 properties.
@@ -1097,15 +1097,15 @@ properties.
 Note, that 32bit is (LSW,MSW) or (LSB,...,MSB).
 
 @<Handle {\caps set line coding}@>=
-  UEINTX &= ~(1 << RXSTPI);
-  while (!(UEINTX & 1 << RXOUTI)) ; /* wait for DATA stage */
-  line_coding.dwDTERate = UEDATX | UEDATX << 8 | UEDATX << 16 | UEDATX << 24;
-  line_coding.bCharFormat = UEDATX;
-  line_coding.bParityType = UEDATX;
-  line_coding.bDataBits = UEDATX;
-  UEINTX &= ~(1 << RXOUTI);
-  UEINTX &= ~(1 << TXINI); /* STATUS stage */
-  @<Configure UART@>@;
+UEINTX &= ~(1 << RXSTPI);
+while (!(UEINTX & 1 << RXOUTI)) ; /* wait for DATA stage */
+line_coding.dwDTERate = UEDATX | UEDATX << 8 | UEDATX << 16 | UEDATX << 24;
+line_coding.bCharFormat = UEDATX;
+line_coding.bParityType = UEDATX;
+line_coding.bDataBits = UEDATX;
+UEINTX &= ~(1 << RXOUTI);
+UEINTX &= ~(1 << TXINI); /* STATUS stage */
+@<Configure UART@>@;
 
 @ This request allows the host to select an alternate setting for the specified interface.
 
