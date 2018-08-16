@@ -24,13 +24,6 @@ typedef unsigned char Uchar;
 @<Predeclarations of procedures@>@;
 @<Type \null definitions@>@;
 
-typedef struct {
-  U32 dwDTERate;
-  U8 bCharFormat;
-  U8 bParityType;
-  U8 bDataBits;
-} S_line_coding;
-
 @* USB stack.
 
 @*1 Device descriptor.
@@ -391,7 +384,6 @@ volatile U8 usb_request_break_generation = 0;
 volatile U8 rs2usb[10];
 volatile U8 cpt_sof;
 volatile U16 g_usb_event = 0;
-S_line_coding line_coding;
 U8 usb_suspended = 0;
 U8 usb_connected = 0;
 Uchar rx_counter;
@@ -1086,6 +1078,17 @@ TODO: manage here hardware flow control
 line_status.all = UEDATX | UEDATX << 8;
 UEINTX &= ~(1 << RXSTPI);
 UEINTX &= ~(1 << TXINI); /* STATUS stage */
+
+@ @<Type \null definitions@>=
+typedef struct {
+  U32 dwDTERate;
+  U8 bCharFormat;
+  U8 bParityType;
+  U8 bDataBits;
+} S_line_coding;
+
+@ @<Global variables@>=
+S_line_coding line_coding;
 
 @ This request allows the host to specify typical asynchronous line-character formatting
 properties.
