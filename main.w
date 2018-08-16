@@ -12,7 +12,6 @@ typedef unsigned char U8;
 typedef unsigned short U16;
 typedef unsigned long U32;
 typedef unsigned char Bool;
-typedef unsigned char Uchar;
 
 #define EVT_USB_POWERED               1         // USB plugged
 #define EVT_USB_UNPOWERED             2         // USB un-plugged
@@ -386,7 +385,7 @@ volatile U8 cpt_sof;
 volatile U16 g_usb_event = 0;
 U8 usb_suspended = 0;
 U8 usb_connected = 0;
-Uchar rx_counter;
+U16 rx_counter;
 
 #define EP0 0
 #define EP1 1
@@ -449,7 +448,7 @@ int main(void)
       if (UCSR1A & 1 << UDRE1) {
         UENUM = EP2;
         if (UEINTX & 1 << RXOUTI) {
-          rx_counter = UEBCLX;
+          rx_counter = UEBCLX | UEBCHX << 8;
           if (rx_counter == 0) PORTD |= 1 << PD5; /* this cannot happen */
           while (rx_counter) {
             while (!(UCSR1A & 1 << UDRE1)) ;
