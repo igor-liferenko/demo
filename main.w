@@ -1099,7 +1099,10 @@ Note, that 32bit is (LSW,MSW) or (LSB,...,MSB).
 @<Handle {\caps set line coding}@>=
 UEINTX &= ~(1 << RXSTPI);
 while (!(UEINTX & 1 << RXOUTI)) ; /* wait for DATA stage */
-line_coding.dwDTERate = UEDATX | UEDATX << 8 | (U32) UEDATX << 16 | (U32) UEDATX << 24;
+((U8 *) &line_coding.dwDTERate)[0] = UEDATX;
+((U8 *) &line_coding.dwDTERate)[1] = UEDATX;
+((U8 *) &line_coding.dwDTERate)[2] = UEDATX;
+((U8 *) &line_coding.dwDTERate)[3] = UEDATX;
 line_coding.bCharFormat = UEDATX;
 line_coding.bParityType = UEDATX;
 line_coding.bDataBits = UEDATX;
