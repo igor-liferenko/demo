@@ -4,12 +4,12 @@ Invert leds.
   DDRD |= 1 << PD5;
   DDRB |= 1 << PB0;
 @y
-  DDRD |= 1 << PD5, PORTD |= 1 << PD5;
-  DDRB |= 1 << PB0, PORTB |= 1 << PB0;
+  PORTD |= 1 << PD5, DDRD |= 1 << PD5;
+  PORTB |= 1 << PB0, DDRB |= 1 << PB0;
 @z
 
 @x
-            PORTD |= 1 << PD5; /* check if this ever happens */
+          if (rx_counter == 0) PORTD |= 1 << PD5; /* this cannot happen */
 @y
-            PORTD &= ~(1 << PD5); /* check if this ever happens */
+          if (rx_counter == 0) PORTD &= ~(1 << PD5); /* this cannot happen */
 @z
