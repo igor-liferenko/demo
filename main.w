@@ -1054,15 +1054,13 @@ TODO: manage here hardware flow control
   UEINTX &= ~(1 << TXINI);
   usb_request_break_generation = 1;
 
-@ This union occupies one byte. This is enough because only LSB is needed.
-
-@<Type \null definitions@>=
+@ @<Type \null definitions@>=
 typedef union {
-  U8 all;
+  U16 all;
   struct {
-    U8 DTR:1;
-    U8 RTS:1;
-    U8 unused:6;
+    U16 DTR:1;
+    U16 RTS:1;
+    U16 unused:14;
   };
 } S_line_status;
 
@@ -1081,7 +1079,7 @@ TODO: manage here hardware flow control
 @^TODO@>
 
 @<Handle {\caps set control line state}@>=
-  line_status.all = UEDATX; /* LSB */
+  line_status.all = UEDATX | UEDATX << 8;
   UEINTX &= ~(1 << RXSTPI);
   UEINTX &= ~(1 << TXINI); /* STATUS stage */
 
