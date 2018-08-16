@@ -960,8 +960,7 @@ selector |0x00|, which allows the host to stall and clear an endpoint.
 Only endpoints other than the default endpoint are recommended to have this functionality.
 
 @<Handle {\caps set feature endpoint}@>=
-  wValue = UEDATX;
-  (void) UEDATX;
+  wValue = UEDATX | UEDATX << 8;
   if (wValue == 0x00) {
     wIndex = UEDATX & 0x7F;
     if (wIndex == 0) {
@@ -988,8 +987,7 @@ Only endpoints other than the default endpoint are recommended to have this func
   }
 
 @ @<Handle {\caps clear feature endpoint}@>=
-  wValue = UEDATX;
-  (void) UEDATX;
+  wValue = UEDATX | UEDATX << 8;
   if (wValue == 0x00) {
     wIndex = UEDATX & 0x7F;
     UENUM = (U8) wIndex;
@@ -1051,7 +1049,7 @@ TODO: manage here hardware flow control
 @^TODO@>
 
 @<Handle {\caps send break}@>=
-  /* NOTE: {\it wValue} contains break length */
+  (void) UEDATX; @+ (void) UEDATX; /* break length */
   UEINTX &= ~(1 << RXSTPI);
   UEINTX &= ~(1 << TXINI);
   usb_request_break_generation = 1;
