@@ -1026,8 +1026,9 @@ value indicates the device is configured.
   while (!(UEINTX & 1 << RXOUTI)) ; /* wait for STATUS stage */
   UEINTX &= ~(1 << RXOUTI);
 
-@ This request allows the host to find out the currently configured line coding. (\S6.2.13 in
-CDC spec.)
+@ This request allows the host to find out the currently configured line coding.
+
+\S6.2.13 in CDC spec.
 
 @<Handle {\caps get line coding}@>=
   UEINTX &= ~(1 << RXSTPI);
@@ -1043,7 +1044,8 @@ CDC spec.)
   UEINTX &= ~(1 << RXOUTI);
 
 @ This request sends special carrier modulation that generates an RS-232 style break.
-(\S6.2.15 in CDC spec.)
+
+\S6.2.15 in CDC spec.
 
 TODO: manage here hardware flow control
 @^TODO@>
@@ -1073,7 +1075,7 @@ Especially, first bit of first byte indicates to DCE if DTE is present or not.
 This signal corresponds to RS-232 signal DTR (0 --- Not Present, 1 --- Present).
 @^DTR@>
 
-\S6.2.14 in CDC spec. 
+\S6.2.14 in CDC spec.
 
 TODO: manage here hardware flow control
 @^TODO@>
@@ -1105,7 +1107,8 @@ Note, that 32bit is (LSW,MSW) or (LSB0,LSB1,LSB2,LSB3) or (MSB3,MSB2,MSB1,MSB0).
   @<Configure UART@>@;
 
 @ This request allows the host to select an alternate setting for the specified interface.
-(\S9.4.10 in USB spec.)
+
+\S9.4.10 in USB spec.
 
 @<Handle {\caps set interface}@>=
   UEINTX &= ~(1 << RXSTPI);
@@ -1135,7 +1138,6 @@ S_serial_state serial_state_saved; // buffered previously sent state
 
 @ Check if serial state has changed and update host with that information.
 Necessary for hardware handshake support.
-(\S6.3.5 in CDC spec.)
 
 |serial_state| is used like a real interrupt status register. Once a notification has been sent,
 the device will reset and re-evaluate the different signals. For the consistent signals like
@@ -1143,6 +1145,8 @@ carrier detect or transmission carrier, this will mean another notification will
 until there is a state change. For the irregular signals like break, the incoming ring signal,
 or the overrun error state, this will reset their values to zero and again will not send another
 notification until their state changes.
+
+\S6.3.5 in CDC spec.
 
 Here we have to wait (before or after sending notification, but
 `after' is not efficient\footnote*{It is not efficient
