@@ -1160,7 +1160,7 @@ to host. Incidentally, on control endpoint it is never necessary
 to wait |TXINI| to become `1', because on control endpoint if |RXSTPI| is `1',
 |TXINI| is guaranteed to be `1'.
 
-\S6.3 in CDC spec (see also \S3.6.2.1).
+CDC\S6.3 (see also CDC\S3.6.2.1).
 
 @<Notify host if |serial_state| changed@>=
 if (serial_state_saved.all != serial_state.all) {
