@@ -538,7 +538,10 @@ MCUSR = 0x00; /* clear WDRF */
 WDTCSR |= 1 << WDCE | 1 << WDE; /* allow to disable WDT */
 WDTCSR = 0x00; /* disable WDT */
 
-@ @<Predeclarations of procedures@>=
+@ TODO: |if (!line_status.DTR) discard byte|
+see also usb/main.w
+
+@<Predeclarations of procedures@>=
 void uart_usb_send_buffer(U8 *buffer, U8 nb_data);
 @ @c
 void uart_usb_send_buffer(U8 *buffer, U8 nb_data)
@@ -661,9 +664,6 @@ TODO: send bank if timer expired and restart timer (check timer in the same
 loop where you alternate between rx and tx as said in above TODO)
 see avr/C.c how to use timer
 
-TODO: prohibit to send data if |line_status.DTR| is not active
-see also usb/main.w
-
 @c
 ISR(USART1_RX_vect)
 {
@@ -678,7 +678,7 @@ ISR(USART1_RX_vect)
         rs2usb[i] = UDR1;
         i++;
       }
-    } while (!(UEINTX & 1 << RWAL));
+    } while (!(UEINTX & 1 << RWAL)); // ???
     uart_usb_send_buffer((U8 *) &rs2usb, i);
     UENUM = (U8) save_ep;
   }
