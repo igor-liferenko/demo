@@ -1071,9 +1071,13 @@ S_line_status line_status;
 
 @ This request generates RS-232/V.24 style control signals.
 
-Especially, first bit of first byte indicates to DCE if DTE is present or not.
-This signal corresponds to RS-232 signal DTR (0 --- Not Present, 1 --- Present).
+Only first two bits of the first byte are used. First bit indicates to DCE if DTE is
+present or not. This signal corresponds to V.24 signal 108/2 and RS-232 signal DTR.
 @^DTR@>
+Second bit activates or deactivates carrier. This signal corresponds to V.24 signal
+105 and RS-232 signal RTS\footnote*{For some reason on linux DTR and RTS signals
+are tied to each other.}. Carrier control is used for half duplex modems.
+The device ignores the value of this bit when operating in full duplex mode.
 
 \S6.2.14 in CDC spec.
 
