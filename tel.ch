@@ -6,15 +6,15 @@ Make it work with tel.w + invert leds.
   DDRF &= ~(1 << PF6), PORTF |= 1 << PF6; /* input */
   DDRD |= 1 << PD7; /* ground */
 @y
-  PORTB |= 1 << PB0; /* led off */
+  PORTD |= 1 << PD5; /* led off */
   DDRE |= 1 << PE6;
   PORTE |= 1 << PE6; /* |DTR| pin high */
 @z
 
 @x
-            PORTB |= 1 << PB0; /* check if this ever happens */
+            PORTD |= 1 << PD5; /* check if this ever happens */
 @y
-            PORTB &= ~(1 << PB0); /* check if this ever happens */
+            PORTD &= ~(1 << PD5); /* check if this ever happens */
 @z
 
 @x
@@ -41,20 +41,20 @@ Make it work with tel.w + invert leds.
 @z
 
 @x
-        PORTD ^= 1 << PD5;
+        PORTB ^= 1 << PB0;
 @y
 @z
 
 @x
-  line_status.all = UEDATX; /* LSB */
+  line_status.all = UEDATX | UEDATX << 8;
 @y
-line_status.all = UEDATX; /* LSB */
+line_status.all = UEDATX | UEDATX << 8;
 if (line_status.DTR) {
   PORTE &= ~(1 << PE6); /* |DTR| pin low */
-  PORTD |= 1 << PD5; /* led off */
+  PORTB |= 1 << PB0; /* led off */
 }
 else {
   PORTE |= 1 << PE6; /* |DTR| pin high */
-  PORTD &= ~(1 << PD5); /* led on */
+  PORTB &= ~(1 << PB0); /* led on */
 }
 @z
