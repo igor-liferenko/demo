@@ -658,6 +658,9 @@ TODO: send bank if timer expired and restart timer (check timer in the same
 loop where you alternate between rx and tx as said in above TODO)
 see avr/C.c how to use timer
 
+TODO: prohibit to send data if |line_status.DTR| is not active
+see also usb/main.w
+
 @c
 ISR(USART1_RX_vect)
 {
