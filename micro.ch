@@ -9,7 +9,7 @@ Invert leds.
 @z
 
 @x
-            PORTB |= 1 << PB0; /* check if this ever happens */
+            PORTD |= 1 << PD5; /* check if this ever happens */
 @y
-            PORTB &= ~(1 << PB0); /* check if this ever happens */
+            PORTD &= ~(1 << PD5); /* check if this ever happens */
 @z

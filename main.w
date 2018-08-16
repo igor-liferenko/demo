@@ -459,7 +459,7 @@ int main(void)
         if (UEINTX & 1 << RXOUTI) {
           rx_counter = UEBCLX;
           if (rx_counter == 0) { /* empty packet received */
-            PORTB |= 1 << PB0; /* check if this ever happens */
+            PORTD |= 1 << PD5; /* check if this ever happens */
             UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
           }
         }
@@ -494,7 +494,7 @@ int main(void)
       }
       if (usb_request_break_generation == 1) {
         usb_request_break_generation = 0;
-        PORTD ^= 1 << PD5;
+        PORTB ^= 1 << PB0;
         @<Reset MCU@>@;
       }
     }
