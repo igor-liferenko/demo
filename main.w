@@ -530,6 +530,10 @@ $$\vbox{\halign{\tt#\cr
 At 16MHz each cycle is 62.5 nanoseconds, so it is 7 instructions,
 taking FIXME cycles, multiplied by 62.5 is ????.
 
+(What the above code does: zero r1 register, clear SREG, initialize program stack
+(to the stack processor writes addresses for returning from subroutines and interrupt
+handlers). To the stack pointer is written address of last cell of RAM.)
+
 @<Disable WDT@>=
 MCUSR = 0x00; /* clear WDRF */
 WDTCSR |= 1 << WDCE | 1 << WDE; /* allow to disable WDT */
