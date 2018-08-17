@@ -744,7 +744,7 @@ default: /* in code derived from this example remove this and all unused "Handle
 }
 
 @ @<Global variables@>=
-U8 data_to_transfer;
+U16 data_to_transfer;
 const void *pbuffer;
 
 @ When host is booting, BIOS asks 8 bytes in first request of device descriptor (8 bytes is
@@ -772,7 +772,7 @@ pbuffer = &conf_desc;
     UEINTX &= ~(1 << RXSTPI);
     empty_packet = 0;
     if (data_to_transfer > wLength)
-      data_to_transfer = (U8) wLength; /* never send more than requested */
+      data_to_transfer = wLength; /* never send more than requested */
     if (data_to_transfer < wLength && data_to_transfer % EP0_SIZE == 0)
       empty_packet = 1; /* indicate to the host that no more data will follow (USB\S5.5.3) */
     UEINTX &= ~(1 << NAKOUTI);
