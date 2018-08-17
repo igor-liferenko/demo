@@ -460,25 +460,19 @@ int main(void)
           }
         }
       }
+#if 0
       if (cpt_sof >= 100) { /* debounce (FIXME: how is this even supposed to work?) */
-        unsigned char data;
-        if (!(PINF & 1 << PF4)) {
-          data = '*'; @+ uart_usb_send_buffer(&data, 1);
+        if (!(PINF & 1 << PF4))
           serial_state.bDCD = 1;
-        }
         else
           serial_state.bDCD = 0;
-        if (!(PINF & 1 << PF5)) {
-          data = '0'; @+ uart_usb_send_buffer(&data, 1);
-        }
-        if (!(PINF & 1 << PF6)) {
-          data = '#'; @+ uart_usb_send_buffer(&data, 1);
+        if (!(PINF & 1 << PF6))
           serial_state.bDSR = 1;
-        }
         else
           serial_state.bDSR = 0;
         @<Notify host if |serial_state| changed@>@;
       }
+#endif
       if (usb_request_break_generation == 1) {
         usb_request_break_generation = 0;
         PORTB ^= 1 << PB0;
