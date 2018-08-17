@@ -381,7 +381,6 @@ U8 endpoint_status[7];
 U8 usb_configuration_nb;
 volatile U8 usb_request_break_generation = 0;
 volatile U8 rs2usb[10];
-volatile U8 cpt_sof;
 volatile U16 g_usb_event = 0;
 U8 usb_suspended = 0;
 U8 usb_connected = 0;
@@ -412,8 +411,6 @@ int main(void)
   DDRF &= ~(1 << PF5), PORTF |= 1 << PF5; /* input */
   DDRF &= ~(1 << PF6), PORTF |= 1 << PF6; /* input */
   DDRD |= 1 << PD7; /* ground */
-
-  UDIEN |= 1 << SOFE;
 
   while (1) {
     if (!usb_connected) {
@@ -461,7 +458,6 @@ int main(void)
         }
       }
 #if 0
-      if (cpt_sof >= 100) { /* debounce (FIXME: how is this even supposed to work?) */
         if (!(PINF & 1 << PF4))
           serial_state.bDCD = 1;
         else
@@ -471,7 +467,6 @@ int main(void)
         else
           serial_state.bDSR = 0;
         @<Notify host if |serial_state| changed@>@;
-      }
 #endif
       if (usb_request_break_generation == 1) {
         usb_request_break_generation = 0;
@@ -562,10 +557,6 @@ ISR(USB_GEN_vect)
       usb_configuration_nb = 0;
       g_usb_event |= 1 << EVT_USB_UNPOWERED;
     }
-  }
-  if (UDINT & 1 << SOFI && UDIEN & 1 << SOFE) {
-    UDINT = ~(1 << SOFI);
-    cpt_sof++;
   }
   if (UDINT & 1 << SUSPI && UDIEN & 1 << SUSPE) {
     usb_suspended = 1;
