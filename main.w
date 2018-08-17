@@ -736,8 +736,8 @@ case 0x0680: @/
     break;
   default: /* in code derived from this example change this to ``Handle
               {\caps get descriptor device qualifier}'' */
-    UECONX |= 1 << STALLRQ;
     UEINTX &= ~(1 << RXSTPI);
+    UECONX |= 1 << STALLRQ;
   }
   break;
 case 0x0880: @/
@@ -765,8 +765,8 @@ case 0x2321: @/
   @<Handle {\caps send break}@>@;
   break;
 default: /* in code derived from this example remove this and all unused "Handle" sections */
-  UECONX |= 1 << STALLRQ;
   UEINTX &= ~(1 << RXSTPI);
+  UECONX |= 1 << STALLRQ;
 }
 
 @ @<Global variables@>=
@@ -875,8 +875,8 @@ pbuffer = &conf_desc;
     UERST = 1 << EP2, UERST = 0;
   }
   else {
-    UECONX |= 1 << STALLRQ;
     UEINTX &= ~(1 << RXSTPI);
+    UECONX |= 1 << STALLRQ;
   }
 
 @ This will send two bytes during the DATA stage. Only first two bits of the first byte are used.
@@ -930,23 +930,23 @@ Only first bit of the first byte is used.
 \.{DEVICE\_REMOTE\_WAKEUP} and \.{TEST\_MODE}.
 
 @<Handle {\caps set feature device}@>=
-  UECONX |= 1 << STALLRQ;
-  UEINTX &= ~(1 << RXSTPI);
+UEINTX &= ~(1 << RXSTPI);
+UECONX |= 1 << STALLRQ;
 
 @ @<Handle {\caps clear feature device}@>=
-  UECONX |= 1 << STALLRQ;
-  UEINTX &= ~(1 << RXSTPI);
+UEINTX &= ~(1 << RXSTPI);
+UECONX |= 1 << STALLRQ;
 
 @ Used to set boolean features. The current USB Specification Revision 2 specifies no
 interface features.
 
 @<Handle {\caps set feature interface}@>=
-  UECONX |= 1 << STALLRQ;
-  UEINTX &= ~(1 << RXSTPI);
+UEINTX &= ~(1 << RXSTPI);
+UECONX |= 1 << STALLRQ;
 
 @ @<Handle {\caps clear feature interface}@>=
-  UECONX |= 1 << STALLRQ;
-  UEINTX &= ~(1 << RXSTPI);
+UEINTX &= ~(1 << RXSTPI);
+UECONX |= 1 << STALLRQ;
 
 @ Used to set endpoint features. The standard currently defines one endpoint feature
 selector |0x00|, which allows the host to stall and clear an endpoint.
@@ -957,8 +957,8 @@ Only endpoints other than the default endpoint are recommended to have this func
   if (wValue == 0x00) {
     wIndex = UEDATX & 0x7F;
     if (wIndex == 0) {
-      UECONX |= 1 << STALLRQ;
       UEINTX &= ~(1 << RXSTPI);
+      UECONX |= 1 << STALLRQ;
     }
     UENUM = (U8) wIndex;
     if (UECONX & 1 << EPEN) {
@@ -970,13 +970,13 @@ Only endpoints other than the default endpoint are recommended to have this func
     }
     else {
       UENUM = EP0;
-      UECONX |= 1 << STALLRQ;
       UEINTX &= ~(1 << RXSTPI);
+      UECONX |= 1 << STALLRQ;
     }
   }
   else {
-    UECONX |= 1 << STALLRQ;
     UEINTX &= ~(1 << RXSTPI);
+    UECONX |= 1 << STALLRQ;
   }
 
 @ @<Handle {\caps clear feature endpoint}@>=
@@ -997,13 +997,13 @@ Only endpoints other than the default endpoint are recommended to have this func
     }
     else {
       UENUM = EP0;
-      UECONX |= 1 << STALLRQ;
       UEINTX &= ~(1 << RXSTPI);
+      UECONX |= 1 << STALLRQ;
     }
   }
   else {
-    UECONX |= 1 << STALLRQ;
     UEINTX &= ~(1 << RXSTPI);
+    UECONX |= 1 << STALLRQ;
   }
 
 @ Used to request the current device configuration. A byte will be sent during the DATA stage
