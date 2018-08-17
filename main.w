@@ -654,7 +654,7 @@ ISR(USART1_RX_vect)
         UEINTX &= ~(1 << FIFOCON);
       }
     }
-    UENUM = (U8) save_ep;
+    UENUM = save_ep;
   }
 }
 
