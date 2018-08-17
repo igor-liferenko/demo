@@ -448,6 +448,7 @@ int main(void)
       if (UCSR1A & 1 << UDRE1) {
         UENUM = EP2;
         if (UEINTX & 1 << RXOUTI) {
+          UEINTX &= ~(1 << RXOUTI);
           rx_counter = UEBCLX | UEBCHX << 8;
           if (rx_counter == 0) PORTD |= 1 << PD5; /* this cannot happen */
           while (rx_counter) {
@@ -455,7 +456,7 @@ int main(void)
             UDR1 = UEDATX;
             rx_counter--;
             if (rx_counter == 0)
-              UEINTX &= ~(1 << RXOUTI), UEINTX &= ~(1 << FIFOCON);
+              UEINTX &= ~(1 << FIFOCON);
           }
         }
       }
@@ -546,15 +547,10 @@ void uart_usb_send_buffer(U8 *buffer, U8 nb_data);
 @ @c
 void uart_usb_send_buffer(U8 *buffer, U8 nb_data)
 {
-  U8 zlp;
+  U8 empty_packet = 0;
 
-  if (nb_data % 0x20) {
-    zlp = 0;
-  }
-  else {
-    zlp = 1;
-  }
-
+  if (nb_data % EP0_SIZE == 0)
+    empty_packet = 1; /* indicate to the host that no more data will follow (USB\S5.8.3) */
   UENUM = EP1;
   while (nb_data) {
     while (!(UEINTX & 1 << RWAL)) ;
@@ -565,7 +561,7 @@ void uart_usb_send_buffer(U8 *buffer, U8 nb_data)
     }
     UEINTX &= ~(1 << TXINI), UEINTX &= ~(1 << FIFOCON);
   }
-  if (zlp) {
+  if (empty_packet) {
     while (!(UEINTX & 1 << RWAL)) ;
     UEINTX &= ~(1 << TXINI), UEINTX &= ~(1 << FIFOCON);
   }
@@ -800,8 +796,7 @@ pbuffer = &conf_desc;
     if (data_to_transfer > wLength)
       data_to_transfer = (U8) wLength; /* never send more than requested */
     if (data_to_transfer < wLength && data_to_transfer % EP0_SIZE == 0)
-      empty_packet = 1; /* indicate to the host that no more data will
-                           follow (\S5.5.3 in USB spec) */
+      empty_packet = 1; /* indicate to the host that no more data will follow (USB\S5.5.3) */
     UEINTX &= ~(1 << NAKOUTI);
     while (data_to_transfer != 0 && !(UEINTX & 1 << NAKOUTI)) {
       while (!(UEINTX & 1 << TXINI)) {
@@ -1171,6 +1166,7 @@ if (serial_state_saved.all != serial_state.all) {
   serial_state_saved.all = serial_state.all;
   UENUM = EP3;
   while (!(UEINTX & 1 << TXINI)) ; /* wait until previous packet is sent */
+  UEINTX &= ~(1 << TXINI);
   UEDATX = 0xA1;
   UEDATX = 0x20;
   UEDATX = 0x00; @+ UEDATX = 0x00;
@@ -1178,7 +1174,7 @@ if (serial_state_saved.all != serial_state.all) {
   UEDATX = 0x02; @+ UEDATX = 0x00;
   UEDATX = ((U8 *) &serial_state.all)[0];
   UEDATX = ((U8 *) &serial_state.all)[1];
-  UEINTX &= ~(1 << TXINI), UEINTX &= ~(1 << FIFOCON);
+  UEINTX &= ~(1 << FIFOCON);
 }
 
 @ In application we set baud only once, before setting |DTR|;
