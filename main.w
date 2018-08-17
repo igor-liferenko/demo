@@ -674,7 +674,7 @@ ISR(USART1_RX_vect)
         rs2usb[i] = UDR1;
         i++;
       }
-    } while (!(UEINTX & 1 << RWAL)); // ???
+    } while (!(UEINTX & 1 << RWAL)); // while write not allowed
     uart_usb_send_buffer((U8 *) &rs2usb, i);
     UENUM = (U8) save_ep;
   }
@@ -957,7 +957,8 @@ Only endpoints other than the default endpoint are recommended to have this func
     }
     UENUM = (U8) wIndex;
     if (UECONX & 1 << EPEN) {
-      UECONX |= 1 << STALLRQ;
+      UECONX |= 1 << STALLRQ; /* TODO: determine if it is a ``functional stall'' or
+        ``commanded stall'' and compare this code with USB\S8.4 or USB\S9 respectively */
       UENUM = EP0;
       endpoint_status[wIndex] = 0x01;
       UEINTX &= ~(1 << RXSTPI);
