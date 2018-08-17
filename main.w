@@ -1,9 +1,10 @@
+%incompatible changes started in commit 0abb132676c5c072b87414e01b306804df913c8b
 \let\lheader\rheader
 %\datethis
 \secpagedepth=2 % begin new page only on *
 \font\caps=cmcsc10 at 9pt
 
-@* Program. This is cleaned-up Atmel's demo. All functionality of original is preserved.
+@* Program. This is cleaned-up Atmel's demo.
 
 @c
 @<Header files@>@;
