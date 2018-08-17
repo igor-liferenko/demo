@@ -31,20 +31,20 @@ TODO: find what prefixes mean in names of variables (i.e., `b', `bcd', ...)
 
 @<Global variables@>=
 struct {
-  uint8_t      bLength;
-  uint8_t      bDescriptorType;
-  uint16_t     bcdUSB; /* version */
-  uint8_t      bDeviceClass; /* class code assigned by the USB */
-  uint8_t      bDeviceSubClass; /* sub-class code assigned by the USB */
-  uint8_t      bDeviceProtocol; /* protocol code assigned by the USB */
-  uint8_t      bMaxPacketSize0; /* max packet size for EP0 */
-  uint16_t     idVendor;
-  uint16_t     idProduct;
-  uint16_t     bcdDevice; /* device release number */
-  uint8_t      iManufacturer; /* index of manu. string descriptor */
-  uint8_t      iProduct; /* index of prod. string descriptor */
-  uint8_t      iSerialNumber; /* index of S.N. string descriptor */
-  uint8_t      bNumConfigurations;
+  U8 bLength;
+  U8 bDescriptorType;
+  U16 bcdUSB; /* version */
+  U8 bDeviceClass; /* class code assigned by the USB */
+  U8 bDeviceSubClass; /* sub-class code assigned by the USB */
+  U8 bDeviceProtocol; /* protocol code assigned by the USB */
+  U8 bMaxPacketSize0; /* max packet size for EP0 */
+  U16 idVendor;
+  U16 idProduct;
+  U16 bcdDevice; /* device release number */
+  U8 iManufacturer; /* index of manu. string descriptor */
+  U8 iProduct; /* index of prod. string descriptor */
+  U8 iSerialNumber; /* index of S.N. string descriptor */
+  U8 bNumConfigurations;
 } const dev_desc
 @t\hskip2.5pt@> @=PROGMEM@> = { @t\1@> @/
   18, /* size of this structure */
@@ -117,16 +117,16 @@ const S_configuration_descriptor conf_desc
 
 @ @<Configuration header descriptor@>=
 struct {
-   uint8_t      bLength;
-   uint8_t      bDescriptorType;
-   uint16_t     wTotalLength;
-   uint8_t      bNumInterfaces;
-   uint8_t      bConfigurationValue; /* number between 1 and |bNumConfigurations|, for
+   U8 bLength;
+   U8 bDescriptorType;
+   U16 wTotalLength;
+   U8 bNumInterfaces;
+   U8 bConfigurationValue; /* number between 1 and |bNumConfigurations|, for
      each configuration\footnote\dag{For some reason
      configurations start numbering with `1', and interfaces and altsettings with `0'.} */
-   uint8_t      iConfiguration; /* index of string descriptor */
-   uint8_t      bmAttibutes;
-   uint8_t      MaxPower;
+   U8 iConfiguration; /* index of string descriptor */
+   U8 bmAttibutes;
+   U8 MaxPower;
 }
 
 @ @<Initialize element 1 in configuration descriptor@>= { @t\1@> @/
@@ -146,16 +146,16 @@ struct {
 
 @<Type definitions ...@>=
 typedef struct {
-   uint8_t      bLength;
-   uint8_t      bDescriptorType;
-   uint8_t      bInterfaceNumber; /* number between 0 and |bNumInterfaces-1|, for
+   U8 bLength;
+   U8 bDescriptorType;
+   U8 bInterfaceNumber; /* number between 0 and |bNumInterfaces-1|, for
                                      each interface */
-   uint8_t      bAlternativeSetting; /* number starting from 0, for each interface */
-   uint8_t      bNumEndpoints; /* number of EP except EP 0 */
-   uint8_t      bInterfaceClass; /* class code assigned by the USB */
-   uint8_t      bInterfaceSubClass; /* sub-class code assigned by the USB */
-   uint8_t      bInterfaceProtocol; /* protocol code assigned by the USB */
-   uint8_t      iInterface; /* index of string descriptor */
+   U8 bAlternativeSetting; /* number starting from 0, for each interface */
+   U8 bNumEndpoints; /* number of EP except EP 0 */
+   U8 bInterfaceClass; /* class code assigned by the USB */
+   U8 bInterfaceSubClass; /* sub-class code assigned by the USB */
+   U8 bInterfaceProtocol; /* protocol code assigned by the USB */
+   U8 iInterface; /* index of string descriptor */
 }  S_interface_descriptor;
 
 @ @<Initialize element 2 in configuration descriptor@>= { @t\1@> @/
@@ -188,12 +188,12 @@ typedef struct {
 
 @<Type definitions ...@>=
 typedef struct {
-  uint8_t bLength;
-  uint8_t bDescriptorType;
-  uint8_t bEndpointAddress;
-  uint8_t bmAttributes;
-  uint16_t wMaxPacketSize;
-  uint8_t bInterval; /* interval for polling EP by host to determine if data is available (ms-1) */
+  U8 bLength;
+  U8 bDescriptorType;
+  U8 bEndpointAddress;
+  U8 bmAttributes;
+  U16 wMaxPacketSize;
+  U8 bInterval; /* interval for polling EP by host to determine if data is available (ms-1) */
 } S_endpoint_descriptor;
 
 @ @d IN (1 << 7)
@@ -252,10 +252,10 @@ interface and its descriptors comply.
 
 @<Class-specific interface descriptor 1@>=
 struct {
-  uint8_t bFunctionLength;
-  uint8_t bDescriptorType;
-  uint8_t bDescriptorSubtype;
-  uint16_t bcdCDC;
+  U8 bFunctionLength;
+  U8 bDescriptorType;
+  U8 bDescriptorSubtype;
+  U16 bcdCDC;
 }
 
 @ @<Initialize element 3 in configuration descriptor@>= { @t\1@> @/
@@ -277,11 +277,11 @@ the processing of calls for the Communication Class interface.
 
 @<Class-specific interface descriptor 2@>=
 struct {
-  uint8_t bFunctionLength;
-  uint8_t bDescriptorType;
-  uint8_t bDescriptorSubtype;
-  uint8_t bmCapabilities;
-  uint8_t bDataInterface;
+  U8 bFunctionLength;
+  U8 bDescriptorType;
+  U8 bDescriptorSubtype;
+  U8 bmCapabilities;
+  U8 bDataInterface;
 }
 
 @ |bmCapabilities|:
@@ -316,10 +316,10 @@ SubClass code of Abstract Control Model.
 
 @<Class-specific interface descriptor 3@>=
 struct {
-  uint8_t bFunctionLength;
-  uint8_t bDescriptorType;
-  uint8_t bDescriptorSubtype;
-  uint8_t bmCapabilities;
+  U8 bFunctionLength;
+  U8 bDescriptorType;
+  U8 bDescriptorSubtype;
+  U8 bmCapabilities;
 }
 
 @ |bmCapabilities|: Only first four bits are used.
@@ -356,11 +356,11 @@ interface but apply to the entire group of interfaces.
 
 @<Class-specific interface descriptor 4@>=
 struct {
-  uint8_t bFunctionLength;
-  uint8_t bDescriptorType;
-  uint8_t bDescriptorSubtype;
-  uint8_t bMasterInterface;
-  uint8_t bSlaveInterface[SLAVE_INTERFACE_NUM];
+  U8 bFunctionLength;
+  U8 bDescriptorType;
+  U8 bDescriptorSubtype;
+  U8 bMasterInterface;
+  U8 bSlaveInterface[SLAVE_INTERFACE_NUM];
 }
 
 @ @d SLAVE_INTERFACE_NUM 1
@@ -668,7 +668,7 @@ U8 configuration_number;
 UEINTX &= ~(1 << RXOUTI); /* TODO: ??? - check if it is non-zero here */
 U16 wLength;
 U8 nb_byte;
-uint8_t empty_packet;
+U8 empty_packet;
 switch (UEDATX | UEDATX << 8) {
 case 0x0080: @/
   @<Handle {\caps get status device}@>@;
