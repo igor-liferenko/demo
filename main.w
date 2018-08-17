@@ -407,10 +407,11 @@ int main(void)
   sei();
   DDRD |= 1 << PD5;
   DDRB |= 1 << PB0;
+#if 0
   DDRF &= ~(1 << PF4), PORTF |= 1 << PF4; /* input */
   DDRF &= ~(1 << PF5), PORTF |= 1 << PF5; /* input */
-  DDRF &= ~(1 << PF6), PORTF |= 1 << PF6; /* input */
   DDRD |= 1 << PD7; /* ground */
+#endif
 
   while (1) {
     if (!usb_connected) {
@@ -462,7 +463,7 @@ int main(void)
           serial_state.bDCD = 1;
         else
           serial_state.bDCD = 0;
-        if (!(PINF & 1 << PF6))
+        if (!(PINF & 1 << PF5))
           serial_state.bDSR = 1;
         else
           serial_state.bDSR = 0;
