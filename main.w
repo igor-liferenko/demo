@@ -661,12 +661,11 @@ ISR(USART1_RX_vect)
 @ The following big switch just dispatches SETUP request.
 
 @<Process SETUP request@>=
-U8 addr;
 U16 wValue;
-U8 wIndex;
+U16 wIndex;
+U16 wLength;
 U8 configuration_number;
 UEINTX &= ~(1 << RXOUTI); /* TODO: ??? - check if it is non-zero here */
-U16 wLength;
 U8 nb_byte;
 U8 empty_packet;
 switch (UEDATX | UEDATX << 8) {
@@ -805,8 +804,8 @@ pbuffer = &conf_desc;
     UEINTX &= ~(1 << RXOUTI);
 
 @ @<Handle {\caps set address}@>=
-  addr = UEDATX;
-  UDADDR = (UDADDR & 1 << ADDEN) | ((U8) addr & 0x7F);
+  wValue = UEDATX | UEDATX << 8;
+  UDADDR = (UDADDR & 1 << ADDEN) | (wValue & 0x7F);
   UEINTX &= ~(1 << RXSTPI);
   UEINTX &= ~(1 << TXINI);
   while (!(UEINTX & 1 << TXINI)) ; /* wait until ZLP, prepared by previous command, is
@@ -882,12 +881,10 @@ host up during suspend. The remote wakeup bit can be by the {\caps set feature} 
 Only first bit of the first byte is used.
 
 @<Handle {\caps get status endpoint}@>=
-  (void) UEDATX;
-  (void) UEDATX;
-  wIndex = UEDATX;
+  (void) UEDATX; @+ (void) UEDATX;
+  wIndex = UEDATX | UEDATX << 8;
   UEINTX &= ~(1 << RXSTPI);
-  wIndex = wIndex & 0x7F;
-  UEDATX = (U8) endpoint_status[wIndex];
+  UEDATX = (U8) endpoint_status[wIndex & 0x7F];
   UEDATX = 0x00;
   UEINTX &= ~(1 << TXINI);
   while (!(UEINTX & 1 << RXOUTI)) ;
@@ -929,8 +926,8 @@ Only endpoints other than the default endpoint are recommended to have this func
 
 @<Handle {\caps set feature endpoint}@>=
   wValue = UEDATX | UEDATX << 8;
-  if (wValue == 0x00) {
-    wIndex = UEDATX & 0x7F;
+  if (wValue == 0) {
+    wIndex = UEDATX | UEDATX << 8;
     if (wIndex == 0) {
       UEINTX &= ~(1 << RXSTPI);
       UECONX |= 1 << STALLRQ;
@@ -940,7 +937,7 @@ Only endpoints other than the default endpoint are recommended to have this func
       UECONX |= 1 << STALLRQ; /* TODO: determine if it is a ``functional stall'' or
         ``commanded stall'' and compare this code with USB\S8.4 or USB\S9 respectively */
       UENUM = EP0;
-      endpoint_status[wIndex] = 0x01;
+      endpoint_status[wIndex & 0x7F] = 0x01;
       UEINTX &= ~(1 << RXSTPI);
       UEINTX &= ~(1 << TXINI); /* STATUS stage */
     }
@@ -957,8 +954,8 @@ Only endpoints other than the default endpoint are recommended to have this func
 
 @ @<Handle {\caps clear feature endpoint}@>=
   wValue = UEDATX | UEDATX << 8;
-  if (wValue == 0x00) {
-    wIndex = UEDATX & 0x7F;
+  if (wValue == 0) {
+    wIndex = UEDATX | UEDATX << 8;
     UENUM = (U8) wIndex;
     if (UECONX & 1 << EPEN) {
       if (wIndex != 0) {
@@ -967,7 +964,7 @@ Only endpoints other than the default endpoint are recommended to have this func
         UECONX |= 1 << RSTDT;
       }
       UENUM = EP0;
-      endpoint_status[wIndex] = 0x00;
+      endpoint_status[wIndex & 0x7F] = 0x00;
       UEINTX &= ~(1 << RXSTPI);
       UEINTX &= ~(1 << TXINI); /* STATUS stage */
     }
