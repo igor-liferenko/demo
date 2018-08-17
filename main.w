@@ -599,12 +599,9 @@ ISR(USB_GEN_vect)
   if (UDINT & 1 << EORSTI && UDIEN & 1 << EORSTE) {
     UDINT = ~(1 << EORSTI);
     UENUM = EP0;
-    if (!(UECONX & 1 << EPEN)) {
-      UENUM = EP0;
       UECONX |= 1 << EPEN;
       UECFG1X = 1 << EPSIZE1;
       UECFG1X |= 1 << ALLOC;
-    }
     g_usb_event |= 1 << EVT_USB_RESET;
   }
 }
