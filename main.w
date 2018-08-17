@@ -754,6 +754,9 @@ It is OK if we transfer less than the requested amount. But if we try to
 transfer more, host does not send OUT packet to initiate STATUS stage.
 
 @<Handle {\caps get descriptor device}\null@>=
+(void) UEDATX; @+ (void) UEDATX;
+wLength = UEDATX | UEDATX << 8;
+UEINTX &= ~(1 << RXSTPI);
 data_to_transfer = sizeof dev_desc;
 pbuffer = &dev_desc;
 @<Send descriptor@>@;
@@ -761,21 +764,20 @@ pbuffer = &dev_desc;
 @ First request is 9 bytes, second is according to length given in response to first request.
 
 @<Handle {\caps get descriptor configuration}@>=
+(void) UEDATX; @+ (void) UEDATX;
+wLength = UEDATX | UEDATX << 8;
+UEINTX &= ~(1 << RXSTPI);
 data_to_transfer = sizeof conf_desc;
 pbuffer = &conf_desc;
 @<Send descriptor@>@;
 
 @ @<Send descriptor@>=
-    (void) UEDATX;
-    (void) UEDATX;
-    wLength = UEDATX | UEDATX << 8;
-    UEINTX &= ~(1 << RXSTPI);
     empty_packet = 0;
-    if (data_to_transfer > wLength)
-      data_to_transfer = wLength; /* never send more than requested */
     if (data_to_transfer < wLength && data_to_transfer % EP0_SIZE == 0)
       empty_packet = 1; /* indicate to the host that no more data will follow (USB\S5.5.3) */
-    UEINTX &= ~(1 << NAKOUTI);
+    if (data_to_transfer > wLength)
+      data_to_transfer = wLength; /* never send more than requested */
+    UEINTX &= ~(1 << NAKOUTI); /* TODO: ??? - check if it is non-zero here */
     while (data_to_transfer != 0 && !(UEINTX & 1 << NAKOUTI)) {
       while (!(UEINTX & 1 << TXINI)) {
         if (UEINTX & 1 << NAKOUTI)
