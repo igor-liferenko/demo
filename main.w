@@ -886,7 +886,7 @@ Only first bit of the first byte is used.
   (void) UEDATX; @+ (void) UEDATX;
   wIndex = UEDATX | UEDATX << 8;
   UEINTX &= ~(1 << RXSTPI);
-  UEDATX = (U8) endpoint_status[wIndex & 0x7F];
+  UEDATX = endpoint_status[wIndex & 0x7F];
   UEDATX = 0x00;
   UEINTX &= ~(1 << TXINI);
   while (!(UEINTX & 1 << RXOUTI)) ;
@@ -939,8 +939,8 @@ Only endpoints other than the default endpoint are recommended to have this func
       UECONX |= 1 << STALLRQ; /* TODO: determine if it is a ``functional stall'' or
         ``commanded stall'' and compare this code with USB\S8.4 or USB\S9 respectively
         and see datasheet\S22.11 */
-      UENUM = EP0;
       endpoint_status[wIndex & 0x7F] = 0x01;
+      UENUM = EP0;
       UEINTX &= ~(1 << RXSTPI);
       UEINTX &= ~(1 << TXINI); /* STATUS stage */
     }
@@ -968,8 +968,8 @@ Only endpoints other than the default endpoint are recommended to have this func
         UERST = 1 << (U8) wIndex, UERST = 0;
         UECONX |= 1 << RSTDT;
       }
-      UENUM = EP0;
       endpoint_status[wIndex & 0x7F] = 0x00;
+      UENUM = EP0;
       UEINTX &= ~(1 << RXSTPI);
       UEINTX &= ~(1 << TXINI); /* STATUS stage */
     }
