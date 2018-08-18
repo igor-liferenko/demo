@@ -664,7 +664,6 @@ ISR(USART1_RX_vect)
 U16 wValue;
 U16 wIndex;
 U16 wLength;
-U8 configuration_number;
 UEINTX &= ~(1 << RXOUTI); /* TODO: ??? - check if it is non-zero here */
 U8 nb_byte;
 U8 empty_packet;
@@ -822,9 +821,10 @@ pbuffer = &conf_desc;
   UDADDR |= 1 << ADDEN;
 
 @ @<Handle {\caps set configuration}@>=
-  configuration_number = UEDATX;
+  wValue = UEDATX | UEDATX << 8;
+  UEINTX &= ~(1 << RXSTPI);
+  configuration_number = (U8) wValue;
   if (configuration_number <= 1) {
-    UEINTX &= ~(1 << RXSTPI);
     usb_configuration_nb = configuration_number;
     UEINTX &= ~(1 << TXINI); /* STATUS stage */
 
@@ -850,10 +850,8 @@ pbuffer = &conf_desc;
     UERST = 1 << EP1, UERST = 0;
     UERST = 1 << EP2, UERST = 0;
   }
-  else {
-    UEINTX &= ~(1 << RXSTPI);
+  else
     UECONX |= 1 << STALLRQ; /* return STALL in response to IN token of STATUS stage */
-  }
 
 @ This will send two bytes during the DATA stage. Only first two bits of the first byte are used.
 If first bit is set, then this indicates the device is self powered. If clear, the device
