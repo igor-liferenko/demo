@@ -1055,9 +1055,10 @@ TODO: manage here hardware flow control
 @^TODO@>
 
 @<Handle {\caps set control line state}@>=
-line_status.all = UEDATX | UEDATX << 8;
+wValue = UEDATX | UEDATX << 8;
 UEINTX &= ~(1 << RXSTPI);
 UEINTX &= ~(1 << TXINI); /* STATUS stage */
+line_status.all = wValue;
 
 @ @<Type \null definitions@>=
 typedef struct {
