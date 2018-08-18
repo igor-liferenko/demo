@@ -807,7 +807,7 @@ pbuffer = &conf_desc;
 
 @ @<Handle {\caps set address}@>=
   wValue = UEDATX | UEDATX << 8;
-  UDADDR = (UDADDR & 1 << ADDEN) | (wValue & 0x7F);
+  UDADDR = wValue & 0x7F;
   UEINTX &= ~(1 << RXSTPI);
   UEINTX &= ~(1 << TXINI);
   while (!(UEINTX & 1 << TXINI)) ; /* wait until ZLP, prepared by previous command, is
