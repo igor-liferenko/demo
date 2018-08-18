@@ -642,7 +642,7 @@ ISR(USART1_RX_vect)
         while (!(UEINTX & 1 << TXINI)) ;
         UEINTX &= ~(1 << TXINI);
         while (UEINTX & 1 << RWAL && i) {
-          UEDATX = (U8) *buffer;
+          UEDATX = *buffer;
           buffer++;
           i--;
         }
