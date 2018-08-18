@@ -865,8 +865,8 @@ host up during suspend. The remote wakeup bit can be by the {\caps set feature} 
   UEINTX &= ~(1 << RXSTPI);
   UEDATX = 0x01;
   UEDATX = 0x00;
-  UEINTX &= ~(1 << TXINI);
-  while (!(UEINTX & 1 << RXOUTI)) ;
+  UEINTX &= ~(1 << TXINI); /* DATA stage */
+  while (!(UEINTX & 1 << RXOUTI)) ; /* wait for STATUS stage */
   UEINTX &= ~(1 << RXOUTI);
 
 @ Sends two bytes of |0x00|, |0x00|. (Both bytes are reserved for future use.)
@@ -875,8 +875,8 @@ host up during suspend. The remote wakeup bit can be by the {\caps set feature} 
   UEINTX &= ~(1 << RXSTPI);
   UEDATX = 0x00;
   UEDATX = 0x00;
-  UEINTX &= ~(1 << TXINI);
-  while (!(UEINTX & 1 << RXOUTI)) ;
+  UEINTX &= ~(1 << TXINI); /* DATA stage */
+  while (!(UEINTX & 1 << RXOUTI)) ; /* wait for STATUS stage */
   UEINTX &= ~(1 << RXOUTI);
 
 @ Sends two bytes indicating the status (Halted/Stalled) of an endpoint.
@@ -888,16 +888,17 @@ Only first bit of the first byte is used.
   UEINTX &= ~(1 << RXSTPI);
   UEDATX = endpoint_status[wIndex & 0x7F];
   UEDATX = 0x00;
-  UEINTX &= ~(1 << TXINI);
-  while (!(UEINTX & 1 << RXOUTI)) ;
+  UEINTX &= ~(1 << TXINI); /* DATA stage */
+  while (!(UEINTX & 1 << RXOUTI)) ; /* wait for STATUS stage */
   UEINTX &= ~(1 << RXOUTI);
 
 @ This gets the Alternative Interface setting.
 
 @<Handle {\caps get interface}@>=
   UEINTX &= ~(1 << RXSTPI);
-  UEINTX &= ~(1 << TXINI);
-  while (!(UEINTX & 1 << RXOUTI)) ;
+  UEDATX = 0x00;
+  UEINTX &= ~(1 << TXINI); /* DATA stage */
+  while (!(UEINTX & 1 << RXOUTI)) ; /* wait for STATUS stage */
   UEINTX &= ~(1 << RXOUTI);
 
 @ Used to set boolean features. The only two feature selectors available are
