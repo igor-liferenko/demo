@@ -991,7 +991,7 @@ value indicates the device is configured.
 
 @<Handle {\caps get configuration}@>=
   UEINTX &= ~(1 << RXSTPI);
-  UEDATX = (U8) usb_configuration_nb;
+  UEDATX = usb_configuration_nb;
   UEINTX &= ~(1 << TXINI); /* DATA stage */
   while (!(UEINTX & 1 << RXOUTI)) ; /* wait for STATUS stage */
   UEINTX &= ~(1 << RXOUTI);
