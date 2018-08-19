@@ -1,6 +1,3 @@
-In wireshark start sniffing before device is connected, otherwise wireshark
-will not recognize set control line state and set line coding requests.
-
 http://linux-usb.vger.kernel.narkive.com/Z1nMowmQ/cdc-acm-driver-can-t-communicate-with-windows-ce-satellite-phone-could-be-an-ms-active-sync-issue (manually specify "http://" in browser, because by CTRL+click it does not open)
 https://www.mail-archive.com/search?l=wireshark-bugs@wireshark.org&q=subject:%22%5C%5BWireshark%5C-bugs%5C%5D+%5C%5BBug+14587%5C%5D+Incorrect+parsing+of+USB+CDC+packets.%22&o=newest&f=1
 https://bugs.wireshark.org/bugzilla/show_bug.cgi?id=14587
