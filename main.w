@@ -664,7 +664,6 @@ ISR(USART1_RX_vect)
 U16 wValue;
 U16 wIndex;
 U16 wLength;
-U8 configuration_number;
 UEINTX &= ~(1 << RXOUTI); /* TODO: ??? - check if it is non-zero here */
 U8 nb_byte;
 U8 empty_packet;
@@ -822,10 +821,12 @@ pbuffer = &conf_desc;
   UDADDR |= 1 << ADDEN;
 
 @ @<Handle {\caps set configuration}@>=
-  configuration_number = UEDATX; @+ (void) UEDATX;
+  wValue = UEDATX | UEDATX << 8;
   UEINTX &= ~(1 << RXSTPI);
-  if (configuration_number <= 1) {
-    usb_configuration_nb = configuration_number;
+  if (wValue <= 1) { /* FIXME: this is nonsense, because host cannot send configuration
+      which was not specified in |S_configuration_descriptor|, and because host cannot
+      set configuration with zero value (?) */
+    usb_configuration_nb = wValue & 0xFF;
     UEINTX &= ~(1 << TXINI); /* STATUS stage */
 
     UENUM = EP3;
