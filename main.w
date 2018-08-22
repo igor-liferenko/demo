@@ -665,8 +665,6 @@ U16 wValue;
 U16 wIndex;
 U16 wLength;
 UEINTX &= ~(1 << RXOUTI); /* TODO: ??? - check if it is non-zero here */
-U8 nb_byte;
-U8 empty_packet;
 switch (UEDATX | UEDATX << 8) {
 case 0x0080: @/
   @<Handle {\caps get status device}@>@;
@@ -746,6 +744,7 @@ default: /* in code derived from this example remove this and all unused "Handle
 @ @<Global variables@>=
 U16 data_to_transfer;
 const void *pbuffer;
+U8 empty_packet;
 
 @ When host is booting, BIOS asks 8 bytes in first request of device descriptor (8 bytes is
 sufficient for first request of device descriptor). OS asks
@@ -777,13 +776,9 @@ pbuffer = &conf_desc;
       empty_packet = 1; /* indicate to the host that no more data will follow (USB\S5.5.3) */
     if (data_to_transfer > wLength)
       data_to_transfer = wLength; /* never send more than requested */
-    UEINTX &= ~(1 << NAKOUTI); /* TODO: ??? - check if it is non-zero here */
-    while (data_to_transfer != 0 && !(UEINTX & 1 << NAKOUTI)) {
-      while (!(UEINTX & 1 << TXINI)) {
-        if (UEINTX & 1 << NAKOUTI)
-          break;
-      }
-      nb_byte = 0;
+    while (data_to_transfer != 0) {
+      while (!(UEINTX & 1 << TXINI)) ;
+      U8 nb_byte = 0;
       while (data_to_transfer != 0) {
         if (nb_byte++ == EP0_SIZE) {
           break;
@@ -791,17 +786,13 @@ pbuffer = &conf_desc;
         UEDATX = (U8) pgm_read_byte_near((unsigned int) pbuffer++);
         data_to_transfer--;
       }
-      if (UEINTX & 1 << NAKOUTI)
-        break;
-      else
-        UEINTX &= ~(1 << TXINI);
+      UEINTX &= ~(1 << TXINI);
     }
-    if (empty_packet && !(UEINTX & 1 << NAKOUTI)) {
+    if (empty_packet) {
       while (!(UEINTX & 1 << TXINI)) ;
       UEINTX &= ~(1 << TXINI);
     }
-    while (!(UEINTX & 1 << NAKOUTI)) ;
-    UEINTX &= ~(1 << NAKOUTI);
+    while (!(UEINTX & 1 << RXOUTI)) ;
     UEINTX &= ~(1 << RXOUTI);
 
 @ @<Handle {\caps set address}@>=
