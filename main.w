@@ -741,11 +741,6 @@ default: /* in code derived from this example remove this and all unused "Handle
     DATA or SETUP stage */
 }
 
-@ @<Global variables@>=
-U16 data_to_transfer;
-const void *pbuffer;
-U8 empty_packet;
-
 @ When host is booting, BIOS asks 8 bytes in first request of device descriptor (8 bytes is
 sufficient for first request of device descriptor). OS asks
 64 bytes in first request of device descriptor.
@@ -769,6 +764,11 @@ UEINTX &= ~(1 << RXSTPI);
 data_to_transfer = sizeof conf_desc;
 pbuffer = &conf_desc;
 @<Send descriptor@>@;
+
+@ @<Global variables@>=
+U16 data_to_transfer;
+const void *pbuffer;
+U8 empty_packet;
 
 @ @<Send descriptor@>=
     empty_packet = 0;
