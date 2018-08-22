@@ -770,7 +770,14 @@ U16 data_to_transfer;
 const void *pbuffer;
 U8 empty_packet;
 
-@ @<Send descriptor@>=
+@ Transmit data and empty packet (if necessary) and wait for STATUS stage.
+
+For control endpoints, by clearing TXINI we say that when next IN token arrives,
+data must be sent. When data was sent, TXINI becomes `1'.
+After TXINI becomes `1', new data may be written to UEDATX.
+(For non-control endpoints clearing TXINI serves different purpose.)
+
+@<Send descriptor@>=
     empty_packet = 0;
     if (data_to_transfer < wLength && data_to_transfer % EP0_SIZE == 0)
       empty_packet = 1; /* indicate to the host that no more data will follow (USB\S5.5.3) */
