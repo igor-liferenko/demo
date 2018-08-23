@@ -818,8 +818,7 @@ After TXINI becomes `1', new data may be written to UEDATX.
             stage is absent).} */
   UDADDR |= 1 << ADDEN;
 
-@ For {\caps set configuration} there is no DATA stage.
-The host sends an IN token to the control pipe to initiate the STATUS stage.
+@ The host sends an IN token to the control pipe to initiate the STATUS stage.
 
 $$\hbox to12.06cm{\vbox to4.26861111111111cm{\vfil\special{%
   psfile=stall-control-write-without-data-stage.eps
