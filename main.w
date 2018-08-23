@@ -706,9 +706,8 @@ case 0x0680: @/
     break;
   default: /* in code derived from this example change this to ``Handle
               {\caps get descriptor device qualifier}'' */
+    UECONX |= 1 << STALLRQ; /* prepare to return STALL in response to next token from host */
     UEINTX &= ~(1 << RXSTPI);
-    UECONX |= 1 << STALLRQ; /* return STALL in response to IN or OUT token of
-      DATA or SETUP stage */
   }
   break;
 case 0x0880: @/
@@ -737,8 +736,7 @@ case 0x2321: @/
   break;
 default: /* in code derived from this example remove this and all unused "Handle" sections */
   UEINTX &= ~(1 << RXSTPI);
-  UECONX |= 1 << STALLRQ; /* return STALL in response to IN or OUT token of
-    DATA or SETUP stage */
+  UECONX |= 1 << STALLRQ; /* prepare to return STALL in response to next token from host */
 }
 
 @ When host is booting, BIOS asks 8 bytes in first request of device descriptor (8 bytes is
@@ -818,12 +816,24 @@ After TXINI becomes `1', new data may be written to UEDATX.
             stage is absent).} */
   UDADDR |= 1 << ADDEN;
 
-@ @<Handle {\caps set configuration}@>=
+@ For {\caps set configuration} there is no DATA stage.
+The host sends an IN token to the control pipe to initiate the STATUS stage.
+
+$$\hbox to12.06cm{\vbox to4.26861111111111cm{\vfil\special{%
+  psfile=stall-control-write-without-data-stage.eps
+  clip llx=0 lly=0 urx=342 ury=121 rwi=3420}}\hfil}$$
+
+Note, that next token comes after \.{RXSTPI} is cleared, so we set \.{STALLRQ} before
+clearing \.{RXSTPI}, to make sure that \.{STALLRQ} is already set when next token arrives.
+
+\xdef\stallinstatus{\secno}
+
+@<Handle {\caps set configuration}@>=
   wValue = UEDATX | UEDATX << 8;
-  UEINTX &= ~(1 << RXSTPI);
   if (wValue <= 1) { /* FIXME: this is nonsense, because host cannot send configuration
       which was not specified in |S_configuration_descriptor|, and because host cannot
       set configuration with zero value (?) */
+    UEINTX &= ~(1 << RXSTPI);
     usb_configuration_nb = wValue & 0xFF;
     UEINTX &= ~(1 << TXINI); /* STATUS stage */
 
@@ -849,8 +859,10 @@ After TXINI becomes `1', new data may be written to UEDATX.
     UERST = 1 << EP1, UERST = 0;
     UERST = 1 << EP2, UERST = 0;
   }
-  else
-    UECONX |= 1 << STALLRQ; /* return STALL in response to IN token of STATUS stage */
+  else {
+    UECONX |= 1 << STALLRQ; /* prepare to return STALL in response to IN token of STATUS stage */
+    UEINTX &= ~(1 << RXSTPI);
+  }
 
 @ This will send two bytes during the DATA stage. Only first two bits of the first byte are used.
 If first bit is set, then this indicates the device is self powered. If clear, the device
@@ -902,23 +914,23 @@ Only first bit of the first byte is used.
 \.{DEVICE\_REMOTE\_WAKEUP} and \.{TEST\_MODE}.
 
 @<Handle {\caps set feature device}@>=
+UECONX |= 1 << STALLRQ; /* see \S\stallinstatus\ */
 UEINTX &= ~(1 << RXSTPI);
-UECONX |= 1 << STALLRQ; /* return STALL in response to IN token of STATUS stage */
 
 @ @<Handle {\caps clear feature device}@>=
+UECONX |= 1 << STALLRQ; /* see \S\stallinstatus\ */
 UEINTX &= ~(1 << RXSTPI);
-UECONX |= 1 << STALLRQ; /* return STALL in response to IN token of STATUS stage */
 
 @ Used to set boolean features. The current USB Specification Revision 2 specifies no
 interface features.
 
 @<Handle {\caps set feature interface}@>=
+UECONX |= 1 << STALLRQ; /* see \S\stallinstatus\ */
 UEINTX &= ~(1 << RXSTPI);
-UECONX |= 1 << STALLRQ; /* return STALL in response to IN token of STATUS stage */
 
 @ @<Handle {\caps clear feature interface}@>=
+UECONX |= 1 << STALLRQ; /* see \S\stallinstatus\ */
 UEINTX &= ~(1 << RXSTPI);
-UECONX |= 1 << STALLRQ; /* return STALL in response to IN token of STATUS stage */
 
 @ Used to set endpoint features. The standard currently defines one endpoint feature
 selector |0x00|, which allows the host to stall and clear an endpoint.
@@ -929,8 +941,8 @@ Only endpoints other than the default endpoint are recommended to have this func
   if (wValue == 0) {
     wIndex = UEDATX | UEDATX << 8;
     if (wIndex == 0) {
+      UECONX |= 1 << STALLRQ; /* see \S\stallinstatus\ */
       UEINTX &= ~(1 << RXSTPI);
-      UECONX |= 1 << STALLRQ; /* return STALL in response to IN token of STATUS stage */
     }
     UENUM = (U8) wIndex;
     if (UECONX & 1 << EPEN) {
@@ -944,13 +956,13 @@ Only endpoints other than the default endpoint are recommended to have this func
     }
     else {
       UENUM = EP0;
+      UECONX |= 1 << STALLRQ; /* see \S\stallinstatus\ */
       UEINTX &= ~(1 << RXSTPI);
-      UECONX |= 1 << STALLRQ; /* return STALL in response to IN token of STATUS stage */
     }
   }
   else {
+    UECONX |= 1 << STALLRQ; /* see \S\stallinstatus\ */
     UEINTX &= ~(1 << RXSTPI);
-    UECONX |= 1 << STALLRQ; /* return STALL in response to IN token of STATUS stage */
   }
 
 @ @<Handle {\caps clear feature endpoint}@>=
@@ -973,13 +985,13 @@ Only endpoints other than the default endpoint are recommended to have this func
     }
     else {
       UENUM = EP0;
+      UECONX |= 1 << STALLRQ; /* see \S\stallinstatus\ */
       UEINTX &= ~(1 << RXSTPI);
-      UECONX |= 1 << STALLRQ; /* return STALL in response to IN token of STATUS stage */
     }
   }
   else {
+    UECONX |= 1 << STALLRQ; /* see \S\stallinstatus\ */
     UEINTX &= ~(1 << RXSTPI);
-    UECONX |= 1 << STALLRQ; /* return STALL in response to IN token of STATUS stage */
   }
 
 @ Used to request the current device configuration. A byte will be sent during the DATA stage
