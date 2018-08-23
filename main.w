@@ -706,7 +706,8 @@ case 0x0680: @/
     break;
   default: /* in code derived from this example change this to ``Handle
               {\caps get descriptor device qualifier}'' */
-    UECONX |= 1 << STALLRQ; /* prepare to return STALL in response to next token from host */
+    UECONX |= 1 << STALLRQ; /* prepare to send STALL handshake in response to next token from
+      host */
     UEINTX &= ~(1 << RXSTPI);
   }
   break;
@@ -736,7 +737,7 @@ case 0x2321: @/
   break;
 default: /* in code derived from this example remove this and all unused "Handle" sections */
   UEINTX &= ~(1 << RXSTPI);
-  UECONX |= 1 << STALLRQ; /* prepare to return STALL in response to next token from host */
+  UECONX |= 1 << STALLRQ; /* prepare to send STALL handshake in response to next token from host */
 }
 
 @ When host is booting, BIOS asks 8 bytes in first request of device descriptor (8 bytes is
@@ -826,6 +827,11 @@ $$\hbox to12.06cm{\vbox to4.26861111111111cm{\vfil\special{%
 Note, that next token comes after \.{RXSTPI} is cleared, so we set \.{STALLRQ} before
 clearing \.{RXSTPI}, to make sure that \.{STALLRQ} is already set when next token arrives.
 
+This STALL condition is automatically cleared on the receipt of the
+next SETUP token.
+
+USB\S8.5.3.4, datasheet\S22.11.
+
 \xdef\stallinstatus{\secno}
 
 @<Handle {\caps set configuration}@>=
@@ -860,7 +866,8 @@ clearing \.{RXSTPI}, to make sure that \.{STALLRQ} is already set when next toke
     UERST = 1 << EP2, UERST = 0;
   }
   else {
-    UECONX |= 1 << STALLRQ; /* prepare to return STALL in response to IN token of STATUS stage */
+    UECONX |= 1 << STALLRQ; /* prepare to send STALL handshake in response to IN token of STATUS
+      stage */
     UEINTX &= ~(1 << RXSTPI);
   }
 
