@@ -736,9 +736,9 @@ case 0x2321: @/
   @<Handle {\caps send break}@>@;
   break;
 default: /* in code derived from this example remove this and all unused "Handle" sections */
-  UEINTX &= ~(1 << RXSTPI);
   UECONX |= 1 << STALLRQ; /* prepare to send STALL handshake in response to next token from host
     (USB\S8.5.3.4) */
+  UEINTX &= ~(1 << RXSTPI);
 }
 
 @ When host is booting, BIOS asks 8 bytes in first request of device descriptor (8 bytes is
