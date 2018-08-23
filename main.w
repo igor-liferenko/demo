@@ -848,23 +848,25 @@ USB\S8.5.3.4, datasheet\S22.11.
 
     UENUM = EP3;
     UECONX |= 1 << EPEN;
-    UECFG0X = 1 << EPTYPE1 | 1 << EPTYPE0 | 1 << EPDIR;       /* interrupt, IN */
-    UECFG1X = 1 << EPSIZE1;   /* 32 bytes */
+    UECFG0X = 1 << EPTYPE1 | 1 << EPTYPE0 | 1 << EPDIR; /* interrupt\footnote\dag{FIXME:
+      must correspond to where?}, IN */
+    UECFG1X = 1 << EPSIZE1; /* 32 bytes\footnote\dag{FIXME: must correspond to where?} */
     UECFG1X |= 1 << ALLOC;
 
     UENUM = EP1;
     UECONX |= 1 << EPEN;
-    UECFG0X = 1 << EPTYPE1 | 1 << EPDIR;      /* bulk, IN */
-    UECFG1X = 1 << EPSIZE1;   /* 32 bytes */
+    UECFG0X = 1 << EPTYPE1 | 1 << EPDIR; /* bulk\footnote\dag{FIXME: must correspond to where?},
+      IN */
+    UECFG1X = 1 << EPSIZE1; /* 32 bytes\footnote\dag{FIXME: must correspond to where?} */
     UECFG1X |= 1 << ALLOC;
 
     UENUM = EP2;
     UECONX |= 1 << EPEN;
-    UECFG0X = 1 << EPTYPE1;   /* bulk, OUT */
-    UECFG1X = 1 << EPSIZE1;   /* 32 bytes */
+    UECFG0X = 1 << EPTYPE1; /* bulk\footnote\dag{FIXME: must correspond to where?}, OUT */
+    UECFG1X = 1 << EPSIZE1; /* 32 bytes\footnote\dag{FIXME: must correspond to where?} */
     UECFG1X |= 1 << ALLOC;
 
-    UERST = 1 << EP3, UERST = 0;
+    UERST = 1 << EP3, UERST = 0; /* FIXME: is it necessary? */
     UERST = 1 << EP1, UERST = 0;
     UERST = 1 << EP2, UERST = 0;
   }
