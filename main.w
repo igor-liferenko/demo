@@ -828,7 +828,7 @@ Note, that next token comes after \.{RXSTPI} is cleared, so we set \.{STALLRQ} b
 clearing \.{RXSTPI}, to make sure that \.{STALLRQ} is already set when next token arrives.
 
 Also note, that such STALL (which is called ``protocol stall'') does not indicate an error with
-the device, it serves as a means of extending USB requests.
+the device ---~it serves as a means of extending USB requests.
 
 This STALL condition is automatically cleared on the receipt of the
 next SETUP token.
