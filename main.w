@@ -619,7 +619,7 @@ TODO: send bank if timer expired and restart timer (check timer in the same
 loop where you alternate between rx and tx as said in above TODO)
 see avr/C.c how to use timer
 
-TODO: see usb/main.w
+TODO: see usb/README.DTR
 
 @c
 ISR(USART1_RX_vect)
