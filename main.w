@@ -862,7 +862,7 @@ USB\S8.5.3.4, datasheet\S22.11.
     UECFG1X = 1 << EPSIZE1; /* 32 bytes\footnote\dag{FIXME: must correspond to where?} */
     UECFG1X |= 1 << ALLOC;
 
-    UERST = 1 << EP3, UERST = 0; /* FIXME: is it necessary? */
+    UERST = 1 << EP3, UERST = 0; /* FIXME: why is it done? */
     UERST = 1 << EP1, UERST = 0;
     UERST = 1 << EP2, UERST = 0;
 
