@@ -267,9 +267,6 @@ struct {
 
 @*3 Call management functional descriptor.
 
-FIXME: remove it?
-@^FIXME@>
-
 The Call Management functional descriptor describes
 the processing of calls for the Communication Class interface.
 
