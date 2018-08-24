@@ -869,7 +869,7 @@ USB\S8.5.3.4, datasheet\S22.11.
     UERST = 1 << EP1, UERST = 0;
     UERST = 1 << EP2, UERST = 0;
 
-    UENUM = EP0;
+    UENUM = EP0; /* restore for further setup requests */
     UEINTX &= ~(1 << TXINI); /* STATUS stage */
   }
   else {
