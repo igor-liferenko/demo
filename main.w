@@ -844,7 +844,6 @@ USB\S8.5.3.4, datasheet\S22.11.
       set configuration with zero value (?) */
     UEINTX &= ~(1 << RXSTPI);
     usb_configuration_nb = wValue & 0xFF;
-    UEINTX &= ~(1 << TXINI); /* STATUS stage */
 
     UENUM = EP3;
     UECONX |= 1 << EPEN;
@@ -869,6 +868,9 @@ USB\S8.5.3.4, datasheet\S22.11.
     UERST = 1 << EP3, UERST = 0; /* FIXME: is it necessary? */
     UERST = 1 << EP1, UERST = 0;
     UERST = 1 << EP2, UERST = 0;
+
+    UENUM = EP0;
+    UEINTX &= ~(1 << TXINI); /* STATUS stage */
   }
   else {
     UECONX |= 1 << STALLRQ; /* prepare to send STALL handshake in response to IN token of STATUS
