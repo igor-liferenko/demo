@@ -378,7 +378,14 @@ struct {
 @t\2@> } @/
 }
 
-@ @c
+@ @d EP0 0
+@d EP1 1
+@d EP2 2
+@d EP3 3
+@d EP0_SIZE 32 /* 32 bytes\footnote\dag{Must correspond to |UECFG1X| of |EP0|.}
+                    (max for atmega32u4) */
+
+@c
 @<Global variables@>@;
 U8 endpoint_status[7];
 U8 usb_configuration_nb;
@@ -389,15 +396,6 @@ U8 usb_suspended = 0;
 U8 usb_connected = 0;
 U16 rx_counter;
 
-#define EP0 0
-#define EP1 1
-#define EP2 2
-#define EP3 3
-
-@ @d EP0_SIZE 32 /* 32 bytes\footnote\dag{Must correspond to |UECFG1X| of |EP0|.}
-                    (max for atmega32u4) */
-
-@c
 int main(void)
 {
   @<Disable WDT@>@;
