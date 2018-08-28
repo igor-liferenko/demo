@@ -700,7 +700,7 @@ case 0x0500: @/
 case 0x0680: @/
   switch (UEDATX | UEDATX << 8) {
   case 0x0100: @/
-    @<Handle {\caps get descriptor device}\null@>@;
+    @<Handle {\caps get descriptor device}@>@;
     break;
   case 0x0200: @/
     @<Handle {\caps get descriptor configuration}@>@;
@@ -748,7 +748,7 @@ sufficient for first request of device descriptor). OS asks
 It is OK if we transfer less than the requested amount. But if we try to
 transfer more, host does not send OUT packet to initiate STATUS stage.
 
-@<Handle {\caps get descriptor device}\null@>=
+@<Handle {\caps get descriptor device}@>=
 (void) UEDATX; @+ (void) UEDATX;
 wLength = UEDATX | UEDATX << 8;
 UEINTX &= ~(1 << RXSTPI);
