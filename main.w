@@ -1115,7 +1115,8 @@ The device ignores the value of this bit when operating in full duplex mode.
 
 \S6.2.14 in CDC spec.
 
-TODO: manage here hardware flow control
+TODO: manage here hardware flow control (this TODO taken from original example, not
+sure what it means)
 @^TODO@>
 
 @<Handle {\caps set control line state}@>=
