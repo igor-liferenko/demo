@@ -547,7 +547,10 @@ WDTCSR |= 1 << WDCE | 1 << WDE; /* allow to disable WDT */
 WDTCSR = 0x00; /* disable WDT */
 
 @ TODO: |if (!line_status.DTR) discard byte|
-see also usb/main.w
+see also usb/README.DTR
+
+BUG: do not use |uart_usb_send_buffer| outside interrupt, because |empty_packet| is calculated
+for one situation, and bank may be filled with data behind the scenes
 
 @<Predeclarations of procedures@>=
 void uart_usb_send_buffer(U8 *buffer, U8 nb_data);
@@ -666,8 +669,6 @@ and later do via ring buffer
 TODO: send bank if timer expired and restart timer (check timer in the same
 loop where you alternate between rx and tx as said in above TODO)
 see avr/C.c how to use timer
-
-TODO: see usb/README.DTR
 
 @c
 ISR(USART1_RX_vect)
