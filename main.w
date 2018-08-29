@@ -5,6 +5,13 @@
 
 @* Program. This is cleaned-up Atmel's demo. All functionality of original is preserved.
 
+@d EP0 0
+@d EP1 1
+@d EP2 2
+@d EP3 3
+@d EP0_SIZE 32 /* 32 bytes\footnote\dag{Must correspond to |UECFG1X| of |EP0|.}
+                    (max for atmega32u4) */
+
 @c
 @<Header files@>@;
 
@@ -21,18 +28,9 @@ typedef unsigned char Bool;
 #define EVT_USB_RESET                 8
 
 @<Predeclarations of procedures@>@;
-
 @<Type \null definitions@>@;
-
-@ @d EP0 0
-@d EP1 1
-@d EP2 2
-@d EP3 3
-@d EP0_SIZE 32 /* 32 bytes\footnote\dag{Must correspond to |UECFG1X| of |EP0|.}
-                    (max for atmega32u4) */
-
-@c
 @<Global variables@>@;
+
 U8 endpoint_status[7];
 U8 usb_configuration_nb;
 volatile U8 usb_request_break_generation = 0;
