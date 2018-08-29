@@ -718,7 +718,8 @@ value indicates the device is configured.
 
 \S6.2.15 in CDC spec.
 
-TODO: manage here hardware flow control
+TODO: manage here hardware flow control (this TODO taken from original example, not
+sure what it means)
 @^TODO@>
 
 @<Handle {\caps send break}@>=
