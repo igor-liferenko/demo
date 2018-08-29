@@ -1,5 +1,3 @@
-%incompatible changes started in commit 0abb132676c5c072b87414e01b306804df913c8b
-
 % TODO: move "@* USB stack." to the bottom
 
 \let\lheader\rheader
