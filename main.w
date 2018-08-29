@@ -22,6 +22,8 @@ typedef unsigned char Bool;
 #define EVT_USB_RESUME                7
 #define EVT_USB_RESET                 8
 
+@<Predeclarations of procedures@>@;
+
 @<Type \null definitions@>@;
 
 @* USB stack.
