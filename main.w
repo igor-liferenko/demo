@@ -7,7 +7,7 @@
 \secpagedepth=2 % begin new page only on *
 \font\caps=cmcsc10 at 9pt
 
-@* Program. This is cleaned-up Atmel's demo.
+@* Program. This is cleaned-up Atmel's demo. All functionality of original is preserved.
 
 @c
 @<Header files@>@;
@@ -398,6 +398,7 @@ U8 endpoint_status[7];
 U8 usb_configuration_nb;
 volatile U8 usb_request_break_generation = 0;
 volatile U8 rs2usb[10];
+volatile U8 cpt_sof;
 volatile U16 g_usb_event = 0;
 U8 usb_suspended = 0;
 U8 usb_connected = 0;
@@ -416,11 +417,12 @@ int main(void)
   sei();
   DDRD |= 1 << PD5;
   DDRB |= 1 << PB0;
-#if 0
   DDRF &= ~(1 << PF4), PORTF |= 1 << PF4; /* input */
   DDRF &= ~(1 << PF5), PORTF |= 1 << PF5; /* input */
+  DDRF &= ~(1 << PF6), PORTF |= 1 << PF6; /* input */
   DDRD |= 1 << PD7; /* ground */
-#endif
+
+  UDIEN |= 1 << SOFE;
 
   while (1) {
     if (!usb_connected) {
@@ -467,17 +469,25 @@ int main(void)
           }
         }
       }
-#if 0
-        if (!(PINF & 1 << PF4))
+      if (cpt_sof >= 100) { /* debounce (FIXME: how is this even supposed to work?) */
+        unsigned char data;
+        if (!(PINF & 1 << PF4)) {
+          data = '*'; @+ uart_usb_send_buffer(&data, 1);
           serial_state.bDCD = 1;
+        }
         else
           serial_state.bDCD = 0;
-        if (!(PINF & 1 << PF5))
+        if (!(PINF & 1 << PF5)) {
+          data = '0'; @+ uart_usb_send_buffer(&data, 1);
+        }
+        if (!(PINF & 1 << PF6)) {
+          data = '#'; @+ uart_usb_send_buffer(&data, 1);
           serial_state.bDSR = 1;
+        }
         else
           serial_state.bDSR = 0;
         @<Notify host if |serial_state| changed@>@;
-#endif
+      }
       if (usb_request_break_generation == 1) {
         usb_request_break_generation = 0;
         PORTB ^= 1 << PB0;
@@ -538,7 +548,34 @@ MCUSR = 0x00; /* clear WDRF */
 WDTCSR |= 1 << WDCE | 1 << WDE; /* allow to disable WDT */
 WDTCSR = 0x00; /* disable WDT */
 
+@ TODO: |if (!line_status.DTR) discard byte|
+see also usb/main.w
+
+@<Predeclarations of procedures@>=
+void uart_usb_send_buffer(U8 *buffer, U8 nb_data);
 @ @c
+void uart_usb_send_buffer(U8 *buffer, U8 nb_data)
+{
+  U8 empty_packet = 0;
+
+  if (nb_data % EP0_SIZE == 0)
+    empty_packet = 1; /* indicate to the host that no more data will follow (USB\S5.8.3) */
+  UENUM = EP1;
+  while (nb_data) {
+    while (!(UEINTX & 1 << RWAL)) ;
+    while (UEINTX & 1 << RWAL && nb_data) {
+      UEDATX = (U8) *buffer;
+      buffer++;
+      nb_data--;
+    }
+    UEINTX &= ~(1 << TXINI), UEINTX &= ~(1 << FIFOCON);
+  }
+  if (empty_packet) {
+    while (!(UEINTX & 1 << RWAL)) ;
+    UEINTX &= ~(1 << TXINI), UEINTX &= ~(1 << FIFOCON);
+  }
+}
+
 ISR(USB_GEN_vect)
 {
   if (USBINT & 1 << VBUSTI && USBCON & 1 << VBUSTE) {
@@ -567,6 +604,10 @@ ISR(USB_GEN_vect)
       usb_configuration_nb = 0;
       g_usb_event |= 1 << EVT_USB_UNPOWERED;
     }
+  }
+  if (UDINT & 1 << SOFI && UDIEN & 1 << SOFE) {
+    UDINT = ~(1 << SOFI);
+    cpt_sof++;
   }
   if (UDINT & 1 << SUSPI && UDIEN & 1 << SUSPE) {
     usb_suspended = 1;
@@ -608,9 +649,12 @@ ISR(USB_GEN_vect)
   if (UDINT & 1 << EORSTI && UDIEN & 1 << EORSTE) {
     UDINT = ~(1 << EORSTI);
     UENUM = EP0;
-    UECONX |= 1 << EPEN;
-    UECFG1X = 1 << EPSIZE1; /* 32 bytes\footnote\ddag{Must correspond to |EP0_SIZE|.} */
-    UECFG1X |= 1 << ALLOC;
+    if (!(UECONX & 1 << EPEN)) {
+      UENUM = EP0;
+      UECONX |= 1 << EPEN;
+      UECFG1X = 1 << EPSIZE1;
+      UECFG1X |= 1 << ALLOC;
+    }
     g_usb_event |= 1 << EVT_USB_RESET;
   }
 }
@@ -641,29 +685,9 @@ ISR(USART1_RX_vect)
         rs2usb[i] = UDR1;
         i++;
       }
-    } while (!(UEINTX & 1 << TXINI)); // while write not allowed
-    if (line_status.DTR) {
-      volatile U8 *buffer = rs2usb;
-      U8 empty_packet = 0;
-      if (i % EP0_SIZE == 0)
-        empty_packet = 1; /* indicate to the host that no more data will follow (USB\S5.8.3) */
-      while (i) {
-        while (!(UEINTX & 1 << TXINI)) ;
-        UEINTX &= ~(1 << TXINI);
-        while (UEINTX & 1 << RWAL && i) {
-          UEDATX = *buffer;
-          buffer++;
-          i--;
-        }
-        UEINTX &= ~(1 << FIFOCON);
-      }
-      if (empty_packet) {
-        while (!(UEINTX & 1 << TXINI)) ;
-        UEINTX &= ~(1 << TXINI);
-        UEINTX &= ~(1 << FIFOCON);
-      }
-    }
-    UENUM = save_ep;
+    } while (!(UEINTX & 1 << RWAL)); // while write not allowed
+    uart_usb_send_buffer((U8 *) &rs2usb, i);
+    UENUM = (U8) save_ep;
   }
 }
 
