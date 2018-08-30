@@ -409,6 +409,22 @@ default: /* in code derived from this example remove this and all unused "Handle
   UEINTX &= ~(1 << RXSTPI);
 }
 
+@ @<Handle {\caps set address}@>=
+wValue = UEDATX | UEDATX << 8;
+UDADDR = wValue & 0x7F;
+UEINTX &= ~(1 << RXSTPI);
+UEINTX &= ~(1 << TXINI);
+while (!(UEINTX & 1 << TXINI)) ; /* wait until ZLP, prepared by previous command, is
+          sent to host\footnote{$\sharp$}{According to \S22.7 of the datasheet,
+          firmware must send ZLP in the STATUS stage before enabling the new address.
+          The reason is that the request started by using zero address, and all the stages of the
+          request must use the same address.
+          Otherwise STATUS stage will not complete, and thus set address request will not
+          succeed. We can determine when ZLP is sent by receiving the ACK, which sets TXINI to 1.
+          See ``Control write (by host)'' in table of contents for the picture (note that DATA
+          stage is absent).} */
+UDADDR |= 1 << ADDEN;
+
 @ When host is booting, BIOS asks 8 bytes in first request of device descriptor (8 bytes is
 sufficient for first request of device descriptor). OS asks
 64 bytes in first request of device descriptor.
@@ -433,63 +449,6 @@ data_to_transfer = sizeof conf_desc;
 pbuffer = &conf_desc;
 @<Send descriptor@>@;
 
-@ @<Global variables@>=
-U16 data_to_transfer;
-const void *pbuffer;
-U8 empty_packet;
-
-@ Transmit data and empty packet (if necessary) and wait for STATUS stage.
-
-On control endpoint by clearing TXINI (in addition to making it possible to
-know when bank will be free again) we say that when next IN token arrives,
-data must be sent and endpoint bank cleared. When data was sent, TXINI becomes `1'.
-After TXINI becomes `1', new data may be written to UEDATX.\footnote*{The
-difference of clearing TXINI for control and non-control endpoint is that
-on control endpoint clearing TXINI also sends the packet and clears the endpoint bank.
-On non-control endpoints there is a possibility to have double bank, so another
-mechanism must be used.}
-
-@<Send descriptor@>=
-    empty_packet = 0;
-    if (data_to_transfer < wLength && data_to_transfer % EP0_SIZE == 0)
-      empty_packet = 1; /* indicate to the host that no more data will follow (USB\S5.5.3) */
-    if (data_to_transfer > wLength)
-      data_to_transfer = wLength; /* never send more than requested */
-    while (data_to_transfer != 0) {
-      while (!(UEINTX & 1 << TXINI)) ;
-      U8 nb_byte = 0;
-      while (data_to_transfer != 0) {
-        if (nb_byte++ == EP0_SIZE) {
-          break;
-        }
-        UEDATX = (U8) pgm_read_byte_near((unsigned int) pbuffer++);
-        data_to_transfer--;
-      }
-      UEINTX &= ~(1 << TXINI);
-    }
-    if (empty_packet) {
-      while (!(UEINTX & 1 << TXINI)) ;
-      UEINTX &= ~(1 << TXINI);
-    }
-    while (!(UEINTX & 1 << RXOUTI)) ;
-    UEINTX &= ~(1 << RXOUTI);
-
-@ @<Handle {\caps set address}@>=
-  wValue = UEDATX | UEDATX << 8;
-  UDADDR = wValue & 0x7F;
-  UEINTX &= ~(1 << RXSTPI);
-  UEINTX &= ~(1 << TXINI);
-  while (!(UEINTX & 1 << TXINI)) ; /* wait until ZLP, prepared by previous command, is
-            sent to host\footnote{$\sharp$}{According to \S22.7 of the datasheet,
-            firmware must send ZLP in the STATUS stage before enabling the new address.
-            The reason is that the request started by using zero address, and all the stages of the
-            request must use the same address.
-            Otherwise STATUS stage will not complete, and thus set address request will not
-            succeed. We can determine when ZLP is sent by receiving the ACK, which sets TXINI to 1.
-            See ``Control write (by host)'' in table of contents for the picture (note that DATA
-            stage is absent).} */
-  UDADDR |= 1 << ADDEN;
-
 @ The host sends an IN token to the control pipe to initiate the STATUS stage.
 
 $$\hbox to12.06cm{\vbox to4.26861111111111cm{\vfil\special{%
@@ -510,49 +469,90 @@ USB\S8.5.3.4, datasheet\S22.11.
 \xdef\stallinstatus{\secno}
 
 @<Handle {\caps set configuration}@>=
-  wValue = UEDATX | UEDATX << 8;
-  if (wValue <= 1) { /* FIXME: this is nonsense, because host cannot send configuration
-      which was not specified in |S_configuration_descriptor|, and because host cannot
-      set configuration with zero value (?) */
-    UEINTX &= ~(1 << RXSTPI);
-    usb_configuration_nb = wValue & 0xFF;
+wValue = UEDATX | UEDATX << 8;
+if (wValue <= 1) { /* FIXME: this is nonsense, because host cannot send configuration
+    which was not specified in |S_configuration_descriptor|, and because host cannot
+    set configuration with zero value (?) */
+  UEINTX &= ~(1 << RXSTPI);
+  usb_configuration_nb = wValue & 0xFF;
 
-    UENUM = EP3;
-    UECONX |= 1 << EPEN;
-    UECFG0X = 1 << EPTYPE1 | 1 << EPTYPE0 | 1 << EPDIR; /* interrupt\footnote\dag{Must
-      correspond to |@<Initialize element 6 ...@>|.}, IN */
-    UECFG1X = 1 << EPSIZE1; /* 32 bytes\footnote\ddag{Must
-      correspond to |@<Initialize element 6 ...@>|.} */
-    UECFG1X |= 1 << ALLOC;
+  UENUM = EP3;
+  UECONX |= 1 << EPEN;
+  UECFG0X = 1 << EPTYPE1 | 1 << EPTYPE0 | 1 << EPDIR; /* interrupt\footnote\dag{Must
+    correspond to |@<Initialize element 6 ...@>|.}, IN */
+  UECFG1X = 1 << EPSIZE1; /* 32 bytes\footnote\ddag{Must
+    correspond to |@<Initialize element 6 ...@>|.} */
+  UECFG1X |= 1 << ALLOC;
 
-    UENUM = EP1;
-    UECONX |= 1 << EPEN;
-    UECFG0X = 1 << EPTYPE1 | 1 << EPDIR; /* bulk\footnote\dag{Must
-      correspond to |@<Initialize element 8 ...@>|.}, IN */
-    UECFG1X = 1 << EPSIZE1; /* 32 bytes\footnote\ddag{Must
-      correspond to |@<Initialize element 8 ...@>|.} */
-    UECFG1X |= 1 << ALLOC;
+  UENUM = EP1;
+  UECONX |= 1 << EPEN;
+  UECFG0X = 1 << EPTYPE1 | 1 << EPDIR; /* bulk\footnote\dag{Must
+    correspond to |@<Initialize element 8 ...@>|.}, IN */
+  UECFG1X = 1 << EPSIZE1; /* 32 bytes\footnote\ddag{Must
+    correspond to |@<Initialize element 8 ...@>|.} */
+  UECFG1X |= 1 << ALLOC;
 
-    UENUM = EP2;
-    UECONX |= 1 << EPEN;
-    UECFG0X = 1 << EPTYPE1; /* bulk\footnote\dag{Must
-      correspond to |@<Initialize element 9 ...@>|.}, OUT */
-    UECFG1X = 1 << EPSIZE1; /* 32 bytes\footnote\ddag{Must
-      correspond to |@<Initialize element 9 ...@>|.} */
-    UECFG1X |= 1 << ALLOC;
+  UENUM = EP2;
+  UECONX |= 1 << EPEN;
+  UECFG0X = 1 << EPTYPE1; /* bulk\footnote\dag{Must
+    correspond to |@<Initialize element 9 ...@>|.}, OUT */
+  UECFG1X = 1 << EPSIZE1; /* 32 bytes\footnote\ddag{Must
+    correspond to |@<Initialize element 9 ...@>|.} */
+  UECFG1X |= 1 << ALLOC;
 
-    UERST = 1 << EP3, UERST = 0; /* FIXME: why is it done? */
-    UERST = 1 << EP1, UERST = 0;
-    UERST = 1 << EP2, UERST = 0;
+  UERST = 1 << EP3, UERST = 0; /* FIXME: why is it done? */
+  UERST = 1 << EP1, UERST = 0;
+  UERST = 1 << EP2, UERST = 0;
 
-    UENUM = EP0; /* restore for further setup requests */
-    UEINTX &= ~(1 << TXINI); /* STATUS stage */
+  UENUM = EP0; /* restore for further setup requests */
+  UEINTX &= ~(1 << TXINI); /* STATUS stage */
+}
+else {
+  UECONX |= 1 << STALLRQ; /* prepare to send STALL handshake in response to IN token of STATUS
+    stage */
+  UEINTX &= ~(1 << RXSTPI);
+}
+
+@ @<Global variables@>=
+U16 data_to_transfer;
+const void *pbuffer;
+U8 empty_packet;
+
+@ Transmit data and empty packet (if necessary) and wait for STATUS stage.
+
+On control endpoint by clearing TXINI (in addition to making it possible to
+know when bank will be free again) we say that when next IN token arrives,
+data must be sent and endpoint bank cleared. When data was sent, TXINI becomes `1'.
+After TXINI becomes `1', new data may be written to UEDATX.\footnote*{The
+difference of clearing TXINI for control and non-control endpoint is that
+on control endpoint clearing TXINI also sends the packet and clears the endpoint bank.
+On non-control endpoints there is a possibility to have double bank, so another
+mechanism must be used.}
+
+@<Send descriptor@>=
+empty_packet = 0;
+if (data_to_transfer < wLength && data_to_transfer % EP0_SIZE == 0)
+  empty_packet = 1; /* indicate to the host that no more data will follow (USB\S5.5.3) */
+if (data_to_transfer > wLength)
+  data_to_transfer = wLength; /* never send more than requested */
+while (data_to_transfer != 0) {
+  while (!(UEINTX & 1 << TXINI)) ;
+  U8 nb_byte = 0;
+  while (data_to_transfer != 0) {
+    if (nb_byte++ == EP0_SIZE) {
+      break;
+    }
+    UEDATX = (U8) pgm_read_byte_near((unsigned int) pbuffer++);
+    data_to_transfer--;
   }
-  else {
-    UECONX |= 1 << STALLRQ; /* prepare to send STALL handshake in response to IN token of STATUS
-      stage */
-    UEINTX &= ~(1 << RXSTPI);
-  }
+  UEINTX &= ~(1 << TXINI);
+}
+if (empty_packet) {
+  while (!(UEINTX & 1 << TXINI)) ;
+  UEINTX &= ~(1 << TXINI);
+}
+while (!(UEINTX & 1 << RXOUTI)) ;
+UEINTX &= ~(1 << RXOUTI);
 
 @ This will send two bytes during the DATA stage. Only first two bits of the first byte are used.
 If first bit is set, then this indicates the device is self powered. If clear, the device
@@ -561,44 +561,44 @@ host up during suspend. The remote wakeup bit can be by the {\caps set feature} 
 {\caps clear feature} requests with a feature selector of |0x01| (\.{DEVICE\_REMOTE\_WAKEUP}).
 
 @<Handle {\caps get status device}@>=
-  UEINTX &= ~(1 << RXSTPI);
-  UEDATX = 0x01;
-  UEDATX = 0x00;
-  UEINTX &= ~(1 << TXINI); /* DATA stage */
-  while (!(UEINTX & 1 << RXOUTI)) ; /* wait for STATUS stage */
-  UEINTX &= ~(1 << RXOUTI);
+UEINTX &= ~(1 << RXSTPI);
+UEDATX = 0x01;
+UEDATX = 0x00;
+UEINTX &= ~(1 << TXINI); /* DATA stage */
+while (!(UEINTX & 1 << RXOUTI)) ; /* wait for STATUS stage */
+UEINTX &= ~(1 << RXOUTI);
 
 @ Sends two bytes of |0x00|, |0x00|. (Both bytes are reserved for future use.)
 
 @<Handle {\caps get status interface}@>=
-  UEINTX &= ~(1 << RXSTPI);
-  UEDATX = 0x00;
-  UEDATX = 0x00;
-  UEINTX &= ~(1 << TXINI); /* DATA stage */
-  while (!(UEINTX & 1 << RXOUTI)) ; /* wait for STATUS stage */
-  UEINTX &= ~(1 << RXOUTI);
+UEINTX &= ~(1 << RXSTPI);
+UEDATX = 0x00;
+UEDATX = 0x00;
+UEINTX &= ~(1 << TXINI); /* DATA stage */
+while (!(UEINTX & 1 << RXOUTI)) ; /* wait for STATUS stage */
+UEINTX &= ~(1 << RXOUTI);
 
 @ Sends two bytes indicating the status (Halted/Stalled) of an endpoint.
 Only first bit of the first byte is used.
 
 @<Handle {\caps get status endpoint}@>=
-  (void) UEDATX; @+ (void) UEDATX;
-  wIndex = UEDATX | UEDATX << 8;
-  UEINTX &= ~(1 << RXSTPI);
-  UEDATX = endpoint_status[wIndex & 0x7F];
-  UEDATX = 0x00;
-  UEINTX &= ~(1 << TXINI); /* DATA stage */
-  while (!(UEINTX & 1 << RXOUTI)) ; /* wait for STATUS stage */
-  UEINTX &= ~(1 << RXOUTI);
+(void) UEDATX; @+ (void) UEDATX;
+wIndex = UEDATX | UEDATX << 8;
+UEINTX &= ~(1 << RXSTPI);
+UEDATX = endpoint_status[wIndex & 0x7F];
+UEDATX = 0x00;
+UEINTX &= ~(1 << TXINI); /* DATA stage */
+while (!(UEINTX & 1 << RXOUTI)) ; /* wait for STATUS stage */
+UEINTX &= ~(1 << RXOUTI);
 
 @ This gets the Alternative Interface setting.
 
 @<Handle {\caps get interface}@>=
-  UEINTX &= ~(1 << RXSTPI);
-  UEDATX = 0x00;
-  UEINTX &= ~(1 << TXINI); /* DATA stage */
-  while (!(UEINTX & 1 << RXOUTI)) ; /* wait for STATUS stage */
-  UEINTX &= ~(1 << RXOUTI);
+UEINTX &= ~(1 << RXSTPI);
+UEDATX = 0x00;
+UEINTX &= ~(1 << TXINI); /* DATA stage */
+while (!(UEINTX & 1 << RXOUTI)) ; /* wait for STATUS stage */
+UEINTX &= ~(1 << RXOUTI);
 
 @ Used to set boolean features. The only two feature selectors available are
 \.{DEVICE\_REMOTE\_WAKEUP} and \.{TEST\_MODE}.
@@ -689,28 +689,28 @@ indicating the devices status. A zero value means the device is not configured a
 value indicates the device is configured.
 
 @<Handle {\caps get configuration}@>=
-  UEINTX &= ~(1 << RXSTPI);
-  UEDATX = usb_configuration_nb;
-  UEINTX &= ~(1 << TXINI); /* DATA stage */
-  while (!(UEINTX & 1 << RXOUTI)) ; /* wait for STATUS stage */
-  UEINTX &= ~(1 << RXOUTI);
+UEINTX &= ~(1 << RXSTPI);
+UEDATX = usb_configuration_nb;
+UEINTX &= ~(1 << TXINI); /* DATA stage */
+while (!(UEINTX & 1 << RXOUTI)) ; /* wait for STATUS stage */
+UEINTX &= ~(1 << RXOUTI);
 
 @ This request allows the host to find out the currently configured line coding.
 
 \S6.2.13 in CDC spec.
 
 @<Handle {\caps get line coding}@>=
-  UEINTX &= ~(1 << RXSTPI);
-  UEDATX = ((U8 *) &line_coding.dwDTERate)[0];
-  UEDATX = ((U8 *) &line_coding.dwDTERate)[1];
-  UEDATX = ((U8 *) &line_coding.dwDTERate)[2];
-  UEDATX = ((U8 *) &line_coding.dwDTERate)[3];
-  UEDATX = line_coding.bCharFormat;
-  UEDATX = line_coding.bParityType;
-  UEDATX = line_coding.bDataBits;
-  UEINTX &= ~(1 << TXINI); /* DATA stage */
-  while (!(UEINTX & 1 << RXOUTI)) ; /* wait for STATUS stage */
-  UEINTX &= ~(1 << RXOUTI);
+UEINTX &= ~(1 << RXSTPI);
+UEDATX = ((U8 *) &line_coding.dwDTERate)[0];
+UEDATX = ((U8 *) &line_coding.dwDTERate)[1];
+UEDATX = ((U8 *) &line_coding.dwDTERate)[2];
+UEDATX = ((U8 *) &line_coding.dwDTERate)[3];
+UEDATX = line_coding.bCharFormat;
+UEDATX = line_coding.bParityType;
+UEDATX = line_coding.bDataBits;
+UEINTX &= ~(1 << TXINI); /* DATA stage */
+while (!(UEINTX & 1 << RXOUTI)) ; /* wait for STATUS stage */
+UEINTX &= ~(1 << RXOUTI);
 
 @ This request sends special carrier modulation that generates an RS-232 style break.
 
