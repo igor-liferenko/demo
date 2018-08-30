@@ -142,6 +142,68 @@ char __low_level_init()
   return 1;
 }
 
+@ @<Type \null definitions@>=
+typedef union {
+  U16 all;
+  struct {
+    U16 bDCD:1;
+    U16 bDSR:1;
+    U16 bBreak:1;
+    U16 bRing:1;
+    U16 bFraming:1;
+    U16 bParity:1;
+    U16 bOverRun:1;
+    U16 reserved:9;
+  };
+} S_serial_state;
+
+@ We buffer the old state in ordrer to send this interrupt message only if
+|serial_state| has changed.
+
+@<Global variables@>=
+S_serial_state serial_state; // actual state
+S_serial_state serial_state_saved; // buffered previously sent state
+
+@ Check if serial state has changed and update host with that information.
+Necessary for hardware handshake support.
+
+|serial_state| is used like a real interrupt status register. Once a notification has been sent,
+the device will reset and re-evaluate the different signals. For the consistent signals like
+carrier detect or transmission carrier, this will mean another notification will not be generated
+until there is a state change. For the irregular signals like break, the incoming ring signal,
+or the overrun error state, this will reset their values to zero and again will not send another
+notification until their state changes.
+
+\S6.3.5 in CDC spec.
+
+Here we have to wait (before or after sending notification, but
+`after' is not efficient\footnote*{It is not efficient
+to wait right after clearing |FIFOCON|.
+We may do other things --- meanwhile the data will be transmitted.
+It is only necessary to wait right before sending next data.})
+if we want to make sure that notification was delivered
+to host. Incidentally, on control endpoint it is never necessary
+to wait |TXINI| to become `1', because on control endpoint if |RXSTPI| is `1',
+|TXINI| is guaranteed to be `1'.
+
+CDC\S6.3 (see also CDC\S3.6.2.1).
+
+@<Notify host if |serial_state| changed@>=
+if (serial_state_saved.all != serial_state.all) {
+  serial_state_saved.all = serial_state.all;
+  UENUM = EP3;
+  while (!(UEINTX & 1 << TXINI)) ; /* wait until previous packet is sent */
+  UEINTX &= ~(1 << TXINI);
+  UEDATX = 0xA1;
+  UEDATX = 0x20;
+  UEDATX = 0x00; @+ UEDATX = 0x00;
+  UEDATX = 0x00; @+ UEDATX = 0x00;
+  UEDATX = 0x02; @+ UEDATX = 0x00;
+  UEDATX = ((U8 *) &serial_state.all)[0];
+  UEDATX = ((U8 *) &serial_state.all)[1];
+  UEINTX &= ~(1 << FIFOCON);
+}
+
 @ Used in \.{USB\_RESET} interrupt handler.
 
 @<Reset MCU@>=
@@ -800,68 +862,6 @@ if (empty_packet) {
 }
 while (!(UEINTX & 1 << RXOUTI)) ;
 UEINTX &= ~(1 << RXOUTI);
-
-@ @<Type \null definitions@>=
-typedef union {
-  U16 all;
-  struct {
-    U16 bDCD:1;
-    U16 bDSR:1;
-    U16 bBreak:1;
-    U16 bRing:1;
-    U16 bFraming:1;
-    U16 bParity:1;
-    U16 bOverRun:1;
-    U16 reserved:9;
-  };
-} S_serial_state;
-
-@ We buffer the old state in ordrer to send this interrupt message only if
-|serial_state| has changed.
-
-@<Global variables@>=
-S_serial_state serial_state; // actual state
-S_serial_state serial_state_saved; // buffered previously sent state
-
-@ Check if serial state has changed and update host with that information.
-Necessary for hardware handshake support.
-
-|serial_state| is used like a real interrupt status register. Once a notification has been sent,
-the device will reset and re-evaluate the different signals. For the consistent signals like
-carrier detect or transmission carrier, this will mean another notification will not be generated
-until there is a state change. For the irregular signals like break, the incoming ring signal,
-or the overrun error state, this will reset their values to zero and again will not send another
-notification until their state changes.
-
-\S6.3.5 in CDC spec.
-
-Here we have to wait (before or after sending notification, but
-`after' is not efficient\footnote*{It is not efficient
-to wait right after clearing |FIFOCON|.
-We may do other things --- meanwhile the data will be transmitted.
-It is only necessary to wait right before sending next data.})
-if we want to make sure that notification was delivered
-to host. Incidentally, on control endpoint it is never necessary
-to wait |TXINI| to become `1', because on control endpoint if |RXSTPI| is `1',
-|TXINI| is guaranteed to be `1'.
-
-CDC\S6.3 (see also CDC\S3.6.2.1).
-
-@<Notify host if |serial_state| changed@>=
-if (serial_state_saved.all != serial_state.all) {
-  serial_state_saved.all = serial_state.all;
-  UENUM = EP3;
-  while (!(UEINTX & 1 << TXINI)) ; /* wait until previous packet is sent */
-  UEINTX &= ~(1 << TXINI);
-  UEDATX = 0xA1;
-  UEDATX = 0x20;
-  UEDATX = 0x00; @+ UEDATX = 0x00;
-  UEDATX = 0x00; @+ UEDATX = 0x00;
-  UEDATX = 0x02; @+ UEDATX = 0x00;
-  UEDATX = ((U8 *) &serial_state.all)[0];
-  UEDATX = ((U8 *) &serial_state.all)[1];
-  UEINTX &= ~(1 << FIFOCON);
-}
 
 @ In application we set baud only once, before setting |DTR|;
 if you change baud in middle of application, think if something
