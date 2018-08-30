@@ -627,62 +627,62 @@ selector |0x00|, which allows the host to stall and clear an endpoint.
 Only endpoints other than the default endpoint are recommended to have this functionality.
 
 @<Handle {\caps set feature endpoint}@>=
-  wValue = UEDATX | UEDATX << 8;
-  if (wValue == 0) {
-    wIndex = UEDATX | UEDATX << 8;
-    if (wIndex == 0) {
-      UECONX |= 1 << STALLRQ; /* see \S\stallinstatus\ */
-      UEINTX &= ~(1 << RXSTPI);
-    }
-    UENUM = (U8) wIndex;
-    if (UECONX & 1 << EPEN) {
-      UECONX |= 1 << STALLRQ; /* TODO: determine if it is a ``functional stall'' or
-        ``commanded stall'' and compare this code with USB\S8.4 or USB\S9 respectively
-        and see datasheet\S22.11 */
-      endpoint_status[wIndex & 0x7F] = 0x01;
-      UENUM = EP0;
-      UEINTX &= ~(1 << RXSTPI);
-      UEINTX &= ~(1 << TXINI); /* STATUS stage */
-    }
-    else {
-      UENUM = EP0;
-      UECONX |= 1 << STALLRQ; /* see \S\stallinstatus\ */
-      UEINTX &= ~(1 << RXSTPI);
-    }
-  }
-  else {
+wValue = UEDATX | UEDATX << 8;
+if (wValue == 0) {
+  wIndex = UEDATX | UEDATX << 8;
+  if (wIndex == 0) {
     UECONX |= 1 << STALLRQ; /* see \S\stallinstatus\ */
     UEINTX &= ~(1 << RXSTPI);
   }
+  UENUM = (U8) wIndex;
+  if (UECONX & 1 << EPEN) {
+    UECONX |= 1 << STALLRQ; /* TODO: determine if it is a ``functional stall'' or
+      ``commanded stall'' and compare this code with USB\S8.4 or USB\S9 respectively
+      and see datasheet\S22.11 */
+    endpoint_status[wIndex & 0x7F] = 0x01;
+    UENUM = EP0;
+    UEINTX &= ~(1 << RXSTPI);
+    UEINTX &= ~(1 << TXINI); /* STATUS stage */
+  }
+  else {
+    UENUM = EP0;
+    UECONX |= 1 << STALLRQ; /* see \S\stallinstatus\ */
+    UEINTX &= ~(1 << RXSTPI);
+  }
+}
+else {
+  UECONX |= 1 << STALLRQ; /* see \S\stallinstatus\ */
+  UEINTX &= ~(1 << RXSTPI);
+}
 
 @ @<Handle {\caps clear feature endpoint}@>=
-  wValue = UEDATX | UEDATX << 8;
-  if (wValue == 0) {
-    wIndex = UEDATX | UEDATX << 8;
-    UENUM = (U8) wIndex;
-    if (UECONX & 1 << EPEN) {
-      if (wIndex != 0) {
-        UECONX |= 1 << STALLRQC; /* TODO: determine if it is a ``functional stall'' or
-        ``commanded stall'' and compare this code with USB\S8.4 or USB\S9 respectively
-        and see datasheet\S22.11 */
-        UERST = 1 << (U8) wIndex, UERST = 0;
-        UECONX |= 1 << RSTDT;
-      }
-      endpoint_status[wIndex & 0x7F] = 0x00;
-      UENUM = EP0;
-      UEINTX &= ~(1 << RXSTPI);
-      UEINTX &= ~(1 << TXINI); /* STATUS stage */
+wValue = UEDATX | UEDATX << 8;
+if (wValue == 0) {
+  wIndex = UEDATX | UEDATX << 8;
+  UENUM = (U8) wIndex;
+  if (UECONX & 1 << EPEN) {
+    if (wIndex != 0) {
+      UECONX |= 1 << STALLRQC; /* TODO: determine if it is a ``functional stall'' or
+      ``commanded stall'' and compare this code with USB\S8.4 or USB\S9 respectively
+      and see datasheet\S22.11 */
+      UERST = 1 << (U8) wIndex, UERST = 0;
+      UECONX |= 1 << RSTDT;
     }
-    else {
-      UENUM = EP0;
-      UECONX |= 1 << STALLRQ; /* see \S\stallinstatus\ */
-      UEINTX &= ~(1 << RXSTPI);
-    }
+    endpoint_status[wIndex & 0x7F] = 0x00;
+    UENUM = EP0;
+    UEINTX &= ~(1 << RXSTPI);
+    UEINTX &= ~(1 << TXINI); /* STATUS stage */
   }
   else {
+    UENUM = EP0;
     UECONX |= 1 << STALLRQ; /* see \S\stallinstatus\ */
     UEINTX &= ~(1 << RXSTPI);
   }
+}
+else {
+  UECONX |= 1 << STALLRQ; /* see \S\stallinstatus\ */
+  UEINTX &= ~(1 << RXSTPI);
+}
 
 @ Used to request the current device configuration. A byte will be sent during the DATA stage
 indicating the devices status. A zero value means the device is not configured and a non-zero
@@ -721,10 +721,10 @@ sure what it means)
 @^TODO@>
 
 @<Handle {\caps send break}@>=
-  (void) UEDATX; @+ (void) UEDATX; /* break length */
-  UEINTX &= ~(1 << RXSTPI);
-  UEINTX &= ~(1 << TXINI);
-  usb_request_break_generation = 1;
+(void) UEDATX; @+ (void) UEDATX; /* break length */
+UEINTX &= ~(1 << RXSTPI);
+UEINTX &= ~(1 << TXINI);
+usb_request_break_generation = 1;
 
 @ @<Type \null definitions@>=
 typedef union {
