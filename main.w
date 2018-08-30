@@ -1,3 +1,6 @@
+%TODO: put section "set line coding" after "set configuration"
+%TODO: indent what is overindented
+
 \let\lheader\rheader
 %\datethis
 \secpagedepth=2 % begin new page only on *
