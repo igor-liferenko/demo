@@ -789,7 +789,7 @@ while (data_to_transfer != 0) {
     if (nb_byte++ == EP0_SIZE) {
       break;
     }
-    UEDATX = (U8) pgm_read_byte_near((unsigned int) pbuffer++);
+    UEDATX = pgm_read_byte(pbuffer++);
     data_to_transfer--;
   }
   UEINTX &= ~(1 << TXINI);
