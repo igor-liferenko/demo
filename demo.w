@@ -513,46 +513,37 @@ else {
   UEINTX &= ~(1 << RXSTPI);
 }
 
+@ @<Type \null definitions@>=
+typedef struct {
+  U32 dwDTERate;
+  U8 bCharFormat;
+  U8 bParityType;
+  U8 bDataBits;
+} S_line_coding;
+
 @ @<Global variables@>=
-U16 data_to_transfer;
-const void *pbuffer;
-U8 empty_packet;
+S_line_coding line_coding;
 
-@ Transmit data and empty packet (if necessary) and wait for STATUS stage.
+@ This request allows the host to specify typical asynchronous line-character formatting
+properties.
 
-On control endpoint by clearing TXINI (in addition to making it possible to
-know when bank will be free again) we say that when next IN token arrives,
-data must be sent and endpoint bank cleared. When data was sent, TXINI becomes `1'.
-After TXINI becomes `1', new data may be written to UEDATX.\footnote*{The
-difference of clearing TXINI for control and non-control endpoint is that
-on control endpoint clearing TXINI also sends the packet and clears the endpoint bank.
-On non-control endpoints there is a possibility to have double bank, so another
-mechanism must be used.}
+\S6.2.12 in CDC spec.
 
-@<Send descriptor@>=
-empty_packet = 0;
-if (data_to_transfer < wLength && data_to_transfer % EP0_SIZE == 0)
-  empty_packet = 1; /* indicate to the host that no more data will follow (USB\S5.5.3) */
-if (data_to_transfer > wLength)
-  data_to_transfer = wLength; /* never send more than requested */
-while (data_to_transfer != 0) {
-  while (!(UEINTX & 1 << TXINI)) ;
-  U8 nb_byte = 0;
-  while (data_to_transfer != 0) {
-    if (nb_byte++ == EP0_SIZE) {
-      break;
-    }
-    UEDATX = (U8) pgm_read_byte_near((unsigned int) pbuffer++);
-    data_to_transfer--;
-  }
-  UEINTX &= ~(1 << TXINI);
-}
-if (empty_packet) {
-  while (!(UEINTX & 1 << TXINI)) ;
-  UEINTX &= ~(1 << TXINI);
-}
-while (!(UEINTX & 1 << RXOUTI)) ;
+Note, that 32bit is (LSW,MSW) or (LSB,...,MSB).
+
+@<Handle {\caps set line coding}@>=
+UEINTX &= ~(1 << RXSTPI);
+while (!(UEINTX & 1 << RXOUTI)) ; /* wait for DATA stage */
+((U8 *) &line_coding.dwDTERate)[0] = UEDATX;
+((U8 *) &line_coding.dwDTERate)[1] = UEDATX;
+((U8 *) &line_coding.dwDTERate)[2] = UEDATX;
+((U8 *) &line_coding.dwDTERate)[3] = UEDATX;
+line_coding.bCharFormat = UEDATX;
+line_coding.bParityType = UEDATX;
+line_coding.bDataBits = UEDATX;
 UEINTX &= ~(1 << RXOUTI);
+UEINTX &= ~(1 << TXINI); /* STATUS stage */
+@<Configure UART@>@;
 
 @ This will send two bytes during the DATA stage. Only first two bits of the first byte are used.
 If first bit is set, then this indicates the device is self powered. If clear, the device
@@ -761,45 +752,54 @@ UEINTX &= ~(1 << RXSTPI);
 UEINTX &= ~(1 << TXINI); /* STATUS stage */
 line_status.all = wValue;
 
-@ @<Type \null definitions@>=
-typedef struct {
-  U32 dwDTERate;
-  U8 bCharFormat;
-  U8 bParityType;
-  U8 bDataBits;
-} S_line_coding;
-
-@ @<Global variables@>=
-S_line_coding line_coding;
-
-@ This request allows the host to specify typical asynchronous line-character formatting
-properties.
-
-\S6.2.12 in CDC spec.
-
-Note, that 32bit is (LSW,MSW) or (LSB,...,MSB).
-
-@<Handle {\caps set line coding}@>=
-UEINTX &= ~(1 << RXSTPI);
-while (!(UEINTX & 1 << RXOUTI)) ; /* wait for DATA stage */
-((U8 *) &line_coding.dwDTERate)[0] = UEDATX;
-((U8 *) &line_coding.dwDTERate)[1] = UEDATX;
-((U8 *) &line_coding.dwDTERate)[2] = UEDATX;
-((U8 *) &line_coding.dwDTERate)[3] = UEDATX;
-line_coding.bCharFormat = UEDATX;
-line_coding.bParityType = UEDATX;
-line_coding.bDataBits = UEDATX;
-UEINTX &= ~(1 << RXOUTI);
-UEINTX &= ~(1 << TXINI); /* STATUS stage */
-@<Configure UART@>@;
-
 @ This request allows the host to select an alternate setting for the specified interface.
 
 \S9.4.10 in USB spec.
 
 @<Handle {\caps set interface}@>=
-  UEINTX &= ~(1 << RXSTPI);
-  UEINTX &= ~(1 << TXINI); /* STATUS stage */
+UEINTX &= ~(1 << RXSTPI);
+UEINTX &= ~(1 << TXINI); /* STATUS stage */
+
+@ @<Global variables@>=
+U16 data_to_transfer;
+const void *pbuffer;
+U8 empty_packet;
+
+@ Transmit data and empty packet (if necessary) and wait for STATUS stage.
+
+On control endpoint by clearing TXINI (in addition to making it possible to
+know when bank will be free again) we say that when next IN token arrives,
+data must be sent and endpoint bank cleared. When data was sent, TXINI becomes `1'.
+After TXINI becomes `1', new data may be written to UEDATX.\footnote*{The
+difference of clearing TXINI for control and non-control endpoint is that
+on control endpoint clearing TXINI also sends the packet and clears the endpoint bank.
+On non-control endpoints there is a possibility to have double bank, so another
+mechanism must be used.}
+
+@<Send descriptor@>=
+empty_packet = 0;
+if (data_to_transfer < wLength && data_to_transfer % EP0_SIZE == 0)
+  empty_packet = 1; /* indicate to the host that no more data will follow (USB\S5.5.3) */
+if (data_to_transfer > wLength)
+  data_to_transfer = wLength; /* never send more than requested */
+while (data_to_transfer != 0) {
+  while (!(UEINTX & 1 << TXINI)) ;
+  U8 nb_byte = 0;
+  while (data_to_transfer != 0) {
+    if (nb_byte++ == EP0_SIZE) {
+      break;
+    }
+    UEDATX = (U8) pgm_read_byte_near((unsigned int) pbuffer++);
+    data_to_transfer--;
+  }
+  UEINTX &= ~(1 << TXINI);
+}
+if (empty_packet) {
+  while (!(UEINTX & 1 << TXINI)) ;
+  UEINTX &= ~(1 << TXINI);
+}
+while (!(UEINTX & 1 << RXOUTI)) ;
+UEINTX &= ~(1 << RXOUTI);
 
 @ @<Type \null definitions@>=
 typedef union {
