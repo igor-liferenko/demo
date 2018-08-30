@@ -4,7 +4,7 @@ all:
 	@avr-gcc -mmcu=atmega32u4 -Wl,-Map=EVK527-ATMega32U4-usbdevice_cdc.map,--cref,--gc-sections,--relax default/demo.o -o fw.elf
 	@avr-objcopy -O ihex fw.elf fw.hex
 
-objdump:
+dump:
 	@avr-objdump -d fw.elf
 
 flash:
