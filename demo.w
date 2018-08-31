@@ -73,7 +73,6 @@ int main(void)
         while (!(PLLCSR & 1 << PLOCK)) ;
         USBCON &= ~(1 << FRZCLK);
         UDCON &= ~(1 << DETACH);
-        UDCON &= ~(1 << RSTCPU);
         UDIEN |= 1 << SUSPE;
         UDIEN |= 1 << EORSTE;
         sei();
@@ -292,8 +291,6 @@ ISR(USB_GEN_vect)
       while (!(PLLCSR & 1 << PLOCK)) ;
       USBCON &= ~(1 << FRZCLK);
       UDCON &= ~(1 << DETACH);
-
-      UDCON &= ~(1 << RSTCPU);
 
       UDIEN |= 1 << SUSPE;
       UDIEN |= 1 << EORSTE;
