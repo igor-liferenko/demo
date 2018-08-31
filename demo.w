@@ -66,7 +66,8 @@ int main(void)
 @^FIXME@>
   while (1) {
     if (!usb_connected) {
-      if (USBSTA & 1 << VBUS) {
+      if (USBSTA & 1 << VBUS) { /* FIXME: why VBUS is detected via interrupt and via polling? */
+@^FIXME@>
         USBCON |= 1 << USBE;
         usb_connected = 1;
         USBCON |= 1 << FRZCLK;
