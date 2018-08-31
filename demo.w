@@ -51,7 +51,8 @@ int main(void)
   USBCON |= 1 << USBE;
   USBCON |= 1 << OTGPADE;
   USBCON |= 1 << VBUSTE;
-  sei();
+  UDIEN |= 1 << SOFE;
+
   DDRD |= 1 << PD5;
   DDRB |= 1 << PB0;
   DDRF &= ~(1 << PF4), PORTF |= 1 << PF4; /* input */
@@ -59,8 +60,8 @@ int main(void)
   DDRF &= ~(1 << PF6), PORTF |= 1 << PF6; /* input */
   DDRD |= 1 << PD7; /* ground */
 
-  UDIEN |= 1 << SOFE;
-
+  sei(); /* FIXME: is in needed here? */
+@^FIXME@>
   while (1) {
     if (!usb_connected) {
       if (USBSTA & 1 << VBUS) {
@@ -306,7 +307,7 @@ ISR(USB_GEN_vect)
       g_usb_event |= 1 << EVT_USB_UNPOWERED;
     }
   }
-  if (UDINT & 1 << SOFI && UDIEN & 1 << SOFE) {
+  if (UDINT & 1 << SOFI) {
     UDINT &= ~(1 << SOFI); /* FIXME: why it was simply `=' here in original example? */
 @^FIXME@>
     cpt_sof++;
