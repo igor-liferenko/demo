@@ -5,6 +5,9 @@
 
 @* Program. This is cleaned-up Atmel's demo. All functionality of original is preserved.
 
+To test this, run `\.{stty raw /dev/ttyACM\#}' and `\.{cat /dev/ttyACM\#}' and
+press keys `\.*', `\.0' and `\.\#' on numpad.
+
 @d EP0 0
 @d EP1 1
 @d EP2 2
