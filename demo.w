@@ -23,12 +23,6 @@ typedef unsigned char U8;
 typedef unsigned short U16;
 typedef unsigned long U32;
 
-#define EVT_USB_POWERED               1         // USB plugged
-#define EVT_USB_UNPOWERED             2         // USB un-plugged
-#define EVT_USB_SUSPEND               5
-#define EVT_USB_WAKE_UP               6
-#define EVT_USB_RESUME                7
-
 @<Predeclarations of procedures@>@;
 @<Type \null definitions@>@;
 @<Global variables@>@;
@@ -38,7 +32,6 @@ volatile U8 usb_configuration_nb;
 volatile U8 usb_request_break_generation = 0;
 volatile U8 rs2usb[10];
 volatile U8 cpt_sof;
-volatile U16 g_usb_event = 0;
 U8 usb_suspended = 0;
 U8 usb_connected = 0;
 U16 rx_counter;
@@ -285,7 +278,6 @@ ISR(USB_GEN_vect)
     if (USBSTA & 1 << VBUS) { /* if there is power from USB (this check makes no sense when device
                                  is powered from USB) */
       usb_connected = 1;
-      g_usb_event |= 1 << EVT_USB_POWERED;
       PLLCSR = 1 << PINDIV; /* FIXME: if we do not use `|PLLCSR = 0;|' is it possible to
                                skip this? */
 @^FIXME@>
@@ -300,7 +292,6 @@ ISR(USB_GEN_vect)
               from USB) */
       usb_connected = 0;
       usb_configuration_nb = 0;
-      g_usb_event |= 1 << EVT_USB_UNPOWERED;
     }
   }
   if (UDINT & 1 << SOFI) { /* was it |SOFI| that caused this interrupt handler to be called? */
@@ -313,7 +304,6 @@ ISR(USB_GEN_vect)
   if (UDINT & 1 << SUSPI) {
     usb_suspended = 1;
     UDINT &= ~(1 << WAKEUPI);
-    g_usb_event |= 1 << EVT_USB_SUSPEND;
     UDINT &= ~(1 << SUSPI);
     UDIEN |= 1 << WAKEUPE;
     UDIEN &= ~(1 << EORSME);
@@ -340,7 +330,6 @@ ISR(USB_GEN_vect)
 @^FIXME@>
       UDINT &= ~(1 << WAKEUPI);
       UDIEN &= ~(1 << WAKEUPE);
-      g_usb_event |= 1 << EVT_USB_WAKE_UP;
       UDIEN |= 1 << SUSPE;
     }
   }
@@ -352,7 +341,6 @@ ISR(USB_GEN_vect)
                                 and avoid misdetecting an event
                                 that will cause this interrupt handler to be called */
     UDIEN &= ~(1 << EORSME); /* do not detect ``End Of Resume'' signal from host */
-    g_usb_event |= 1 << EVT_USB_RESUME;
   }
   if (UDINT & 1 << EORSTI) {
     UDINT &= ~(1 << EORSTI);
