@@ -280,7 +280,7 @@ void uart_usb_send_buffer(U8 *buffer, U8 nb_data)
 
 ISR(USB_GEN_vect)
 {
-  if (USBINT & 1 << VBUSTI && USBCON & 1 << VBUSTE) {
+  if (USBINT & 1 << VBUSTI) {
     USBINT = ~(1 << VBUSTI);
     if (USBSTA & 1 << VBUS) {
       usb_connected = 1;
