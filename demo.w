@@ -299,8 +299,6 @@ ISR(USB_GEN_vect)
       PLLCSR |= 1 << PLLE;
       while (!(PLLCSR & 1 << PLOCK)) ;
       USBCON &= ~(1 << FRZCLK);
-      UDCON &= ~(1 << DETACH);
-
       UDIEN |= 1 << SUSPE;
       UDIEN |= 1 << EORSTE;
       UDCON &= ~(1 << DETACH);
