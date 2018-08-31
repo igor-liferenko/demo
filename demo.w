@@ -278,9 +278,12 @@ void uart_usb_send_buffer(U8 *buffer, U8 nb_data)
 
 ISR(USB_GEN_vect)
 {
-  if (USBINT & 1 << VBUSTI) {
-    USBINT = ~(1 << VBUSTI);
-    if (USBSTA & 1 << VBUS) {
+  if (USBINT & 1 << VBUSTI) { /* was it |VBUSTI| that caused this interrupt handler
+                                 to be called? */
+    USBINT = ~(1 << VBUSTI); /* for the interrupt handler to be called for
+                                next VBUS state change */
+    if (USBSTA & 1 << VBUS) { /* if there is power from USB (this check makes no sense when device
+                                 is powered from USB) */
       usb_connected = 1;
       g_usb_event |= 1 << EVT_USB_POWERED;
       UDIEN |= 1 << EORSTE;
