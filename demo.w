@@ -60,7 +60,8 @@ int main(void)
   while (1) {
     if (!usb_connected) {
       if (USBSTA & 1 << VBUS) { /* FIXME: why VBUS is detected via interrupt and via polling?
-        (Incorrect execution of VBUSTI interrupt: The CPU may incorrectly execute the interrupt
+        (FOR OLDER REVISIONS:
+        Incorrect execution of VBUSTI interrupt: The CPU may incorrectly execute the interrupt
         vector related to the VBUSTI interrupt flag. Problem fix/work around: Do not enable this
         interrupt. Firmware must process this USB event by polling VBUSTI.) */
 @^FIXME@>
@@ -304,7 +305,9 @@ ISR(USB_GEN_vect)
                                 that will cause this interrupt handler to be called */
     cpt_sof++;
   }
-  if (UDINT & 1 << SUSPI) {
+  if (UDINT & 1 << SUSPI) { /* NOTE: (for latest revisions) To work around atmega32u4 bug of
+      high current consumption in sleep mode, before entering sleep, interrupts not used to wake
+      up the part from the sleep mode should be disabled. */
     usb_suspended = 1;
     UDINT &= ~(1 << WAKEUPI);
     UDINT &= ~(1 << SUSPI);
