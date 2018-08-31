@@ -307,7 +307,8 @@ ISR(USB_GEN_vect)
     }
   }
   if (UDINT & 1 << SOFI && UDIEN & 1 << SOFE) {
-    UDINT = ~(1 << SOFI);
+    UDINT &= ~(1 << SOFI); /* FIXME: why it was simply `=' here in original example? */
+@^FIXME@>
     cpt_sof++;
   }
   if (UDINT & 1 << SUSPI && UDIEN & 1 << SUSPE) {
