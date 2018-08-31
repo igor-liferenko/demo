@@ -303,7 +303,6 @@ ISR(USB_GEN_vect)
 
       UDIEN |= 1 << SUSPE;
       UDIEN |= 1 << EORSTE;
-      sei();
       UDCON &= ~(1 << DETACH);
     }
     else {
