@@ -75,10 +75,10 @@ int main(void)
         PLLCSR |= 1 << PLLE;
         while (!(PLLCSR & 1 << PLOCK)) ;
         USBCON &= ~(1 << FRZCLK);
-        UDCON &= ~(1 << DETACH);
         UDIEN |= 1 << SUSPE;
         UDIEN |= 1 << EORSTE;
         sei();
+        UDCON &= ~(1 << DETACH);
       }
     }
     UENUM = EP0;
@@ -333,8 +333,10 @@ ISR(USB_GEN_vect)
     USBCON &= ~(1 << FRZCLK);
     UDINT &= ~(1 << WAKEUPI);
     if (usb_suspended) {
-      UDIEN |= 1 << EORSME; /* detect ``End Of Resume'' signal from host */
-      UDIEN |= 1 << EORSTE;
+      UDIEN |= 1 << EORSME; /* detect ``End Of Resume'' signal from host (issued by host
+        to terminate remote wakeup issued by MCU) */
+      UDIEN |= 1 << EORSTE; /* FIXME: is EORSTE disabled after wakeup? */
+@^FIXME@>
       UDINT &= ~(1 << WAKEUPI);
       UDIEN &= ~(1 << WAKEUPE);
       g_usb_event |= 1 << EVT_USB_WAKE_UP;
@@ -351,7 +353,7 @@ ISR(USB_GEN_vect)
     UDIEN &= ~(1 << EORSME); /* do not detect ``End Of Resume'' signal from host */
     g_usb_event |= 1 << EVT_USB_RESUME;
   }
-  if (UDINT & 1 << EORSTI && UDIEN & 1 << EORSTE) {
+  if (UDINT & 1 << EORSTI) {
     UDINT &= ~(1 << EORSTI);
     UENUM = EP0;
     UECONX |= 1 << EPEN;
