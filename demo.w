@@ -284,8 +284,9 @@ ISR(USB_GEN_vect)
 {
   if (USBINT & 1 << VBUSTI) { /* was it |VBUSTI| that caused this interrupt handler
                                  to be called? */
-    USBINT = ~(1 << VBUSTI); /* for the interrupt handler to be called for
-                                next VBUS state change */
+    USBINT &= ~(1 << VBUSTI); /* for the interrupt handler to be called for
+                                next VBUS state change and avoid misdetecting an event
+                                that will cause this interrupt handler to be called */
     if (USBSTA & 1 << VBUS) { /* if there is power from USB (this check makes no sense when device
                                  is powered from USB) */
       usb_connected = 1;
@@ -300,7 +301,8 @@ ISR(USB_GEN_vect)
       UDIEN |= 1 << EORSTE;
       UDCON &= ~(1 << DETACH);
     }
-    else {
+    else { /* if there is no power from USB (this condition never happens when device is powered
+              from USB) */
       usb_connected = 0;
       usb_configuration_nb = 0;
       g_usb_event |= 1 << EVT_USB_UNPOWERED;
@@ -308,18 +310,16 @@ ISR(USB_GEN_vect)
   }
   if (UDINT & 1 << SOFI) { /* was it |SOFI| that caused this interrupt handler to be called? */
     UDINT &= ~(1 << SOFI); /* for the interrupt handler to be called when
-                                next USB ``Start Of Frame'' PID will be detected */
-                           /* FIXME: why it was simply `=' here in original example? */
-@^FIXME@>
+                                next USB ``Start Of Frame'' PID will be detected
+                                and avoid misdetecting an event
+                                that will cause this interrupt handler to be called */
     cpt_sof++;
   }
   if (UDINT & 1 << SUSPI && UDIEN & 1 << SUSPE) {
     usb_suspended = 1;
-    UDINT &= ~(1 << WAKEUPI); /* FIXME: why it was simply `=' here in original example? */
-@^FIXME@>
+    UDINT &= ~(1 << WAKEUPI);
     g_usb_event |= 1 << EVT_USB_SUSPEND;
-    UDINT &= ~(1 << SUSPI); /* FIXME: why it was simply `=' here in original example? */
-@^FIXME@>
+    UDINT &= ~(1 << SUSPI);
     UDIEN |= 1 << WAKEUPE;
     UDIEN &= ~(1 << EORSME);
     USBCON |= 1 << FRZCLK;
@@ -337,31 +337,28 @@ ISR(USB_GEN_vect)
       while (!(PLLCSR & (1 << PLOCK))) ;
     }
     USBCON &= ~(1 << FRZCLK);
-    UDINT &= ~(1 << WAKEUPI); /* FIXME: why it was simply `=' here in original example? */
-@^FIXME@>
+    UDINT &= ~(1 << WAKEUPI);
     if (usb_suspended) {
-      UDIEN |= 1 << EORSME;
+      UDIEN |= 1 << EORSME; /* detect ``End Of Resume'' signal from host */
       UDIEN |= 1 << EORSTE;
-      UDINT &= ~(1 << WAKEUPI); /* FIXME: why it was simply `=' here in original example? */
-@^FIXME@>
+      UDINT &= ~(1 << WAKEUPI);
       UDIEN &= ~(1 << WAKEUPE);
       g_usb_event |= 1 << EVT_USB_WAKE_UP;
       UDIEN |= 1 << SUSPE;
-      UDIEN |= 1 << EORSME;
-      UDIEN |= 1 << EORSTE;
     }
   }
   if (UDINT & 1 << EORSMI && UDIEN & 1 << EORSME) {
     usb_suspended = 0;
     UDIEN &= ~(1 << WAKEUPE);
-    UDINT &= ~(1 << EORSMI); /* FIXME: why it was simply `=' here in original example? */
-@^FIXME@>
-    UDIEN &= ~(1 << EORSME);
+    UDINT &= ~(1 << EORSMI); /* for the interrupt handler to be called when
+                                next USB ``End Of Resume'' signal will be detected
+                                and avoid misdetecting an event
+                                that will cause this interrupt handler to be called */
+    UDIEN &= ~(1 << EORSME); /* do not detect ``End Of Resume'' signal from host */
     g_usb_event |= 1 << EVT_USB_RESUME;
   }
   if (UDINT & 1 << EORSTI && UDIEN & 1 << EORSTE) {
-    UDINT &= ~(1 << EORSTI); /* FIXME: why it was simply `=' here in original example? */
-@^FIXME@>
+    UDINT &= ~(1 << EORSTI);
     UENUM = EP0;
     UECONX |= 1 << EPEN;
     UECFG1X = 1 << EPSIZE1; /* 32 bytes\footnote\ddag{Must correspond to |EP0_SIZE|.} */
