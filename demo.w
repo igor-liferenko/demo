@@ -309,13 +309,17 @@ ISR(USB_GEN_vect)
   }
   if (UDINT & 1 << SUSPI && UDIEN & 1 << SUSPE) {
     usb_suspended = 1;
-    UDINT = ~(1 << WAKEUPI);
+    UDINT &= ~(1 << WAKEUPI); /* FIXME: why it was simply `=' here in original example? */
+@^FIXME@>
     g_usb_event |= 1 << EVT_USB_SUSPEND;
-    UDINT = ~(1 << SUSPI);
+    UDINT &= ~(1 << SUSPI); /* FIXME: why it was simply `=' here in original example? */
+@^FIXME@>
     UDIEN |= 1 << WAKEUPE;
     UDIEN &= ~(1 << EORSME);
     USBCON |= 1 << FRZCLK;
-    PLLCSR &= ~(1 << PLLE), PLLCSR = 0;
+    PLLCSR &= ~(1 << PLLE);
+    PLLCSR = 0; /* FIXME: why it is used? */
+@^FIXME@>
   }
   if (UDINT & 1 << WAKEUPI && UDIEN & 1 << WAKEUPE) {
     if (!(PLLCSR & 1 << PLOCK)) { /* FIXME: check with led if it can be non-zero here */
@@ -325,11 +329,13 @@ ISR(USB_GEN_vect)
       while (!(PLLCSR & (1 << PLOCK))) ;
     }
     USBCON &= ~(1 << FRZCLK);
-    UDINT = ~(1 << WAKEUPI);
+    UDINT &= ~(1 << WAKEUPI); /* FIXME: why it was simply `=' here in original example? */
+@^FIXME@>
     if (usb_suspended) {
       UDIEN |= 1 << EORSME;
       UDIEN |= 1 << EORSTE;
-      UDINT = ~(1 << WAKEUPI);
+      UDINT &= ~(1 << WAKEUPI); /* FIXME: why it was simply `=' here in original example? */
+@^FIXME@>
       UDIEN &= ~(1 << WAKEUPE);
       g_usb_event |= 1 << EVT_USB_WAKE_UP;
       UDIEN |= 1 << SUSPE;
@@ -340,13 +346,14 @@ ISR(USB_GEN_vect)
   if (UDINT & 1 << EORSMI && UDIEN & 1 << EORSME) {
     usb_suspended = 0;
     UDIEN &= ~(1 << WAKEUPE);
-    UDINT = ~(1 << EORSMI);
+    UDINT &= ~(1 << EORSMI); /* FIXME: why it was simply `=' here in original example? */
+@^FIXME@>
     UDIEN &= ~(1 << EORSME);
     g_usb_event |= 1 << EVT_USB_RESUME;
   }
   if (UDINT & 1 << EORSTI && UDIEN & 1 << EORSTE) {
-    UDINT = ~(1 << EORSTI);
-    UENUM = EP0;
+    UDINT &= ~(1 << EORSTI); /* FIXME: why it was simply `=' here in original example? */
+@^FIXME@>
     UENUM = EP0;
     UECONX |= 1 << EPEN;
     UECFG1X = 1 << EPSIZE1; /* 32 bytes\footnote\ddag{Must correspond to |EP0_SIZE|.} */
