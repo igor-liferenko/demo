@@ -28,14 +28,13 @@ typedef unsigned long U32;
 #define EVT_USB_SUSPEND               5
 #define EVT_USB_WAKE_UP               6
 #define EVT_USB_RESUME                7
-#define EVT_USB_RESET                 8
 
 @<Predeclarations of procedures@>@;
 @<Type \null definitions@>@;
 @<Global variables@>@;
 
 U8 endpoint_status[7];
-U8 usb_configuration_nb;
+volatile U8 usb_configuration_nb;
 volatile U8 usb_request_break_generation = 0;
 volatile U8 rs2usb[10];
 volatile U8 cpt_sof;
@@ -81,11 +80,6 @@ int main(void)
         UDIEN |= 1 << EORSTE;
         sei();
       }
-    }
-    if (g_usb_event & 1 << EVT_USB_RESET) {
-      g_usb_event &= ~(1 << EVT_USB_RESET);
-      UERST = 1 << EP0, UERST = 0;
-      usb_configuration_nb = 0;
     }
     UENUM = EP0;
     if (UEINTX & 1 << RXSTPI) {
@@ -363,7 +357,8 @@ ISR(USB_GEN_vect)
     UECONX |= 1 << EPEN;
     UECFG1X = 1 << EPSIZE1; /* 32 bytes\footnote\ddag{Must correspond to |EP0_SIZE|.} */
     UECFG1X |= 1 << ALLOC;
-    g_usb_event |= 1 << EVT_USB_RESET;
+    UERST = 1 << EP0, UERST = 0; /* FIXME: is it necessary? */
+    usb_configuration_nb = 0;
   }
 }
 
