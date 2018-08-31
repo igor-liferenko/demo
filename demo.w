@@ -22,7 +22,6 @@ output of `\.{tail /var/log/kern.log}').
 typedef unsigned char U8;
 typedef unsigned short U16;
 typedef unsigned long U32;
-typedef unsigned char Bool;
 
 #define EVT_USB_POWERED               1         // USB plugged
 #define EVT_USB_UNPOWERED             2         // USB un-plugged
@@ -313,8 +312,10 @@ ISR(USB_GEN_vect)
       g_usb_event |= 1 << EVT_USB_UNPOWERED;
     }
   }
-  if (UDINT & 1 << SOFI) {
-    UDINT &= ~(1 << SOFI); /* FIXME: why it was simply `=' here in original example? */
+  if (UDINT & 1 << SOFI) { /* was it |SOFI| that caused this interrupt handler to be called? */
+    UDINT &= ~(1 << SOFI); /* for the interrupt handler to be called when
+                                next USB ``Start Of Frame'' PID will be detected */
+                           /* FIXME: why it was simply `=' here in original example? */
 @^FIXME@>
     cpt_sof++;
   }
