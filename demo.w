@@ -290,9 +290,6 @@ ISR(USB_GEN_vect)
                                  is powered from USB) */
       usb_connected = 1;
       g_usb_event |= 1 << EVT_USB_POWERED;
-      UDIEN |= 1 << EORSTE;
-      USBCON |= 1 << FRZCLK;
-
       PLLCSR = 1 << PINDIV; /* FIXME: if we do not use `|PLLCSR = 0;|' is it possible to
                                skip this? */
 @^FIXME@>
