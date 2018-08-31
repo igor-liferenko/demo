@@ -315,7 +315,7 @@ ISR(USB_GEN_vect)
                                 that will cause this interrupt handler to be called */
     cpt_sof++;
   }
-  if (UDINT & 1 << SUSPI && UDIEN & 1 << SUSPE) {
+  if (UDINT & 1 << SUSPI) {
     usb_suspended = 1;
     UDINT &= ~(1 << WAKEUPI);
     g_usb_event |= 1 << EVT_USB_SUSPEND;
