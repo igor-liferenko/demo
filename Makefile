@@ -14,7 +14,7 @@ clean:
 	@git clean -X -d -f
 
 imgs:
-	add from usb/
+	@perl -ne 'if (/^(.*\.eps): (.*)/) { system "convert $$2 $$1" }' Makefile
 
 .PHONY: $(wildcard *.eps)
 
