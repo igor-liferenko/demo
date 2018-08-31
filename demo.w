@@ -290,7 +290,9 @@ ISR(USB_GEN_vect)
       UDIEN |= 1 << EORSTE;
       USBCON |= 1 << FRZCLK;
 
-      PLLCSR = 1 << PINDIV;
+      PLLCSR = 1 << PINDIV; /* FIXME: if we do not use `|PLLCSR = 0;|' is it possible to
+                               skip this? */
+@^FIXME@>
       PLLCSR |= 1 << PLLE;
       while (!(PLLCSR & 1 << PLOCK)) ;
       USBCON &= ~(1 << FRZCLK);
@@ -329,7 +331,9 @@ ISR(USB_GEN_vect)
   if (UDINT & 1 << WAKEUPI && UDIEN & 1 << WAKEUPE) {
     if (!(PLLCSR & 1 << PLOCK)) { /* FIXME: check with led if it can be non-zero here */
 @^FIXME@>
-      PLLCSR = 1 << PINDIV;
+      PLLCSR = 1 << PINDIV; /* FIXME: if we do not use `|PLLCSR = 0;|' is it possible to
+                               skip this? */
+@^FIXME@>
       PLLCSR |= 1 << PLLE;
       while (!(PLLCSR & (1 << PLOCK))) ;
     }
