@@ -59,7 +59,10 @@ int main(void)
 @^FIXME@>
   while (1) {
     if (!usb_connected) {
-      if (USBSTA & 1 << VBUS) { /* FIXME: why VBUS is detected via interrupt and via polling? */
+      if (USBSTA & 1 << VBUS) { /* FIXME: why VBUS is detected via interrupt and via polling?
+        (Incorrect execution of VBUSTI interrupt: The CPU may incorrectly execute the interrupt
+        vector related to the VBUSTI interrupt flag. Problem fix/work around: Do not enable this
+        interrupt. Firmware must process this USB event by polling VBUSTI.) */
 @^FIXME@>
         USBCON |= 1 << USBE;
         usb_connected = 1;
