@@ -68,9 +68,8 @@ int main(void)
         usb_connected = 1;
         USBCON |= 1 << FRZCLK;
 
-        PLLFRQ &=
-          ~(1 << PDIV3 | 1 << PDIV2 | 1 << PDIV1 | 1 << PDIV0),
-          PLLFRQ |= 1 << PDIV2, PLLCSR = 1 << PINDIV | 1 << PLLE;
+        PLLCSR = 1 << PINDIV;
+        PLLCSR |= 1 << PLLE;
         while (!(PLLCSR & 1 << PLOCK)) ;
         USBCON &= ~(1 << FRZCLK);
         UDCON &= ~(1 << DETACH);
@@ -288,8 +287,8 @@ ISR(USB_GEN_vect)
       UDIEN |= 1 << EORSTE;
       USBCON |= 1 << FRZCLK;
 
-      PLLFRQ &= ~(1 << PDIV3 | 1 << PDIV2 | 1 << PDIV1 | 1 << PDIV0),
-        PLLFRQ |= 1 << PDIV2, PLLCSR = 1 << PINDIV | 1 << PLLE;
+      PLLCSR = 1 << PINDIV;
+      PLLCSR |= 1 << PLLE;
       while (!(PLLCSR & 1 << PLOCK)) ;
       USBCON &= ~(1 << FRZCLK);
       UDCON &= ~(1 << DETACH);
@@ -322,10 +321,10 @@ ISR(USB_GEN_vect)
     PLLCSR &= ~(1 << PLLE), PLLCSR = 0;
   }
   if (UDINT & 1 << WAKEUPI && UDIEN & 1 << WAKEUPE) {
-    if (!(PLLCSR & 1 << PLOCK)) {
-      PLLFRQ &=
-        ~(1 << PDIV3 | 1 << PDIV2 | 1 << PDIV1 | 1 << PDIV0),
-        PLLFRQ |= 1 << PDIV2, PLLCSR = 1 << PINDIV | 1 << PLLE;
+    if (!(PLLCSR & 1 << PLOCK)) { /* FIXME: check with led if it can be non-zero here */
+@^FIXME@>
+      PLLCSR = 1 << PINDIV;
+      PLLCSR |= 1 << PLLE;
       while (!(PLLCSR & (1 << PLOCK))) ;
     }
     USBCON &= ~(1 << FRZCLK);
