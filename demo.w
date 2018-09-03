@@ -33,7 +33,6 @@ volatile U8 usb_request_break_generation = 0;
 volatile U8 rs2usb[10];
 volatile U8 cpt_sof;
 U8 usb_suspended = 0;
-U8 voltage_on_bus = 0;
 U16 rx_counter;
 
 int main(void)
@@ -42,11 +41,17 @@ int main(void)
 
   UHWCON |= 1 << UVREGE;
   clock_prescale_set(0);
-  USBCON &= ~(1 << USBE);
   USBCON |= 1 << USBE;
+  PLLCSR = 1 << PINDIV;
+  PLLCSR |= 1 << PLLE;
+  while (!(PLLCSR & 1 << PLOCK)) ;
+  USBCON &= ~(1 << FRZCLK);
   USBCON |= 1 << OTGPADE;
-  USBCON |= 1 << VBUSTE;
+  UDIEN |= 1 << EORSTE;
+  UDIEN |= 1 << SUSPE;
   UDIEN |= 1 << SOFE;
+  sei();
+  UDCON &= ~(1 << DETACH);
 
   DDRD |= 1 << PD5;
   DDRB |= 1 << PB0;
@@ -55,30 +60,8 @@ int main(void)
   DDRF &= ~(1 << PF6), PORTF |= 1 << PF6; /* input */
   DDRD |= 1 << PD7; /* ground */
 
-  sei(); /* FIXME: is in needed here? */
-@^FIXME@>
   while (1) {
-    if (USBSTA & 1 << VBUS) {
-      if (!voltage_on_bus) { /* transition happened */
-        voltage_on_bus = 1;
-        USBCON |= 1 << USBE;
-
-        USBCON |= 1 << FRZCLK; // see in demo-comments/ if it is necessary
-        PLLCSR = 1 << PINDIV;
-        PLLCSR |= 1 << PLLE;
-        while (!(PLLCSR & 1 << PLOCK)) ;
-        USBCON &= ~(1 << FRZCLK);
-
-        UDIEN |= 1 << SUSPE;
-        UDIEN |= 1 << EORSTE;
-        sei();
-        UDCON &= ~(1 << DETACH);
-      }
-    }
-    else {
-      voltage_on_bus = 0;
-      usb_configuration_nb = 0;
-    }
+    if (!(USBSTA & 1 << VBUS)) usb_configuration_nb = 0;
     UENUM = EP0;
     if (UEINTX & 1 << RXSTPI) {
       @<Process SETUP request@>@;
