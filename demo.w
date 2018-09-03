@@ -33,7 +33,7 @@ volatile U8 usb_request_break_generation = 0;
 volatile U8 rs2usb[10];
 volatile U8 cpt_sof;
 U8 usb_suspended = 0;
-U8 usb_connected = 0;
+U8 voltage_on_bus = 0;
 U16 rx_counter;
 
 int main(void)
@@ -58,7 +58,7 @@ int main(void)
   sei(); /* FIXME: is in needed here? */
 @^FIXME@>
   while (1) {
-    if (!usb_connected) {
+    if (!voltage_on_bus) {
       if (USBSTA & 1 << VBUS) { /* FIXME: why VBUS is detected via interrupt and via polling?
         (FOR OLDER REVISIONS:
         Incorrect execution of VBUSTI interrupt: The CPU may incorrectly execute the interrupt
@@ -66,7 +66,7 @@ int main(void)
         interrupt. Firmware must process this USB event by polling VBUSTI.) */
 @^FIXME@>
         USBCON |= 1 << USBE;
-        usb_connected = 1;
+        voltage_on_bus = 1;
         USBCON |= 1 << FRZCLK;
 
         PLLCSR = 1 << PINDIV;
@@ -281,7 +281,7 @@ ISR(USB_GEN_vect)
                                 that will cause this interrupt handler to be called */
     if (USBSTA & 1 << VBUS) { /* if there is power from USB (this check makes no sense when device
                                  is powered from USB) */
-      usb_connected = 1;
+      voltage_on_bus = 1;
       PLLCSR = 1 << PINDIV; /* FIXME: if we do not use `|PLLCSR = 0;|' is it possible to
                                skip this? */
 @^FIXME@>
@@ -294,7 +294,7 @@ ISR(USB_GEN_vect)
     }
     else { /* if there is no power from USB (this condition never happens when device is powered
               from USB) */
-      usb_connected = 0;
+      voltage_on_bus = 0;
       usb_configuration_nb = 0;
     }
   }
