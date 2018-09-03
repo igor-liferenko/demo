@@ -74,10 +74,10 @@ int main(void)
         sei();
         UDCON &= ~(1 << DETACH);
       }
-      else {
-        voltage_on_bus = 0;
-        usb_configuration_nb = 0;
-      }
+    }
+    else {
+      voltage_on_bus = 0;
+      usb_configuration_nb = 0;
     }
     UENUM = EP0;
     if (UEINTX & 1 << RXSTPI) {
