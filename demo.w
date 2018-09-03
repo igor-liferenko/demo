@@ -58,25 +58,25 @@ int main(void)
   sei(); /* FIXME: is in needed here? */
 @^FIXME@>
   while (1) {
-    if (!voltage_on_bus) {
-      if (USBSTA & 1 << VBUS) { /* FIXME: why VBUS is detected via interrupt and via polling?
-        (FOR OLDER REVISIONS:
-        Incorrect execution of VBUSTI interrupt: The CPU may incorrectly execute the interrupt
-        vector related to the VBUSTI interrupt flag. Problem fix/work around: Do not enable this
-        interrupt. Firmware must process this USB event by polling VBUSTI.) */
-@^FIXME@>
-        USBCON |= 1 << USBE;
+    if (USBSTA & 1 << VBUS) {
+      if (!voltage_on_bus) { /* transition happened */
         voltage_on_bus = 1;
-        USBCON |= 1 << FRZCLK;
+        USBCON |= 1 << USBE;
 
+        USBCON |= 1 << FRZCLK; // see in demo-comments/ if it is necessary
         PLLCSR = 1 << PINDIV;
         PLLCSR |= 1 << PLLE;
         while (!(PLLCSR & 1 << PLOCK)) ;
         USBCON &= ~(1 << FRZCLK);
+
         UDIEN |= 1 << SUSPE;
         UDIEN |= 1 << EORSTE;
         sei();
         UDCON &= ~(1 << DETACH);
+      }
+      else {
+        voltage_on_bus = 0;
+        usb_configuration_nb = 0;
       }
     }
     UENUM = EP0;
@@ -84,7 +84,7 @@ int main(void)
       @<Process SETUP request@>@;
     }
     if (usb_configuration_nb != 0) { /* do not allow to receive data before
-                                        end of enumeration FIXME: does this make any sense? */
+                                        {\caps set configuration} */
       if (UCSR1A & 1 << UDRE1) {
         UENUM = EP2;
         if (UEINTX & 1 << RXOUTI) {
@@ -274,30 +274,6 @@ void uart_usb_send_buffer(U8 *buffer, U8 nb_data)
 
 ISR(USB_GEN_vect)
 {
-  if (USBINT & 1 << VBUSTI) { /* was it |VBUSTI| that caused this interrupt handler
-                                 to be called? */
-    USBINT &= ~(1 << VBUSTI); /* for the interrupt handler to be called for
-                                next VBUS state change and avoid misdetecting an event
-                                that will cause this interrupt handler to be called */
-    if (USBSTA & 1 << VBUS) { /* if there is power from USB (this check makes no sense when device
-                                 is powered from USB) */
-      voltage_on_bus = 1;
-      PLLCSR = 1 << PINDIV; /* FIXME: if we do not use `|PLLCSR = 0;|' is it possible to
-                               skip this? */
-@^FIXME@>
-      PLLCSR |= 1 << PLLE;
-      while (!(PLLCSR & 1 << PLOCK)) ;
-      USBCON &= ~(1 << FRZCLK);
-      UDIEN |= 1 << SUSPE;
-      UDIEN |= 1 << EORSTE;
-      UDCON &= ~(1 << DETACH);
-    }
-    else { /* if there is no power from USB (this condition never happens when device is powered
-              from USB) */
-      voltage_on_bus = 0;
-      usb_configuration_nb = 0;
-    }
-  }
   if (UDINT & 1 << SOFI) { /* was it |SOFI| that caused this interrupt handler to be called? */
     UDINT &= ~(1 << SOFI); /* for the interrupt handler to be called when
                                 next USB ``Start Of Frame'' PID will be detected
