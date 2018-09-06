@@ -456,8 +456,8 @@ transfer more, host does not send OUT packet to initiate STATUS stage.
 (void) UEDATX; @+ (void) UEDATX;
 wLength = UEDATX | UEDATX << 8;
 UEINTX &= ~(1 << RXSTPI);
-data_to_transfer = sizeof dev_desc;
-pbuffer = &dev_desc;
+size = sizeof dev_desc;
+buf = &dev_desc;
 @<Send descriptor@>@;
 
 @ First request is 9 bytes, second is according to length given in response to first request.
@@ -466,8 +466,8 @@ pbuffer = &dev_desc;
 (void) UEDATX; @+ (void) UEDATX;
 wLength = UEDATX | UEDATX << 8;
 UEINTX &= ~(1 << RXSTPI);
-data_to_transfer = sizeof conf_desc;
-pbuffer = &conf_desc;
+size = sizeof conf_desc;
+buf = &conf_desc;
 @<Send descriptor@>@;
 
 @ The host sends an IN token to the control pipe to initiate the STATUS stage.
@@ -782,8 +782,8 @@ UEINTX &= ~(1 << RXSTPI);
 UEINTX &= ~(1 << TXINI); /* STATUS stage */
 
 @ @<Global variables@>=
-U16 data_to_transfer;
-const void *pbuffer;
+U16 size;
+const void *buf;
 U8 empty_packet;
 
 @ Transmit data and empty packet (if necessary) and wait for STATUS stage.
@@ -799,19 +799,19 @@ mechanism is used.}
 
 @<Send descriptor@>=
 empty_packet = 0;
-if (data_to_transfer < wLength && data_to_transfer % EP0_SIZE == 0)
+if (size < wLength && size % EP0_SIZE == 0)
   empty_packet = 1; /* indicate to the host that no more data will follow (USB\S5.5.3) */
-if (data_to_transfer > wLength)
-  data_to_transfer = wLength; /* never send more than requested */
-while (data_to_transfer != 0) {
+if (size > wLength)
+  size = wLength; /* never send more than requested */
+while (size != 0) {
   while (!(UEINTX & 1 << TXINI)) ;
   U8 nb_byte = 0;
-  while (data_to_transfer != 0) {
+  while (size != 0) {
     if (nb_byte++ == EP0_SIZE) {
       break;
     }
-    UEDATX = pgm_read_byte(pbuffer++);
-    data_to_transfer--;
+    UEDATX = pgm_read_byte(buf++);
+    size--;
   }
   UEINTX &= ~(1 << TXINI);
 }
