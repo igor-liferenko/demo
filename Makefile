@@ -18,10 +18,6 @@ imgs:
 
 .PHONY: $(wildcard *.eps)
 
-cdc-structure.eps: cdc-structure.png
-	@convert $< $@
-	@imgsize $@ 7.5 -
-
 stall-control-write-without-data-stage.eps: stall-control-write-without-data-stage.gif
 	@convert $< $@
 	@imgsize $@
