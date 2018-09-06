@@ -63,9 +63,8 @@ int main(void)
   while (1) {
     if (!(USBSTA & 1 << VBUS)) usb_configuration_nb = 0;
     UENUM = EP0;
-    if (UEINTX & 1 << RXSTPI) {
+    if (UEINTX & 1 << RXSTPI)
       @<Process SETUP request@>@;
-    }
     if (usb_configuration_nb != 0) { /* do not allow to receive data before
                                         {\caps set configuration} */
       if (UCSR1A & 1 << UDRE1) {
@@ -348,12 +347,14 @@ ISR(USART1_RX_vect)
   }
 }
 
-@ The following big switch just dispatches SETUP request.
-
-@<Process SETUP request@>=
+@ @<Global variables@>=
 U16 wValue;
 U16 wIndex;
 U16 wLength;
+
+@ The following big switch just dispatches SETUP request.
+
+@<Process SETUP request@>=
 switch (UEDATX | UEDATX << 8) {
 case 0x0080: @/
   @<Handle {\caps get status device}@>@;
