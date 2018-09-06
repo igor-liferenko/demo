@@ -1061,6 +1061,7 @@ default:
   MANUFACTURER, /* (\.{Mfr} in \.{kern.log}) */
   PRODUCT, /* (\.{Product} in \.{kern.log}) */
   SERIAL_NUMBER, /* (\.{SerialNumber} in \.{kern.log}) */
+@y
   0, /* set it to non-zero in code derived from this example */
   0, /* set it to non-zero in code derived from this example */
   0, /* set it to non-zero in code derived from this example */
@@ -1107,6 +1108,8 @@ default:
 @z
 
 @x
+@*3 Abstract control management functional descriptor.
+@y
 @*3 Call management functional descriptor.
 
 The Call Management functional descriptor describes
@@ -1144,8 +1147,6 @@ ignored. In this case, second bit is reset to zero.
 @t\2@> 1 /* number of CDC data interface */
 }
 
-@*3 Abstract control management functional descriptor.
-@y
 @*3 Abstract control management functional descriptor.
 @z
 
