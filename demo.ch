@@ -61,7 +61,6 @@ ISR(INT1_vect)
 }
 
 volatile int connected = 0;
-void main(void)
 @y
 U8 endpoint_status[7];
 volatile U8 usb_configuration_nb;
@@ -70,8 +69,6 @@ volatile U8 rs2usb[10];
 volatile U8 cpt_sof;
 U8 usb_suspended = 0;
 U16 rx_counter;
-
-void main(void)
 @z
 
 @x

@@ -35,7 +35,7 @@ volatile U8 cpt_sof;
 U8 usb_suspended = 0;
 U16 rx_counter;
 
-int main(void)
+void main(void)
 {
   @<Disable WDT@>@;
 
@@ -108,7 +108,6 @@ int main(void)
       }
     }
   }
-  return 0;
 }
 
 char __low_level_init(void) __attribute__ ((section(".init3"), naked));
