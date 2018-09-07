@@ -67,7 +67,6 @@ volatile U8 usb_configuration_nb;
 volatile U8 usb_request_break_generation = 0;
 volatile U8 rs2usb[10];
 volatile U8 cpt_sof;
-U8 usb_suspended = 0;
 U16 rx_counter;
 @z
 
