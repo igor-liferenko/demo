@@ -500,9 +500,12 @@ case 0x0302: @/
 @x
     @<Handle {\caps get descriptor device}\null@>@;
     break;
-  case 0x0200: @/
-    @<Handle {\caps get descriptor configuration}@>@;
+@y
+    @<Handle {\caps get descriptor device}@>@;
     break;
+@z
+
+@x
   case 0x0300: @/
     @<Handle {\caps get descriptor string} (language)@>@;
     break;
@@ -519,11 +522,6 @@ case 0x0302: @/
     @<Handle {\caps get descriptor device qualifier}@>@;
     break;
 @y
-    @<Handle {\caps get descriptor device}@>@;
-    break;
-  case 0x0200: @/
-    @<Handle {\caps get descriptor configuration}@>@;
-    break;
   default: /* in code derived from this example change this to ``Handle
               {\caps get descriptor device qualifier}'' */
     UECONX |= 1 << STALLRQ; /* prepare to send STALL handshake in response to next token from
@@ -551,11 +549,9 @@ case 0x0B01: @/
 @z
 
 @x
-case 0x2021: @/
   @<Handle {\caps set line coding}@>@;
   break;
 @y
-case 0x2021: @/
   @<Handle {\caps set line coding}@>@;
   break;
 case 0x21A1: @/
@@ -648,6 +644,10 @@ buf = &sn_desc;
 from_program = 0;
 @<Send descriptor@>@;
 
+@y
+@z
+
+@x
 @ @<Handle {\caps set configuration}@>=
 UEINTX &= ~(1 << RXSTPI);
 
@@ -1268,4 +1268,3 @@ for (U8 i = 0; i < SN_LENGTH; i++) {
 @y
 #include <avr/power.h> /* |clock_prescale_set| */
 @z
-
