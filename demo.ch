@@ -34,9 +34,9 @@ that power supply with AC and DC output may be used)).
 @y
 @* Program. This is cleaned-up Atmel's demo. All functionality of original is preserved.
 
-To test this, run `\.{stty raw </dev/ttyACM\char2}' and `\.{cat /dev/ttyACM\char2}' and
-press keys `\.*', `\.0' and `\.\#' on numpad (`\.{\char2}' can be seen in
-output of `\.{tail /var/log/kern.log}').
+To test this, run `\.{stty raw </dev/ttyACM0}' and `\.{cat /dev/ttyACM0}' and
+press keys `\.*', `\.0' and `\.\#' on numpad (ensure that no other CDC devices are
+plugged in).
 @z
 
 @x
