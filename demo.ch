@@ -36,7 +36,7 @@ that power supply with AC and DC output may be used)).
 
 To test this, run `\.{stty raw </dev/ttyACM0}' and `\.{cat /dev/ttyACM0}' and
 press keys `\.*', `\.0' and `\.\#' on numpad (ensure that no other CDC devices are
-plugged in).
+plugged in because device file may be different otherwise).
 @z
 
 @x
