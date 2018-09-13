@@ -217,6 +217,7 @@ typedef union {
 S_line_status line_status;
 
 @ This request generates RS-232/V.24 style control signals.
+It allows to implement ``hardware flow control''.
 
 Only first two bits of the first byte are used. First bit indicates to DCE if DTE is
 present or not. This signal corresponds to V.24 signal 108/2 and RS-232 signal DTR.
@@ -227,10 +228,6 @@ are tied to each other.}. Carrier control is used for half duplex modems.
 The device ignores the value of this bit when operating in full duplex mode.
 
 \S6.2.14 in CDC spec.
-
-TODO: manage here hardware flow control (this TODO taken from original example, not
-sure what it means)
-@^TODO@>
 
 @<Handle {\caps set control line state}@>=
 wValue = UEDATX | UEDATX << 8;
@@ -325,7 +322,7 @@ S_serial_state serial_state; // actual state
 S_serial_state serial_state_saved; // buffered previously sent state
 
 @ Check if serial state has changed and update host with that information.
-Necessary for hardware handshake support.
+It allows to implement ``hardware flow control''.
 
 |serial_state| is used like a real interrupt status register. Once a notification has been sent,
 the device will reset and re-evaluate the different signals. For the consistent signals like
@@ -945,12 +942,9 @@ while (!(UEINTX & 1 << RXOUTI)) ; /* wait for STATUS stage */
 UEINTX &= ~(1 << RXOUTI);
 
 @ This request sends special carrier modulation that generates an RS-232 style break.
+It allows to implement ``hardware flow control''.
 
 \S6.2.15 in CDC spec.
-
-TODO: manage here hardware flow control (this TODO taken from original example, not
-sure what it means)
-@^TODO@>
 
 @<Handle {\caps send break}@>=
 (void) UEDATX; @+ (void) UEDATX; /* break length */
@@ -972,6 +966,7 @@ typedef union {
 S_line_status line_status;
 
 @ This request generates RS-232/V.24 style control signals.
+It allows to implement ``hardware flow control''.
 
 Only first two bits of the first byte are used. First bit indicates to DCE if DTE is
 present or not. This signal corresponds to V.24 signal 108/2 and RS-232 signal DTR.
@@ -982,10 +977,6 @@ are tied to each other.}. Carrier control is used for half duplex modems.
 The device ignores the value of this bit when operating in full duplex mode.
 
 \S6.2.14 in CDC spec.
-
-TODO: manage here hardware flow control (this TODO taken from original example, not
-sure what it means)
-@^TODO@>
 
 @<Handle {\caps set control line state}@>=
 wValue = UEDATX | UEDATX << 8;
