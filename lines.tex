@@ -1,0 +1,23 @@
+%&17pt
+\output={\shipout
+  \vbox{
+    \vbox to0pt{
+        \font\F=dingbat \F
+        \setbox0=\hbox{^^61}
+        \dimen0=26\wd0 \advance\dimen0-\hsize
+        \kern-2.4cm
+        \hbox{\kern-.5\dimen0^^61\hbox{\leaders\hbox{^^62}\hskip24\wd0}^^63}
+        \nointerlineskip
+        \vbox{\leaders\hbox{\kern-.5\dimen0^^64\hskip25\wd0^^65}\vskip37\ht0}
+        \nointerlineskip
+        \hbox{\kern-.5\dimen0^^66\hbox{\leaders\hbox{^^67}\hskip24\wd0}^^68}
+        \vss}
+    \nointerlineskip
+    \kern.5cm
+    \pagebody}}
+\font\F=omu17 \F
+\parindent=15pt
+\parskip=0pt
+\def\par{\leavevmode\endgraf} \obeylines \let\par=\endgraf %
+\input CONTENT
+\bye

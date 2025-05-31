@@ -1,0 +1,29 @@
+%&17pt
+\output={\shipout
+  \vbox{
+    \vbox to0pt{
+        \font\F=umranda scaled 2000 \F
+        \setbox0=\hbox{^^3d}
+        \setbox2=\hbox{^^3e}
+        \dimen0=25\wd0 \advance\dimen0 by2\wd2 \advance\dimen0 by-\hsize
+        \setbox4=\hbox{\leaders\hbox{^^3d^^3f}\hskip24\wd0}
+        \setbox6=\vbox{\hbox{^^3e}\nointerlineskip\hbox{^^40}}
+        \setbox8=\vbox{\hbox{^^40}\nointerlineskip\hbox{^^3e}}
+        \kern-1.6cm
+        \hbox{\kern-.5\dimen0\kern\wd2\copy4^^3d}
+        \nointerlineskip
+        \vbox{\leaders\hbox{\kern-.5\dimen0\box6\hskip25\wd0\box8}\vskip34\ht2}
+        \nointerlineskip
+        \hbox{\kern-.5\dimen0^^3e\hskip25\wd0^^40}
+        \nointerlineskip
+        \hbox{\kern-.5\dimen0\kern\wd2^^3f\copy4}
+        \vss}
+    \nointerlineskip
+    \kern.5cm
+    \pagebody}}
+\font\F=omu17 \F
+\parindent=15pt
+\parskip=0pt
+\def\par{\leavevmode\endgraf} \obeylines \let\par=\endgraf %
+\input CONTENT
+\bye
