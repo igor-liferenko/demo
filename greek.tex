@@ -1,0 +1,33 @@
+%&17pt
+\font\textfont=omu17
+\font\framefont=umranda at18pt
+\chardef\A="5E
+\chardef\B="5F
+\chardef\C="60
+\chardef\D="61
+\chardef\E="62
+\chardef\F="63
+\chardef\G="64
+\chardef\H="65
+\output={\shipout
+  \vbox{
+    \moveleft6mm \vbox to0pt{
+        \framefont
+        \setbox0=\hbox{\A}
+        \dimen0=26\wd0 \advance\dimen0-\hsize
+        \kern-1.1cm
+        \hbox{\kern-.5\dimen0\A\hbox{\leaders\hbox{\B}\hskip26\wd0}\C}
+        \nointerlineskip
+        \vbox{\leaders\hbox{\kern-.5\dimen0\H\hskip26\wd0\D}\vskip37\ht0}
+        \nointerlineskip
+        \hbox{\kern-.5\dimen0\G\hbox{\leaders\hbox{\F}\hskip26\wd0}\E}
+        \vss}
+    \nointerlineskip
+    \kern.5cm
+    \pagebody}}
+\textfont
+\parindent=15pt
+\parskip=0pt
+\def\par{\leavevmode\endgraf} \obeylines \let\par=\endgraf %
+\input CONTENT
+\bye
