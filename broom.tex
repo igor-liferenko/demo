@@ -1,27 +1,33 @@
 %&17pt
+\font\textF=omu17
+\font\frameF=umranda scaled 2000
+\chardef\A="3D
+\chardef\B="3E
+\chardef\C="3F
+\chardef\D="40
 \output={\shipout
   \vbox{
     \vbox to0pt{
-        \font\F=umranda scaled 2000 \F
-        \setbox0=\hbox{^^3d}
-        \setbox2=\hbox{^^3e}
+        \frameF
+        \setbox0=\hbox{\A}
+        \setbox2=\hbox{\B}
         \dimen0=25\wd0 \advance\dimen0 by2\wd2 \advance\dimen0 by-\hsize
-        \setbox4=\hbox{\leaders\hbox{^^3d^^3f}\hskip24\wd0}
-        \setbox6=\vbox{\hbox{^^3e}\nointerlineskip\hbox{^^40}}
-        \setbox8=\vbox{\hbox{^^40}\nointerlineskip\hbox{^^3e}}
+        \setbox4=\hbox{\leaders\hbox{\A\C}\hskip24\wd0}
+        \setbox6=\vbox{\hbox{\B}\nointerlineskip\hbox{\D}}
+        \setbox8=\vbox{\hbox{\D}\nointerlineskip\hbox{\B}}
         \kern-1.6cm
-        \hbox{\kern-.5\dimen0\kern\wd2\copy4^^3d}
+        \hbox{\kern-.5\dimen0\kern\wd2\copy4 \A}
         \nointerlineskip
         \vbox{\leaders\hbox{\kern-.5\dimen0\box6\hskip25\wd0\box8}\vskip34\ht2}
         \nointerlineskip
-        \hbox{\kern-.5\dimen0^^3e\hskip25\wd0^^40}
+        \hbox{\kern-.5\dimen0 \B\hskip25\wd0 \D}
         \nointerlineskip
-        \hbox{\kern-.5\dimen0\kern\wd2^^3f\copy4}
+        \hbox{\kern-.5\dimen0\kern\wd2 \C\copy4}
         \vss}
     \nointerlineskip
     \kern.5cm
     \pagebody}}
-\font\F=omu17 \F
+\textF
 \parindent=15pt
 \parskip=0pt
 \def\par{\leavevmode\endgraf} \obeylines \let\par=\endgraf %

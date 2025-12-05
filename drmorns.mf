@@ -1,0 +1,51 @@
+% +AMDG  This document was begun on 21 June 11EX, the feast
+% of St. William the Abbot, and it is humbly dedicated to
+% him and to the Immaculate Heart of Mary for their prayers,
+% and to the Sacred Heart of Jesus for His mercy.
+
+font_identifier:="drmorns"; font_size:=10pt#; font_coding_scheme "T1";
+pixels_per_inch:=1200;
+mode_setup;
+
+% This file defines the parameters for the ornaments of the
+% DRM font.
+
+phi = (1+sqrt5)/2;
+%ornshort# = 2in#;
+%ornheight# = ornshort#/phi;
+%centerwid# = ornshort#/12;
+%centerht# = centerwid#/2;
+%ccurvrad# = centerht#/2;
+cap#=8pt#;
+ex#=0.6cap#;
+doubex#=2ex#;
+borderwid# = 0.02pt;
+extrathin# = 0.001pt;
+thinline# = 0.01pt;
+thinerase# = 2thinline#;
+thickline# = 2thinline#;
+smallspace# = thinline#;
+medspace# = 2smallspace#;
+bigspace# = 2medspace#;
+extbigspace# = 2bigspace#;
+ss# = 0.2pt#;
+dotwid#=0.6pt#;
+define_pixels(ornshort,ornheight,centerwid,centerht,ccurvrad,ss);
+define_pixels(thinline,thickline,smallspace,borderwid,thinerase);
+define_pixels(medspace,extrathin,bigspace,extbigspace);
+define_pixels(dotwid,cap,ex,doubex);
+
+pen borderpen; borderpen = pensquare scaled borderwid;
+pen thinpen; thinpen = pensquare scaled thinline;
+pen extthinpen; extthinpen = pensquare scaled extrathin;
+pen thinerasepen; thinerasepen = pensquare scaled thinerase;
+pen thickpen; thickpen = pensquare scaled thickline;
+pen extthickpen; extthickpen = pensquare scaled 2thickline;
+pen semiextextthickpen; semiextextthickpen = pensquare scaled 3thickline;
+pen extextthickpen; extextthickpen = pensquare scaled 4thickline;
+pen medpen; medpen = pensquare scaled 1.5thinline;
+
+%input drmornbars.mf;
+input drmornfont.mf;
+
+end;

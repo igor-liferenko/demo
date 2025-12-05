@@ -1,28 +1,36 @@
 %&17pt
+\font\textF=omu17
+\font\frameF=umranda
+\chardef\A="42
+\chardef\B="44
+\chardef\C="46
+\chardef\D="48
+\chardef\E="4B
 \output={\shipout
   \vbox{
     \vbox to0pt{
-        \font\F=umranda \F
-        \setbox0=\hbox{\kern1pt^^42\kern1pt} % upper
-        \setbox2=\hbox{^^42} \dimen2=\wd0 \advance\dimen2 by-\wd2
-        \setbox4=\vbox{\kern1pt\hbox{^^48}\kern1pt} % right
-        \setbox6=\hbox{^^48} \dimen6=\ht4 \advance\dimen6 by-\ht6
-        \setbox8=\vbox{\kern.5\dimen6\hbox{^^44}\kern.5\dimen6} % left
+        \frameF
+        \setbox0=\hbox{\kern1pt \A \kern1pt} % upper
+        \setbox2=\hbox{\A} \dimen2=\wd0 \advance\dimen2 by-\wd2
+        \setbox4=\vbox{\kern1pt\hbox{\D}\kern1pt} % right
+        \setbox6=\hbox{\D} \dimen6=\ht4 \advance\dimen6 by-\ht6
+        \setbox8=\vbox{\kern.5\dimen6\hbox{\B}\kern.5\dimen6} % left
         \dimen0=23\wd0 \advance\dimen0 by2\wd4 \advance\dimen0 by\dimen2 \advance\dimen0-\hsize
         \kern-1.4cm
-        \hbox{\kern-.5\dimen0^^4b\kern.5\dimen2\hbox{\leaders\copy0\hskip23\wd0}\kern.5\dimen2^^4b}
+        \hbox{\kern-.5\dimen0 \E \kern.5\dimen2\hbox{\leaders\copy0\hskip23\wd0}\kern.5\dimen2 \E}
         \kern.5\dimen6
         \nointerlineskip
         \vbox{\leaders\hbox{\kern-.5\dimen0\copy8\kern.5\dimen2\hskip23\wd0\kern.5\dimen2\copy4}\vskip32\ht4}
         \nointerlineskip
         \kern.5\dimen6
-        \hbox{\kern-.5\dimen0^^4b\kern.5\dimen2\hbox{\leaders\hbox{\kern.5\dimen2^^46\kern.5\dimen2}\hskip23\wd0}\kern.5\dimen2^^4b}
+        \hbox{\kern-.5\dimen0 \E \kern.5\dimen2\hbox{\leaders\hbox{\kern.5\dimen2 \C \kern.5\dimen2}%
+              \hskip23\wd0}\kern.5\dimen2 \E}
         \vss}
     \nointerlineskip
     \kern.3cm
     \pagebody}}
 
-\font\F=omu17 \F
+\textF
 \parindent=10pt
 \parskip=0pt
 \def\par{\leavevmode\endgraf} \obeylines \let\par=\endgraf %

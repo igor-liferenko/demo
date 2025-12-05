@@ -1,6 +1,6 @@
 %&17pt
-\font\textfont=omu17
-\font\framefont=umranda at18pt
+\font\textF=omu17
+\font\frameF=umranda at18pt
 \chardef\A="5E
 \chardef\B="5F
 \chardef\C="60
@@ -12,7 +12,7 @@
 \output={\shipout
   \vbox{
     \moveleft6mm \vbox to0pt{
-        \framefont
+        \frameF
         \setbox0=\hbox{\A}
         \dimen0=26\wd0 \advance\dimen0-\hsize
         \kern-1.1cm
@@ -25,7 +25,7 @@
     \nointerlineskip
     \kern.5cm
     \pagebody}}
-\textfont
+\textF
 \parindent=15pt
 \parskip=0pt
 \def\par{\leavevmode\endgraf} \obeylines \let\par=\endgraf %
