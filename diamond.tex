@@ -1,0 +1,25 @@
+%&17pt
+\font\textF=omu17
+\font\frameF=bbding10 at 20pt
+\chardef\A="36
+\output={\shipout
+  \vbox{
+    \moveleft11mm \vbox to0pt{
+      \frameF
+      \kern-23mm
+      \setbox0=\hbox{\A}
+      \hbox{\leaders\hbox{\A}\hskip26\wd0}
+      \nointerlineskip
+      \vbox{\leaders\hbox{\A\hskip24\wd0\A}\vskip37\ht0}
+      \nointerlineskip
+      \hbox{\leaders\hbox{\A}\hskip26\wd0}
+      \vss}
+    \nointerlineskip
+    \kern5mm
+    \pagebody}}
+\textF
+\parindent=15pt
+\parskip=0pt
+\def\par{\leavevmode\endgraf} \obeylines \let\par=\endgraf %
+\input CONTENT
+\bye
