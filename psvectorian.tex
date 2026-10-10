@@ -1,12 +1,12 @@
-% get ps-file with necessary figure, open it in inkscape, "Save as..." -> .eps
-% (if size will be bigger than ornament with default settings,
-% tick "Use size of exported object")
+% 1) latex psvectorian.tex
+% 2) dvips psvectorian.dvi
+% 3) inkscape psvectorian.ps --export-type="eps"
 \documentclass{article}
 \usepackage{pstricks}
 \usepackage{psvectorian}
 \begin{document}
 \pagestyle{empty}
 \begin{pspicture}(-5,-5)(5,5)% [showgrid]
-\rput(0,0){\psvectorian[width=6cm,flip]{71}}
+\rput(0,0){\psvectorian[flip,mirror]{71}}
 \end{pspicture}
 \end{document}
